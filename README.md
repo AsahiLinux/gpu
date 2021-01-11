@@ -1,6 +1,6 @@
 # Asahi GPU 
 
-Research for an open source graphics stack fo Apple M1.
+Research for an open source graphics stack for Apple M1.
 
 ## Contributors
 

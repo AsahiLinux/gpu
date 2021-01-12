@@ -51,17 +51,10 @@
  * applying the two's complement identity, we are left with (X - mask) & mask
  */
 
-/* 800x600 texture */
-#define WIDTH 800
-#define HEIGHT 600
-#define BPP 4
-
 #define TILE_WIDTH 64
 #define TILE_HEIGHT 64
 #define TILE_SHIFT 6
 #define TILE_MASK ((1 << TILE_SHIFT) - 1)
-
-#define TILES_PER_ROW (WIDTH / TILE_WIDTH)
 
 /* mask of bits used for X coordinate in a tile */
 #define SPACE_MASK 0x555 // 0b010101010101
@@ -77,7 +70,9 @@ ash_space_bits(unsigned x)
 		((x & 8) << 3) | ((x & 16) << 4) | ((x & 32) << 5);
 }
 
-void ash_detile_unaligned_32(uint32_t *tiled, uint32_t *linear, unsigned width, unsigned linear_pitch,
+static void
+ash_detile_unaligned_32(uint32_t *tiled, uint32_t *linear,
+		unsigned width, unsigned linear_pitch,
 		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
 {
 	unsigned tiles_per_row = (width + TILE_WIDTH - 1) >> TILE_SHIFT;
@@ -105,8 +100,10 @@ void ash_detile_unaligned_32(uint32_t *tiled, uint32_t *linear, unsigned width, 
 	}
 }
 
-/* Assume sx, smaxx are both aligned to TILE_WIDTH */
-void ash_detile_aligned_32(uint32_t *tiled, uint32_t *linear, unsigned width, unsigned linear_pitch,
+/* Assumes sx, smaxx are both aligned to TILE_WIDTH */
+static void
+ash_detile_aligned_32(uint32_t *tiled, uint32_t *linear,
+		unsigned width, unsigned linear_pitch,
 		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
 {
 	unsigned tiles_per_row = (width + TILE_WIDTH - 1) >> TILE_SHIFT;
@@ -139,7 +136,9 @@ void ash_detile_aligned_32(uint32_t *tiled, uint32_t *linear, unsigned width, un
 	}
 }
 
-void ash_detile_32(uint32_t *tiled, uint32_t *linear, unsigned width, unsigned linear_pitch,
+static void
+ash_detile_32(uint32_t *tiled, uint32_t *linear,
+		unsigned width, unsigned linear_pitch,
 		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
 {
 	if (sx & TILE_MASK) {
@@ -161,6 +160,18 @@ void ash_detile_32(uint32_t *tiled, uint32_t *linear, unsigned width, unsigned l
 	}
 }
 
+void
+ash_detile(uint32_t *tiled, uint32_t *linear,
+		unsigned width, unsigned bpp, unsigned linear_pitch,
+		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
+{
+	/* TODO: parametrize with macro magic */
+	assert(bpp == 32);
+
+	ash_detile_32(tiled, linear, width, linear_pitch, sx, sy, smaxx, smaxy);
+}
+
+#if 0
 int main(int argc, char **argv)
 {
 	/* Read tiled texture */
@@ -173,6 +184,9 @@ int main(int argc, char **argv)
 	/* Detile detiled */
 	uint32_t *buf2 = malloc(sz);
 
+	const unsigned WIDTH = 800;
+	const unsigned HEIGHT = 600;
+
 	for (unsigned i = 0; i < 1000; ++i) {
 	ash_detile_32(buf, buf2, WIDTH, WIDTH,
 		0, 0, WIDTH, HEIGHT);
@@ -182,3 +196,4 @@ int main(int argc, char **argv)
 	fwrite(buf2, 1, 800 * 600 * 4, fp);
 	fclose(fp);
 }
+#endif

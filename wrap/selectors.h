@@ -92,3 +92,28 @@ struct agx_create_cmdbuf_resp {
 	uint32_t size;
 	uint32_t id;
 } __attribute__((packed));
+
+/* Memory allocation isn't really understood yet */
+
+enum agx_memory_type {
+	AGX_MEMORY_TYPE_NORMAL      = 0x00000000, /* used for user allocations */
+	AGX_MEMORY_TYPE_UNK         = 0x08000000, /* unknown */
+	AGX_MEMORY_TYPE_CMDBUF_64   = 0x18000000, /* used for command buffer storage */
+	AGX_MEMORY_TYPE_SHADER      = 0x48000000, /* used for shader memory, with VA = 0 */
+	AGX_MEMORY_TYPE_CMDBUF_32   = 0x58000000, /* used for command buffers, with VA < 32-bit */
+	AGX_MEMORY_TYPE_FRAMEBUFFER = 0x00888F00, /* used for framebuffer backing */
+};
+
+static inline const char *
+agx_memory_type_name(uint32_t type)
+{
+	switch (type) {
+	case AGX_MEMORY_TYPE_NORMAL: return "normal";
+	case AGX_MEMORY_TYPE_UNK: return "unk";
+	case AGX_MEMORY_TYPE_CMDBUF_64: return "cmdbuf_64";
+	case AGX_MEMORY_TYPE_SHADER: return "shader";
+	case AGX_MEMORY_TYPE_CMDBUF_32: return "cmdbuf_32";
+	case AGX_MEMORY_TYPE_FRAMEBUFFER: return "framebuffer";
+	default: return NULL;
+	}
+}

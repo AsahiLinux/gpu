@@ -62,9 +62,10 @@ int main(int argc, char **argv)
 	ret = IOConnectCallStructMethod(connection, AGX_SELECTOR_SET_API, in,
 			sizeof(in), NULL, NULL);
 
-	if (ret) {
+	/* Oddly, the return codes are flipped for SET_API */
+	if (ret != 1) {
 		fprintf(stderr, "Error setting API: %u\n", ret);
-		/* TODO: why is this raising an error? */
+		return 1;
 	}
 
 	char version[456] = { 0 };

@@ -72,6 +72,7 @@ enum agx_opcodes {
 
 	OPC_LD_VAR_NO_PERSPECTIVE = 0xA1,
 	OPC_LD_VAR = 0xE1, // perspective
+	OPC_ST_VAR = 0x11,
 	OPC_UNK48 = 0x48, // seen before blending
 	OPC_BLEND = 0x09,
 
@@ -119,6 +120,7 @@ static struct {
 	[OPC_LD_VAR_NO_PERSPECTIVE] = { "ld_var.no_perspective", 8, I },
 	[OPC_LD_VAR] = { "ld_var", 8, I },
 	[OPC_STORE] = { "store", 8, I },
+	[OPC_ST_VAR] = { "st_var", 4, C },
 	[OPC_FCSEL] = { "fcsel", 8, I },
 	[OPC_ICSEL] = { "icsel", 8, I },
 	[OPC_MOVI] = { "movi", 4, C },
@@ -255,6 +257,23 @@ agx_print_ld_compute(uint8_t *code, FILE *fp)
 	fprintf(fp, ".%c", "xyzw"[component]);
 }
 
+static void
+agx_print_st_var(uint8_t *code, FILE *fp)
+{
+	/* 4 bytes, first for opcode. Second for source register  third
+	 * indicates the destination, fourth unknown */
+	if (code[1] & 0x1)
+		fprintf(fp, ".unk");
+
+	fprintf(fp, ", index:%u", code[2] & 0xF);
+
+	if ((code[2] & 0xF0) != 0x80)
+		fprintf(fp, ", unk2=%X", code[2] >> 4);
+
+	if (code[3] != 0x80)
+		fprintf(fp, ", unk3=%X", code[3]);
+}
+
 /* Disassembles a single instruction */
 
 unsigned
@@ -313,12 +332,19 @@ agx_disassemble_instr(uint8_t *code, bool *stop, bool verbose, FILE *fp)
 	bool dest_32 = dest & 0x1; /* clear for 16-bit */
 	unsigned dest_reg = (dest >> 1) & 0x3F;
 
+	/* Maybe it's a 32-bit opcode */
+	if (opc == OPC_ST_VAR)
+		dest_32 = !dest_32;
+
 	fprintf(fp, " %s%u",
 			dest_32 ? "w" : "h",
 			dest_reg);
 
 	/* Decode other stuff, TODO */
 	switch (opc) {
+	case OPC_ST_VAR:
+		agx_print_st_var(code, fp);
+		break;
 	case OPC_LD_COMPUTE:
 		agx_print_ld_compute(code, fp);
 		break;

@@ -78,8 +78,6 @@ dump_mappings(void)
 	}
 }
 
-void agx_disassemble(void *code, size_t maxlen, FILE *fp);
-
 /* Apple macro */
 
 #define DYLD_INTERPOSE(_replacment,_replacee) \
@@ -130,27 +128,14 @@ wrap_IOConnectCallMethod(
 
 		printf("%X: SET_API(%s)\n", connection, (const char *) inputStruct);
 		break;
+
 	case AGX_SELECTOR_SUBMIT_COMMAND_BUFFERS:
 		assert(output == NULL && outputStruct == NULL);
 		assert(inputStructCnt == 40);
 		assert(inputCnt == 1);
 		
-		printf("%X: SUBMIT_COMMAND_BUFFERS(%llx) %p\n", connection, input[0], inputStruct);
+		printf("%X: SUBMIT_COMMAND_BUFFERS command queue id:%llx %p\n", connection, input[0], inputStruct);
 
-		bool fs = true;
-
-		for (unsigned i = 0; i < MAP_COUNT; ++i) {
-			unsigned offset = fs ? 0x1380 : 0x13c0;
-
-			if (!mappings[i].gpu_va && !mappings[i].is_cmdbuf) {
-				printf("\n");
-				agx_disassemble(mappings[i].cpu + offset, mappings[i].size - offset, stdout);
-				printf("\n");
-			}
-		}
-
-		dump_mappings();
-	
 		/* fallthrough */
 	default:
 		printf("%X: call %s (out %p, %zu)", connection, wrap_selector_name(selector), outputStructCntP, outputStructCntP ? *outputStructCntP : 0);
@@ -171,9 +156,11 @@ wrap_IOConnectCallMethod(
 	/* Invoke the real method */
 	kern_return_t ret = IOConnectCallMethod(connection, selector, input, inputCnt, inputStruct, inputStructCnt, output, outputCnt, outputStruct, outputStructCntP);
 
+	printf("return %u", ret);
+
 	/* Dump the outputs */
 	if(outputCnt) {
-		printf("return %u scalars: ", *outputCnt);
+		printf("%u scalars: ", *outputCnt);
 
 		for (uint64_t u = 0; u < *outputCnt; ++u)
 			printf("%llx ", output[u]);
@@ -182,7 +169,7 @@ wrap_IOConnectCallMethod(
 	}
 
 	if(outputStructCntP) {
-		printf("return:\n");
+		printf(" struct\n");
 		hexdump(outputStruct, *outputStructCntP);
 
 		if (selector == 2) {
@@ -192,10 +179,12 @@ wrap_IOConnectCallMethod(
 		}
 	}
 
+	printf("\n");
+
 	/* Track allocations for later analysis (dumping, disassembly, etc) */
 	switch (selector) {
 	case AGX_SELECTOR_CREATE_CMDBUF: {
-		 assert(inputCnt == 2);
+		assert(inputCnt == 2);
 		assert((*outputStructCntP) == 0x10);
 		uint64_t *inp = (uint64_t *) input;
 		assert(inp[1] == 1 || inp[1] == 0);
@@ -226,12 +215,19 @@ wrap_IOConnectCallMethod(
 			cpu = cpu_fixed_1;
 		uint64_t size = ptrs[4];
 		unsigned mapping = MAP_COUNT++;
-		printf("allocate gpu va %llx, cpu %llx, 0x%llx bytes (%u)\n", gpu_va, cpu, size, mapping);
+		uint32_t *iwords = (uint32_t *) inputStruct;
+		const char *type = agx_memory_type_name(iwords[20]);
+		printf("allocate gpu va %llx, cpu %llx, 0x%llx bytes (%u) ", gpu_va, cpu, size, mapping);
+		if (type)
+			printf(" %s\n", type);
+		else
+			printf(" unknown type %08X\n", iwords[20]);
+
 		assert(mapping < MAX_MAPPINGS);
 		mappings[mapping] = (struct agx_allocation) {
 			.type = AGX_ALLOC_REGULAR,
 			.size = size,
-			.index = iptrs[3] >> 32ull,
+			.index = ptrs[3] >> 32ull,
 			.gpu_va = gpu_va,
 			.map = (void *) cpu,
 		};
@@ -260,8 +256,55 @@ wrap_IOConnectCallAsyncMethod(
         void            *outputStruct,          // Out
         size_t          *outputStructCntP)      // In/Out
 {
-	printf("async call method! connection %X, selector %s\n", connection, wrap_selector_name(selector));
-	return IOConnectCallAsyncMethod(connection, selector, wakePort, reference, referenceCnt, input, inputCnt, inputStruct, inputStructCnt, output, outputCnt, outputStruct, outputStructCntP);
+	/* Check the arguments make sense */
+	assert((input != NULL) == (inputCnt != 0));
+	assert((inputStruct != NULL) == (inputStructCnt != 0));
+	assert((output != NULL) == (outputCnt != 0));
+	assert((outputStruct != NULL) == (outputStructCntP != 0));
+
+	printf("%X: call %X, wake port %X (out %p, %zu)", connection, selector, wakePort, outputStructCntP, outputStructCntP ? *outputStructCntP : 0);
+
+	for (uint64_t u = 0; u < inputCnt; ++u)
+		printf(" %llx", input[u]);
+
+	if(inputStructCnt) {
+		printf(", struct:\n");
+		hexdump(inputStruct, inputStructCnt);
+	} else {
+		printf("\n");
+	}
+
+	printf(", references: ");
+	for (unsigned i = 0; i < referenceCnt; ++i)
+		printf(" %llx", reference[i]);
+	printf("\n");
+
+	kern_return_t ret = IOConnectCallAsyncMethod(connection, selector, wakePort, reference, referenceCnt, input, inputCnt, inputStruct, inputStructCnt, output, outputCnt, outputStruct, outputStructCntP);
+
+	printf("return %u", ret);
+
+ 	if(outputCnt) {
+		printf("%u scalars: ", *outputCnt);
+
+		for (uint64_t u = 0; u < *outputCnt; ++u)
+			printf("%llx ", output[u]);
+
+		printf("\n");
+	}
+
+	if(outputStructCntP) {
+		printf(" struct\n");
+		hexdump(outputStruct, *outputStructCntP);
+
+		if (selector == 2) {
+			/* Dump linked buffer as well */
+			void **o = outputStruct;
+			hexdump(*o, 64);
+		}
+	}
+
+	printf("\n");
+	return ret;
 }
 
 kern_return_t
@@ -332,9 +375,69 @@ wrap_IOConnectCallAsyncScalarMethod(
                                     NULL,      NULL);
 }
 
+kern_return_t
+wrap_IOConnectSetNotificationPort(
+	io_connect_t	connect,
+	uint32_t	type,
+	mach_port_t	port,
+	uintptr_t	reference )
+{
+	printf("connect %X, type %X, to notification port %X, with reference %lx\n", connect, type, port, reference);
+	kern_return_t ret = IOConnectSetNotificationPort(connect, type, port, reference);
+	printf("return %u\n", ret);
+	return ret;
+}
+
+kern_return_t
+wrap_IOSetNotificationPort(
+	mach_port_t	connect,
+	uint32_t	type,
+	mach_port_t	port )
+{
+	return wrap_IOConnectSetNotificationPort(connect, type, port, 0);
+}
+
+IONotificationPortRef
+wrap_IONotificationPortCreate(
+	mach_port_t	masterPort )
+{
+	IONotificationPortRef ref = IONotificationPortCreate(masterPort);
+	printf("creating notification port from master %X --> %p\n", masterPort, ref);
+	return ref;
+}
+
+void
+wrap_IONotificationPortSetDispatchQueue(IONotificationPortRef notify, dispatch_queue_t queue)
+{
+	printf("set dispatch queue %p to queue %p\n", notify, queue);
+	IONotificationPortSetDispatchQueue(notify, queue);
+}
+
+mach_port_t
+wrap_IODataQueueAllocateNotificationPort()
+{
+	mach_port_t ret = IODataQueueAllocateNotificationPort();
+	printf("data queue notif port %X\n", ret);
+	return ret;
+}
+
+IOReturn
+wrap_IODataQueueSetNotificationPort(IODataQueueMemory *dataQueue, mach_port_t notifyPort)
+{
+	IOReturn ret = IODataQueueSetNotificationPort(dataQueue, notifyPort);
+	printf("data queue %p set notif port %X -> %X\n", dataQueue, notifyPort, ret);
+	return ret;
+}
+
 DYLD_INTERPOSE(wrap_IOConnectCallMethod, IOConnectCallMethod);
 DYLD_INTERPOSE(wrap_IOConnectCallAsyncMethod, IOConnectCallAsyncMethod);
 DYLD_INTERPOSE(wrap_IOConnectCallStructMethod, IOConnectCallStructMethod);
 DYLD_INTERPOSE(wrap_IOConnectCallAsyncStructMethod, IOConnectCallAsyncStructMethod);
 DYLD_INTERPOSE(wrap_IOConnectCallScalarMethod, IOConnectCallScalarMethod);
 DYLD_INTERPOSE(wrap_IOConnectCallAsyncScalarMethod, IOConnectCallAsyncScalarMethod);
+DYLD_INTERPOSE(wrap_IOConnectSetNotificationPort, IOConnectSetNotificationPort);
+//DYLD_INTERPOSE(wrap_IOSetNotificationPort, IOSetNotificationPort);
+DYLD_INTERPOSE(wrap_IONotificationPortCreate, IONotificationPortCreate);
+DYLD_INTERPOSE(wrap_IONotificationPortSetDispatchQueue, IONotificationPortSetDispatchQueue);
+DYLD_INTERPOSE(wrap_IODataQueueAllocateNotificationPort, IODataQueueAllocateNotificationPort);
+DYLD_INTERPOSE(wrap_IODataQueueSetNotificationPort, IODataQueueSetNotificationPort);

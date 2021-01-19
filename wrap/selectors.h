@@ -21,8 +21,14 @@
  * SOFTWARE.
  */
 
+#ifndef __AGX_SELECTOR_H
+#define __AGX_SELECTOR_H
+
+#include <IOKit/IODataQueueClient.h>
+
 enum agx_selector {
 	AGX_SELECTOR_SET_API = 0x7,
+	AGX_SELECTOR_CREATE_COMMAND_QUEUE = 0x8,
 	AGX_SELECTOR_ALLOCATE_MEM = 0xA,
 	AGX_SELECTOR_CREATE_CMDBUF = 0xF,
 	AGX_SELECTOR_SUBMIT_COMMAND_BUFFERS = 0x1E,
@@ -39,7 +45,7 @@ static const char *selector_table[AGX_NUM_SELECTORS] = {
 	"unk5",
 	"unk6",
 	"SET_API",
-	"unk8",
+	"CREATE_COMMAND_QUEUE",
 	"unk9",
 	"ALLOCATE_MEM",
 	"unkB",
@@ -87,13 +93,38 @@ wrap_selector_name(uint32_t selector)
 	return (selector < AGX_NUM_SELECTORS) ? selector_table[selector] : "unk??";
 }
 
+struct agx_create_command_queue_resp {
+	uint64_t id;
+	uint32_t unk2; // 90 0A 08 27
+	uint32_t unk3; // 0
+} __attribute__((packed));
+
 struct agx_create_cmdbuf_resp {
 	void *map;
 	uint32_t size;
 	uint32_t id;
 } __attribute__((packed));
 
-/* Memory allocation isn't really understood yet */
+struct agx_create_notification_queue_resp {
+	IODataQueueMemory *queue;
+	uint32_t unk2; // 1
+	uint32_t unk3; // 0
+} __attribute__((packed));
+
+struct agx_submit_cmdbuf_req {
+	uint32_t unk0;
+	uint32_t unk1;
+	uint32_t cmdbuf;
+	uint32_t mappings;
+	void *user_0;
+	void *user_1;
+	uint32_t unk2;
+	uint32_t unk3;
+} __attribute__((packed));
+
+/* Memory allocation isn't really understood yet. By comparing SHADER/CMDBUF_32
+ * vs everything else, it appears the 0x40000000 bit indicates the GPU VA must
+ * be be in the first 4GiB */
 
 enum agx_memory_type {
 	AGX_MEMORY_TYPE_NORMAL      = 0x00000000, /* used for user allocations */
@@ -117,3 +148,5 @@ agx_memory_type_name(uint32_t type)
 	default: return NULL;
 	}
 }
+
+#endif

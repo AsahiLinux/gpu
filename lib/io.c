@@ -139,7 +139,7 @@ agx_create_notification_queue(mach_port_t connection)
 	assert(resp_size == 0x10);
 
 	kern_return_t ret = IOConnectCallStructMethod(connection,
-			0x11, 
+			AGX_SELECTOR_CREATE_NOTIFICATION_QUEUE,
 			NULL, 0, &resp, &resp_size);
 
 	assert(resp_size == sizeof(resp));

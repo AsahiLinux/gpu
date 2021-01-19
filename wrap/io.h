@@ -26,6 +26,7 @@
 
 #include <stdbool.h>
 #include <mach/mach.h>
+#include "selectors.h"
 
 enum agx_alloc_type {
 	AGX_ALLOC_REGULAR = 0,
@@ -50,7 +51,21 @@ struct agx_allocation {
 	uint64_t gpu_va;
 };
 
-struct agx_allocation agx_alloc_mem(mach_port_t connection, size_t size);
+struct agx_notification_queue {
+	mach_port_t port;
+	IODataQueueMemory *queue;
+	unsigned id;
+};
+
+struct agx_command_queue {
+	unsigned id;
+	struct agx_notification_queue notif;
+};
+
+struct agx_allocation agx_alloc_mem(mach_port_t connection, size_t size, enum agx_memory_type type, bool write_combine);
 struct agx_allocation agx_alloc_cmdbuf(mach_port_t connection, size_t size, bool cmdbuf);
+void agx_submit_cmdbuf(mach_port_t connection, struct agx_allocation *cmdbuf, struct agx_allocation *mappings, uint64_t scalar);
+struct agx_command_queue agx_create_command_queue(mach_port_t connection);
+uint32_t agx_cmdbuf_unk6(mach_port_t connection);
 
 #endif

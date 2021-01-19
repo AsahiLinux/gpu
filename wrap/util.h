@@ -27,4 +27,12 @@
 #define MAX2(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN2(x, y) (((x) < (y)) ? (x) : (y))
 
+static uint32_t
+fui(float f)
+{
+	uint32_t u = 0;
+	memcpy(&u, &f, 4);
+	return u;
+}
+
 #endif

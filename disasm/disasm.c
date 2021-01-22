@@ -73,6 +73,7 @@ enum agx_opcodes {
 	OPC_LD_VAR_NO_PERSPECTIVE = 0xA1,
 	OPC_LD_VAR = 0xE1, // perspective
 	OPC_ST_VAR = 0x11,
+	OPC_UNKB1 = 0xB1, // seen in aux frag shader
 	OPC_UNK48 = 0x48, // seen before blending
 	OPC_BLEND = 0x09,
 
@@ -119,6 +120,7 @@ static struct {
 	[OPC_LOAD] = { "load", 8, I },
 	[OPC_LD_VAR_NO_PERSPECTIVE] = { "ld_var.no_perspective", 8, I },
 	[OPC_LD_VAR] = { "ld_var", 8, I },
+	[OPC_UNKB1] = { "unkb1", 10, I },
 	[OPC_STORE] = { "store", 8, I },
 	[OPC_ST_VAR] = { "st_var", 4, C },
 	[OPC_FCSEL] = { "fcsel", 8, I },

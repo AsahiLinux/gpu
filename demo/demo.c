@@ -60,7 +60,7 @@ static uint64_t
 demo_clear_color(struct agx_allocator *allocator)
 {
 	float colour[] = {
-		0.0, 1.0, 0.0, 1.0
+		0.99, 0.75, 0.53, 1.0
 	};
 
 	return agx_upload(allocator, colour, sizeof(colour));

@@ -1,8 +1,20 @@
+all: wrap.dylib demo-bin
+.PHONY: clean all
+.SUFFIXES:
+
 clean:
 	rm -f wrap.dylib demo-bin
 
-wrap.dylib:
-	clang lib/*.c wrap/*.c -I lib/ -dynamiclib -o wrap.dylib -framework IOKit -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function
+CFLAGS := -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function
+WRAP_SRCS := $(wildcard lib/*.c)\
+             $(wildcard wrap/*.c)
 
-demo-bin:
-	clang lib/*.c demo/*.c disasm/*.c -I lib/ -I /opt/X11/include -L /opt/X11/lib/ -lX11 -o demo-bin -framework IOKit -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function
+wrap.dylib: $(WRAP_SRCS) Makefile
+	clang -o $@ $(WRAP_SRCS) -I lib/ -dynamiclib -framework IOKit $(CFLAGS)
+
+DEMO_SRCS := $(wildcard lib/*.c)\
+             $(wildcard demo/*.c)\
+             $(wildcard disasm/*.c)
+
+demo-bin: $(DEMO_SRCS) Makefile
+	clang -o $@ $(DEMO_SRCS) -I lib/ -I /opt/X11/include -L /opt/X11/lib/ -lX11 -framework IOKit $(CFLAGS)

@@ -26,6 +26,7 @@
 #include <mach/mach.h>
 #include <IOKit/IOKitLib.h>
 #include "selectors.h"
+#include "demo.h"
 
 /* Sample code for opening a connection to the AGX kernel module via IOKit */
 
@@ -33,6 +34,9 @@
 
 int main(int argc, char **argv)
 {
+	(void) argc;
+	(void) argv;
+
 	kern_return_t ret;
 
 	/* TODO: Support other models */
@@ -81,6 +85,8 @@ int main(int argc, char **argv)
 
 	assert(version_len == sizeof(version));
 	printf("Kext build date: %s\n", version + (25 * 8));
+
+	demo(connection, getenv("DISPLAY") == NULL);
 
 	ret = IOServiceClose(connection);
 

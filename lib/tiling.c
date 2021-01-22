@@ -170,30 +170,3 @@ ash_detile(uint32_t *tiled, uint32_t *linear,
 
 	ash_detile_32(tiled, linear, width, linear_pitch, sx, sy, smaxx, smaxy);
 }
-
-#if 0
-int main(int argc, char **argv)
-{
-	/* Read tiled texture */
-	size_t sz = 2129920 + 0x40;
-	uint32_t *buf = malloc(sz); 
-	FILE *fp = fopen("buf.bin", "rb");
-	fread(buf + 0x10, 1, sz, fp);
-	fclose(fp);
-
-	/* Detile detiled */
-	uint32_t *buf2 = malloc(sz);
-
-	const unsigned WIDTH = 800;
-	const unsigned HEIGHT = 600;
-
-	for (unsigned i = 0; i < 1000; ++i) {
-	ash_detile_32(buf, buf2, WIDTH, WIDTH,
-		0, 0, WIDTH, HEIGHT);
-	}
-
-	fp = fopen("out.bin", "wb");
-	fwrite(buf2, 1, 800 * 600 * 4, fp);
-	fclose(fp);
-}
-#endif

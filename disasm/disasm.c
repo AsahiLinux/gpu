@@ -66,7 +66,7 @@ enum agx_opcodes {
 	OPC_ICSEL = 0x12,
 	OPC_MOVI = 0x62,
 	OPC_LD_COMPUTE = 0x72,
-	OPC_LD_THREADS_PER_GRID = 0x7E, // todo --- uh, bitwise AND
+	OPC_BITOP = 0x7E,
 	OPC_UNK38 = 0x38, // seen after loads?
 	OPC_STOP = 0x08,
 
@@ -127,7 +127,7 @@ static struct {
 	[OPC_ICSEL] = { "icsel", 8, I },
 	[OPC_MOVI] = { "movi", 4, C },
 	[OPC_LD_COMPUTE] = { "ld_compute", 4, C },
-	[OPC_LD_THREADS_PER_GRID] = { "ld_threads_per_grid", 6, I },
+	[OPC_BITOP] = { "bitop", 6, I },
 	[OPC_BLEND] = { "blend", 8, I },
 	[OPC_STOP] = { "stop", 4, I },
 
@@ -260,6 +260,57 @@ agx_print_ld_compute(uint8_t *code, FILE *fp)
 }
 
 static void
+agx_print_bitop_src(uint16_t value, FILE *fp)
+{
+	/* different encoding from float srcs -- slightly smaller */
+	uint16_t mode = (value >> 6) & 0x0f;
+	uint16_t v = (value & 0x3f) | ((value >> 4) & 0xc0);
+
+	switch (mode) {
+	case 0x0:
+		// 8-bit immediate
+		fprintf(fp, "#0x%x", v);
+		break;
+	case 0x3:
+		// 16b register
+		fprintf(fp, "h%d", v);
+		break;
+	case 0xb:
+		// 32b register
+		fprintf(fp, "w%d", v >> 1);
+		break;
+	default:
+		fprintf(fp, "unk_%x", value);
+		break;
+	}
+}
+
+static void
+agx_print_bitop(uint8_t *code, FILE *fp)
+{
+	/* 6 bytes */
+	/* Universal bitop instruction. Control bits express operation as
+	 * sum-of-products: a&b, ~a&b, a&~b, ~a&~b */
+
+	/* XXX: dst encoding may not be quite correct either, but is done
+	 * in common code before this point */
+	/* XXX: disassemble to "friendly" pseudoop ? */
+
+	uint8_t control = (code[3] >> 2) & 0x3;
+	control |= (code[4] >> 4) & 0xc; 
+	fprintf(fp, ", #0x%x, ", control);
+
+	uint16_t src1_bits = code[2] | ((uint16_t)(code[3]&3) << 8) |
+		((uint16_t)code[5]&0xc)<<8;
+	uint16_t src2_bits = (code[3] >> 4) | (((uint16_t)code[4]&0x3f)<<4) |
+		(((uint16_t)code[5]&0x3)<<10);
+
+	agx_print_bitop_src(src1_bits, fp);
+	fprintf(fp, ", ");
+	agx_print_bitop_src(src2_bits, fp);
+}
+
+static void
 agx_print_st_var(uint8_t *code, FILE *fp)
 {
 	/* 4 bytes, first for opcode. Second for source register  third
@@ -349,6 +400,9 @@ agx_disassemble_instr(uint8_t *code, bool *stop, bool verbose, FILE *fp)
 		break;
 	case OPC_LD_COMPUTE:
 		agx_print_ld_compute(code, fp);
+		break;
+	case OPC_BITOP:
+		agx_print_bitop(code, fp);
 		break;
 	case OPC_MOVI: {
 		uint32_t imm = code[2] | (code[3] << 8);

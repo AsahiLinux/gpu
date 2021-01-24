@@ -136,6 +136,8 @@ wrap_IOConnectCallMethod(
 		
 		printf("%X: SUBMIT_COMMAND_BUFFERS command queue id:%llx %p\n", connection, input[0], inputStruct);
 
+		dump_mappings();
+
 		/* fallthrough */
 	default:
 		printf("%X: call %s (out %p, %zu)", connection, wrap_selector_name(selector), outputStructCntP, outputStructCntP ? *outputStructCntP : 0);

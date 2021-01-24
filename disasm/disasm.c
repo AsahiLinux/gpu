@@ -277,6 +277,7 @@ agx_print_bitop_src(uint16_t value, FILE *fp)
 		break;
 	case 0xb:
 		// 32b register
+		assert((v&1) == 0);
 		fprintf(fp, "w%d", v >> 1);
 		break;
 	default:

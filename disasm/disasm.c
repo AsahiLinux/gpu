@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 /* Opcode table? Speculative since I don't know the opcode size yet, but this
  * should help bootstrap... These opcodes correspond to the bottom 7-bits of
@@ -315,6 +316,69 @@ agx_print_bitop(uint8_t *code, FILE *fp)
 	agx_print_bitop_src(src2_bits, fp);
 }
 
+static float
+agx_decode_float_imm8(uint16_t src)
+{
+	float sign = (src & 0x80) ? -1.0f : 1.0f;
+	int e = ((src & 0x70) >> 4);
+
+	if (e == 0) {
+		/* denorm */
+		return sign * (src & 0x0f) / 64.0f;
+	}
+	else {
+		return sign * ldexpf((src & 0x0f) | 0x10, e - 7);
+	}
+}
+
+static void
+agx_print_fp16_src(uint16_t src, uint16_t type, FILE *fp)
+{
+	/* XXX: type&2 bit may be something odd like code[0]&0x80 */
+
+	switch (type & 5) {
+	case 0x0:
+		/* packed float8 immediate */
+		fprintf(fp, "#%ff", agx_decode_float_imm8(src));
+		break;
+	case 0x1:
+		/* half register */
+		fprintf(fp, "h%d", src);
+		break;
+	case 0x4:
+	case 0x5:
+		/* constant space; extra bit packed in
+		 * bottom bit of type */
+		fprintf(fp, "const_%d", ((type&1)<<8) | src);
+		break;
+	default:
+		fprintf(fp, "unk_%x:%x", type, src);
+		break;
+	}
+
+	if (type & 0x8)
+		fprintf(fp, ".abs");
+	if (type & 0x10)
+		fprintf(fp, ".neg");
+
+}
+
+static void
+agx_print_fadd16(uint8_t *code, FILE *fp)
+{
+	/* 6 bytes */
+	uint16_t src1 = (code[2] & 0x3f) | ((code[5] & 0x0c)<<4);
+	uint16_t type1 = (code[2] >> 6) | ((code[3] & 0x0f)<<2);
+
+	uint16_t src2 = (code[3] >> 4) | ((code[4] & 0x3)<<4) | ((code[5] & 0x3)<<6);
+	uint16_t type2 = (code[4] >> 2);
+
+	fprintf(fp, ", ");
+	agx_print_fp16_src(src1, type1, fp);
+	fprintf(fp, ", ");
+	agx_print_fp16_src(src2, type2, fp);
+}
+
 static void
 agx_print_st_var(uint8_t *code, FILE *fp)
 {
@@ -409,6 +473,12 @@ agx_disassemble_instr(uint8_t *code, bool *stop, bool verbose, FILE *fp)
 	case OPC_BITOP:
 		agx_print_bitop(code, fp);
 		break;
+	case OPC_FADD_16:
+	case OPC_FADD_SAT_16:
+	case OPC_FMUL_16:
+	case OPC_FMUL_SAT_16:
+		agx_print_fadd16(code, fp);
+		break;
 	case OPC_MOVI: {
 		uint32_t imm = code[2] | (code[3] << 8);
 
@@ -419,12 +489,8 @@ agx_disassemble_instr(uint8_t *code, bool *stop, bool verbose, FILE *fp)
 		break;
 	}
 	case OPC_FADD_32:
-	case OPC_FADD_16:
-	case OPC_FADD_SAT_16:
 	case OPC_FADD_SAT_32:
 	case OPC_FMUL_32:
-	case OPC_FMUL_16:
-	case OPC_FMUL_SAT_16:
 	case OPC_FMUL_SAT_32:
 		agx_print_fadd_f32(fp, code);
 		break;

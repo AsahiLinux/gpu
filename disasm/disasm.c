@@ -81,6 +81,9 @@ enum agx_opcodes {
 	OPC_UNKD2 = 0xD2,
 	OPC_UNK42 = 0x42,
 	OPC_UNK52 = 0x52,
+
+	// not sure what this does, but appears to be 4 bytes
+	OPC_UNK80 = 0x80,
 };
 
 #define I 0
@@ -135,6 +138,7 @@ static struct {
 	[OPC_UNK48] = { "unk48", 4, I },
 	[OPC_UNK42] = { "unk42", 6, I },
 	[OPC_UNK52] = { "unk52", 6, I },
+	[OPC_UNK80] = { "unk80", 4, I },
 	[OPC_UNKD2] = { "unkD2", 12, I },
 };
 

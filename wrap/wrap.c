@@ -135,6 +135,7 @@ wrap_IOConnectCallMethod(
 		assert(inputCnt == 1);
 		
 		printf("%X: SUBMIT_COMMAND_BUFFERS command queue id:%llx %p\n", connection, input[0], inputStruct);
+		dump_mappings();
 
 		/* fallthrough */
 	default:

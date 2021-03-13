@@ -142,6 +142,8 @@ demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf, struct 
 
 	uint32_t unk[] = {
 		0x800000,
+
+		/* Transclude command buffer? */
 		0x11002,
 		fsbuf->gpu_va + 0xC0, // XXX: dynalloc
 		aux0_offs,
@@ -247,8 +249,10 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 
 	uint32_t unk0[] = {
 		0x4000002e,
-		0x1002,
-		vsbuf->gpu_va,
+
+		/* Transclude pipeline? */
+		0x1002, vsbuf->gpu_va,
+
 		0x0505,
 	};
 
@@ -382,6 +386,8 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[21] = 0;
 	buf[22] = 0;
 	buf[23] = 0;
+
+	/* Start of region transcluded from unk8? */
 	buf[24] = PTR40(1d, 04, 40, demo_zero(allocator, 256));
 
 	buf[25] = 0x2010bd4d | (0x50dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);

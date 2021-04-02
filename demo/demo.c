@@ -451,33 +451,41 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	/* Vertex stuff */
 	EMIT32(cmdbuf, 0x10000);
-	EMIT32(cmdbuf, 0x780);
+	EMIT32(cmdbuf, 0x780); // Compute: 0x188
 	EMIT32(cmdbuf, 0x7);
 	EMIT_ZERO_WORDS(cmdbuf, 5);
-	EMIT32(cmdbuf, 0x758);
-	EMIT32(cmdbuf, 0x18);
-	EMIT32(cmdbuf, 0x758);
-	EMIT32(cmdbuf, 0x728);
+	EMIT32(cmdbuf, 0x758); // Compute: 0x180
+	EMIT32(cmdbuf, 0x18);  // Compute: 0x0
+	EMIT32(cmdbuf, 0x758); // Compute: 0x0
+	EMIT32(cmdbuf, 0x728); // Compute: 0x150
 
 	EMIT32(cmdbuf, 0x30); /* 0x30 */
-	EMIT32(cmdbuf, 0x01); /* 0x34 */
+	EMIT32(cmdbuf, 0x01); /* 0x34. Compute: 0x03 */
 
+	/* Pointer to data about the vertex shader */
 	EMIT64(cmdbuf, demo_unk2(allocator, vsbuf, fsbuf, shaders));
 
 	EMIT_ZERO_WORDS(cmdbuf, 20);
 
-	EMIT64(cmdbuf, 0); /* 0x90 */
-	EMIT64(cmdbuf, 0); // blob - 0x540 bytes of zero
+	EMIT64(cmdbuf, 0); /* 0x90, compute blob - some zero */
+	EMIT64(cmdbuf, 0); // blob - 0x540 bytes of zero, compute blob - null
 	EMIT64(cmdbuf, 0); // blob - 0x280 bytes of zero
-	EMIT64(cmdbuf, 0); // a8
+	EMIT64(cmdbuf, 0); // a8, compute blob - zero pointer
 
-	EMIT_ZERO_WORDS(cmdbuf, 8);
+	EMIT64(cmdbuf, 0); // compute blob - zero pointer
+	EMIT64(cmdbuf, 0); // compute blob - zero pointer
+	EMIT64(cmdbuf, 0); // compute blob - zero pointer
 
-	EMIT64(cmdbuf, 0); // d0
+	// while zero for vertex, used to include the odd unk6 pattern for compute
+	EMIT64(cmdbuf, 0); // compute blob - 0x1
+	EMIT64(cmdbuf, 0); // d0,  ompute blob - pointer to odd pattern, compare how it's done later for frag
+
+	// compute 8 bytes of zero, then reconverge at *
 
 	EMIT32(cmdbuf, 0x6b0003); // d8
 	EMIT32(cmdbuf, 0x3a0012); // dc
 
+	/* Possibly the funny pattern but not actually pointed to for vertex */
 	EMIT64(cmdbuf, 1); // e0
 	EMIT64(cmdbuf, 0); // e8
 
@@ -485,11 +493,18 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT64(cmdbuf, 0); // blob - 0x20 bytes of zero
 	EMIT64(cmdbuf, 1); // 1a8
-	EMIT64(cmdbuf, 0x1c); // 1b0
-	EMIT64(cmdbuf, 0x0); // 1b8
-	EMIT32(cmdbuf, 0xffffffff);
-	EMIT32(cmdbuf, 0xffffffff);
-	EMIT32(cmdbuf, 0xffffffff);
+
+	// * compute reconverges here at 0xe0 in my trace
+	EMIT32(cmdbuf, 0x1c); // 1b0
+
+	// compute 0xe8: 0x1007a32, 0, 0, 0xffffffff, done for a while
+	// compute 0x120: 0x9 | 0x128: 0x40
+
+	EMIT32(cmdbuf, 0); // 1b0 - compute: 0x10000
+	EMIT64(cmdbuf, 0x0); // 1b8 -- compute 0x10000
+	EMIT32(cmdbuf, 0xffffffff); // note we can zero!
+	EMIT32(cmdbuf, 0xffffffff); // note we can zero! compute 0
+	EMIT32(cmdbuf, 0xffffffff); // note we can zero! compute 0
 	EMIT32(cmdbuf, 0);
 
 	EMIT_ZERO_WORDS(cmdbuf, 40);
@@ -553,10 +568,12 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT64(cmdbuf, 0x230315d6); // this changes every run?
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0xffffffff);
+
+	// remark: opposite order for compute, but we can swap the orders
 	EMIT32(cmdbuf, 1);
 	EMIT32(cmdbuf, 0);
 	EMIT64(cmdbuf, 0);
-	EMIT64(cmdbuf, demo_unk6(allocator));
+	EMIT64(cmdbuf, 0 /* demo_unk6(allocator) */);
 
 	/* note: width/height act like scissor, but changing the 0s doesn't
 	 * seem to affect (maybe scissor enable bit missing), _and this affects

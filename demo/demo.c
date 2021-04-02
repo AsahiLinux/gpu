@@ -468,8 +468,8 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT_ZERO_WORDS(cmdbuf, 20);
 
 	EMIT64(cmdbuf, 0); /* 0x90 */
-	EMIT64(cmdbuf, demo_zero(allocator, 0x540)); // 0x98
-	EMIT64(cmdbuf, demo_zero(allocator, 0x280)); // 0xa0
+	EMIT64(cmdbuf, 0); // blob - 0x540 bytes of zero
+	EMIT64(cmdbuf, 0); // blob - 0x280 bytes of zero
 	EMIT64(cmdbuf, 0); // a8
 
 	EMIT_ZERO_WORDS(cmdbuf, 8);
@@ -484,7 +484,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT_ZERO_WORDS(cmdbuf, 44);
 
-	EMIT64(cmdbuf, demo_zero(allocator, 0x20)); // 0x1a0
+	EMIT64(cmdbuf, 0); // blob - 0x20 bytes of zero
 	EMIT64(cmdbuf, 1); // 1a8
 	EMIT64(cmdbuf, 0x1c); // 1b0
 	EMIT64(cmdbuf, 0x0); // 1b8

@@ -27,12 +27,10 @@
 #include <stdint.h>
 
 struct agx_map_header {
-	uint32_t unk0; // cc c3 68 01
-	uint32_t unk1; // 01 00 00 00
+	uint64_t cmdbuf_id; // GUID
 	uint32_t unk2; // 01 00 00 00
 	uint32_t unk3; // 28 05 00 80
-	uint32_t unk4; // cd c3 68 01
-	uint32_t unk5; // 01 00 00 00 
+	uint64_t encoder_id; // GUID
 	uint32_t unk6; // 00 00 00 00
 	uint32_t unk7; // 80 07 00 00
 	uint32_t nr_entries_1;

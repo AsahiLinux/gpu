@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include <time.h>
 #include "tiling.h"
 #include "demo.h"
@@ -624,15 +625,13 @@ demo_map_entry(struct agx_allocation *alloc)
 }
 
 static struct agx_map_header
-demo_map_header(unsigned unk, unsigned count)
+demo_map_header(uint64_t cmdbuf_id, uint64_t encoder_id, unsigned count)
 {
 	return (struct agx_map_header) {
-		.unk0 = unk,
-		.unk1 = 0x1,
+		.cmdbuf_id = cmdbuf_id,
 		.unk2 = 0x1,
 		.unk3 = 0x528, // 1320
-		.unk4 = unk + 1,
-		.unk5 = 0x1,
+		.encoder_id = encoder_id,
 		.unk6 = 0x0,
 		.unk7 = 0x780, // 1920
 
@@ -644,15 +643,14 @@ demo_map_header(unsigned unk, unsigned count)
 }
 
 static void
-demo_mem_map(void *map, struct agx_allocation *allocs, unsigned count, unsigned unk)
+demo_mem_map(void *map, struct agx_allocation *allocs, unsigned count,
+		uint64_t cmdbuf_id, uint64_t encoder_id)
 {
 	struct agx_map_header *header = map;
 	struct agx_map_entry *entries = (struct agx_map_entry *) (map + 0x40);
 
 	/* Header precedes the entry */
-	*header = demo_map_header(unk, count);
-	header->nr_entries_1 = count + 1;
-	header->nr_entries_2 = count + 1;
+	*header = demo_map_header(cmdbuf_id, encoder_id, count);
 
 	/* Add an entry for each BO mapped */
 	for (unsigned i = 0; i < count; ++i) {
@@ -710,7 +708,8 @@ void demo(mach_port_t connection, bool offscreen)
 		framebuffer
 	};
 
-	demo_mem_map(memmap.map, allocs, sizeof(allocs) / sizeof(allocs[0]), unk6 + 1);
+	demo_mem_map(memmap.map, allocs, sizeof(allocs) / sizeof(allocs[0]),
+			unk6 + 1, unk6 + 2);
 
 	uint32_t *linear = malloc(800 * 600 * 4);
 

@@ -56,6 +56,7 @@ agx_alloc_mem(mach_port_t connection, size_t size, enum agx_memory_type type, bo
 
 	return (struct agx_allocation) {
 		.type = AGX_ALLOC_REGULAR,
+		.guid = out[5],
 		.index = (out[3] >> 32ull),
 		.gpu_va = out[0],
 		.map = (void *) out[1],
@@ -86,7 +87,8 @@ agx_alloc_cmdbuf(mach_port_t connection, size_t size, bool cmdbuf)
 		.type = cmdbuf ? AGX_ALLOC_CMDBUF : AGX_ALLOC_MEMMAP,
 		.index = out.id,
 		.map = out.map,
-		.size = out.size
+		.size = out.size,
+		.guid = 0, /* TODO? */
 	};
 }
 

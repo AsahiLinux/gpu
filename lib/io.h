@@ -41,8 +41,14 @@ struct agx_allocation {
 	enum agx_alloc_type type;
 	size_t size;
 
-	/* Index unique only up to type */
+	/* Index unique only up to type, process-local */
 	unsigned index;
+
+	/* Globally unique value (system wide) for tracing. Exists for
+	 * resources, command buffers, GPU submissions, segments, segent lists,
+	 * encoders, accelerators, and channels. Corresponds to Instruments'
+	 * magic table metal-gpu-submission-to-command-buffer-id */
+	uint64_t guid;
 
 	/* If CPU mapped, CPU address. NULL if not mapped */
 	void *map;

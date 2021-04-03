@@ -566,7 +566,8 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT_ZERO_WORDS(cmdbuf, 4);
 
 	/* Compare compute case ,which has a bit of reordering, but we can swap */
-	EMIT64(cmdbuf, 0x1c); // 0x5a0
+	EMIT32(cmdbuf, 0x1c); // 0x5a0
+	EMIT32(cmdbuf, 0);
 	EMIT64(cmdbuf, 0xCAFECAFE); // encoder ID XXX: don't fix
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0xffffffff);

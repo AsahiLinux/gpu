@@ -583,8 +583,8 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	 * the clear_ .. bbox maybe */
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
-	EMIT32(cmdbuf, 800); // fb width
-	EMIT32(cmdbuf, 600); // fb height
+	EMIT32(cmdbuf, 800); // fb width, can increase up to 16384
+	EMIT32(cmdbuf, 600); // fb height, "
 
 	EMIT32(cmdbuf, 1);
 	EMIT32(cmdbuf, 8);

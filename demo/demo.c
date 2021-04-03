@@ -567,7 +567,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	/* Compare compute case ,which has a bit of reordering, but we can swap */
 	EMIT64(cmdbuf, 0x1c); // 0x5a0
-	EMIT64(cmdbuf, 0x230315d6); // encoder ID XXX: regenerate, compare compute case
+	EMIT64(cmdbuf, 0xCAFECAFE); // encoder ID XXX: don't fix
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0xffffffff);
 
@@ -709,7 +709,7 @@ void demo(mach_port_t connection, bool offscreen)
 	};
 
 	demo_mem_map(memmap.map, allocs, sizeof(allocs) / sizeof(allocs[0]),
-			unk6 + 1, unk6 + 2);
+			0xDEADBEEF, 0xCAFECAFE); // (unk6 + 1, unk6 + 2) but it doesn't really matter
 
 	uint32_t *linear = malloc(800 * 600 * 4);
 

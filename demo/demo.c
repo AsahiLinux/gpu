@@ -698,7 +698,7 @@ void demo(mach_port_t connection, bool offscreen)
 
 	struct agx_allocation memmap = agx_alloc_cmdbuf(connection, 0x4000, false);
 
-	uint32_t unk6 = agx_cmdbuf_unk6(connection);
+	uint64_t global_ids = agx_cmdbuf_global_ids(connection);
 
 	struct agx_allocation allocs[] = {
 		shader,

@@ -92,8 +92,8 @@ agx_alloc_cmdbuf(mach_port_t connection, size_t size, bool cmdbuf)
 	};
 }
 
-uint32_t
-agx_cmdbuf_unk6(mach_port_t connection)
+uint64_t
+agx_cmdbuf_global_ids(mach_port_t connection)
 {
 	uint32_t out[4] = {};
 	size_t out_sz = sizeof(out);
@@ -106,7 +106,9 @@ agx_cmdbuf_unk6(mach_port_t connection)
 	assert(out_sz == sizeof(out));
 	assert(out[2] == (out[0] + 0x1000000));
 
-	return out[0];
+	/* Returns a 32-bit but is 64-bit in Instruments, extend with the
+	 * missing high bit */
+	return (out[0]) | (1ull << 32ull);
 }
 
 void

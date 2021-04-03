@@ -72,6 +72,6 @@ struct agx_allocation agx_alloc_mem(mach_port_t connection, size_t size, enum ag
 struct agx_allocation agx_alloc_cmdbuf(mach_port_t connection, size_t size, bool cmdbuf);
 void agx_submit_cmdbuf(mach_port_t connection, struct agx_allocation *cmdbuf, struct agx_allocation *mappings, uint64_t scalar);
 struct agx_command_queue agx_create_command_queue(mach_port_t connection);
-uint32_t agx_cmdbuf_unk6(mach_port_t connection);
+uint64_t agx_cmdbuf_global_ids(mach_port_t connection);
 
 #endif

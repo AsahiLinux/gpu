@@ -27,6 +27,7 @@
 #include <IOKit/IODataQueueClient.h>
 
 enum agx_selector {
+	AGX_SELECTOR_GET_GLOBAL_IDS = 0x6,
 	AGX_SELECTOR_SET_API = 0x7,
 	AGX_SELECTOR_CREATE_COMMAND_QUEUE = 0x8,
 	AGX_SELECTOR_FREE_COMMAND_QUEUE = 0x9,
@@ -48,7 +49,7 @@ static const char *selector_table[AGX_NUM_SELECTORS] = {
 	"unk3",
 	"unk4",
 	"unk5",
-	"unk6",
+	"GET_GLOBAL_IDS",
 	"SET_API",
 	"CREATE_COMMAND_QUEUE",
 	"FREE_COMMAND_QUEUE",

@@ -497,7 +497,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	// * compute reconverges here at 0xe0 in my trace
 	EMIT32(cmdbuf, 0x1c); // 1b0
 
-	// compute 0xe8: [encoder ID -- from selector6 + 2 with blob], -1, 0, 0xffffffff, done for a while
+	// compute 0xe4: [encoder ID -- from selector6 + 2 with blob], 0, 0, 0xffffffff, done for a while
 	// compute 0x120: 0x9 | 0x128: 0x40
 
 	EMIT32(cmdbuf, 0); // 1b0 - compute: 0x10000
@@ -564,8 +564,9 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT64(cmdbuf, 0);
 	EMIT_ZERO_WORDS(cmdbuf, 4);
 
+	/* Compare compute case ,which has a bit of reordering, but we can swap */
 	EMIT64(cmdbuf, 0x1c); // 0x5a0
-	EMIT64(cmdbuf, 0x230315d6); // this changes every run?
+	EMIT64(cmdbuf, 0x230315d6); // encoder ID XXX: regenerate, compare compute case
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0xffffffff);
 

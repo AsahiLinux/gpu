@@ -67,6 +67,14 @@ demo_clear_color(struct agx_allocator *allocator)
 	return agx_upload(allocator, colour, sizeof(colour));
 }
 
+/* Probably wrong, just eyeballed it */
+enum agx_rt_rotation {
+	AGX_RT_ROTATION_0 = 0,
+	AGX_RT_ROTATION_180 = 1,
+	AGX_RT_ROTATION_90 = 2,
+	AGX_RT_ROTATION_270 = 3
+};
+
 struct agx_render_target {
 	unsigned unk0 : 16; // 0xa22
 	unsigned swiz_r : 2;
@@ -75,11 +83,12 @@ struct agx_render_target {
 	unsigned swiz_a : 2;
 	unsigned width : 14; // minus(1)
 	unsigned height : 14; // minus(1)
-	unsigned unk1 : 12; // 0
-
+	unsigned unk1 : 1;
+	enum agx_rt_rotation rotation : 2;
+	unsigned unk2 : 9; // 0
 	uint64_t buffer : 36; // shift(4)
-	unsigned unk2 : 12;
-	unsigned unk3 : 16;
+	unsigned unk3 : 12;
+	unsigned unk4 : 16;
 } __attribute__((packed));
 
 static uint64_t
@@ -97,10 +106,13 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		.swiz_a = 3,
 		.width = 800 - 1,
 		.height = 800 - 1,
+
 		.unk1 = 0,
+		.rotation = AGX_RT_ROTATION_270,
+
 		.buffer = framebuffer->gpu_va >> 4,
-		.unk2 = 0,
-		.unk3 = 0x1000
+		.unk3 = 0x0,
+		.unk4 = 0x1000
 	};
 
 	return agx_upload(allocator, &rt, sizeof(rt));

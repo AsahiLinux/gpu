@@ -141,7 +141,7 @@ demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf, struct 
 	uint32_t unk[] = {
 		0x800000,
 		0x11002,
-		fsbuf->gpu_va + 0xC0, // XXX: dynalloc
+		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- FS+AUX4
 		aux0_offs,
 	};
 
@@ -544,13 +544,13 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT32(cmdbuf, 0xffff8002); // 0x270
 	EMIT32(cmdbuf, 0);
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x44);// XXX: dynalloc
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x44);// AUX1+AUX2 -- XXX: dynalloc
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0x12);
 
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x84); // 0x290
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x84); // AUX3 -- 0x290 -- XXX: dynalloc
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
 	EMIT64(cmdbuf, 0);
@@ -583,12 +583,12 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0xffff8212);
 	EMIT32(cmdbuf, 0);
 
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x4);// XXX: dynalloc
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x4);// XXX: dynalloc -- AUX0
 	EMIT64(cmdbuf, 0);
 
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0x12);
-	EMIT32(cmdbuf, fsbuf->gpu_va + 0x84);
+	EMIT32(cmdbuf, fsbuf->gpu_va + 0x84); // AUX3
 	EMIT32(cmdbuf, 0);
 
 	EMIT_ZERO_WORDS(cmdbuf, 44);

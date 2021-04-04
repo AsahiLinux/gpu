@@ -347,13 +347,26 @@ demo_unk6(struct agx_allocator *allocator)
 
 #define PTR40(a, b, c, ptr) make_ptr40(0x ## a, 0x ## b, 0x ##c, ptr)
 
+/* Set arguments to a vertex/compute shader (attribute table or
+ * kernel arguments respectively). start/sz are word-sized */
+
+static uint64_t
+demo_bind_arg_words(uint64_t gpu_va, unsigned start, unsigned sz)
+{
+	assert(sz <= 4);
+	assert(gpu_va < (1ull << 40));
+	assert(start < 0x80); /* TODO: oliver */
+
+	return 0x1d | (start << 9) | (sz << 21) | (gpu_va << 24);
+}
+
 static void
 demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator *shader_pool)
 {
 	uint32_t vs_offs = demo_vertex_shader(shader_pool);
 	uint32_t aux0 = demo_vert_aux0(shader_pool);
 
-	buf[0] = PTR40(1d, 00, 80, demo_attributes(allocator));
+	buf[0] = demo_bind_arg_words(demo_attributes(allocator), 0, 4);
 	buf[1] = 0x0000904d | (0x80dull << 32) | ((uint64_t) (vs_offs & 0xFFFF) << 48);
 	buf[2] = (vs_offs >> 16) | (0x028d << 16) | (0x00380100ull << 32);
 	buf[3] = (0xc080) | ((uint64_t) aux0 << 16);

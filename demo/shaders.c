@@ -99,7 +99,8 @@ uint8_t frag_aux0[] = {
 	/* ignored? */
 };
 
-/* involved with clearing the tilebuffer, unclear what u6-u7 are here, maybe depth/stencil?
+/* Clears the tilebuffer, where u6-u7 are preloaded with the FP16 clear colour
+ * by the paired compute shader AUX2
 
    0: 7e018c098040         bitop_mov        r0, u6
    6: 7e058e098000         bitop_mov        r1, u7

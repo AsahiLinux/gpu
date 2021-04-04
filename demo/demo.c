@@ -395,7 +395,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[ 5] = 0;
 	buf[ 6] = 0;
 	buf[ 7] = 0;
-	buf[ 8] = PTR40(1d, 04, 80, demo_clear_color(allocator));
+	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 2, 4);
 	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (aux1_offs & 0xFFFF) << 48);
 	buf[10] = ((uint64_t) aux1_offs >> 16) | (0x18d << 16) | (0x00380100ull << 32);
 	buf[11] = ((uint64_t) aux2_offs << 16) | 0xc080;

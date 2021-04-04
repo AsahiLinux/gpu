@@ -79,8 +79,11 @@ demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 	uint32_t width = 800;
 	uint32_t height = 600;
 
+	/* Default to BGRA */
+	uint8_t swizzle = (2 << 0) | (1 << 2) | (0 << 4) | (3 << 6);
+
 	uint64_t unk[] = {
-		0xc60a22 | (((uint64_t) (width - 1)) << 24) | ((uint64_t) (height - 1) << 38),
+		0x0a22 | (swizzle << 16) | (((uint64_t) (width - 1)) << 24) | ((uint64_t) (height - 1) << 38),
 		(framebuffer->gpu_va >> 4)  | (0x1000ull << 48),
 		0,
 		0xffffffff00000000ull,

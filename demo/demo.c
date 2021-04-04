@@ -407,7 +407,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[21] = 0;
 	buf[22] = 0;
 	buf[23] = 0;
-	buf[24] = PTR40(1d, 04, 40, demo_zero(allocator, 256));
+	buf[24] = demo_bind_arg_words(demo_zero(allocator, 8), 2, 2);
 
 	buf[25] = 0x2010bd4d | (0x50dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
 	buf[26] = (fs_offs >> 16) | (0x218d << 16) | (0xf3580100ull << 32);

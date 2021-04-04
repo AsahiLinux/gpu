@@ -68,39 +68,6 @@ demo_clear_color(struct agx_allocator *allocator)
 }
 
 static uint64_t
-demo_unk0_0(struct agx_allocator *allocator)
-{
-	uint8_t unk[] = {
-		0x32, 0x0a, 0x0a, 0xf6, 0x31, 0x5c, 0x09, 0x00, 0x00, 0x60,
-		0x02, 0x40, 0x85, 0x40, 0x0c, 0x80, 0x00, 0x73, 0x02, 0x50,
-		0x01, 0x00, 0x00, 0x00
-	};
-
-	return agx_upload(allocator, unk, sizeof(unk));
-}
-
-static uint64_t
-demo_unk0_1(struct agx_allocator *allocator)
-{
-	uint8_t unk[] = {
-		0x00, 0x00, 0x0e, 0x00, 0x40, 0x03, 0x00, 0x00
-	};
-
-	return agx_upload(allocator, unk, sizeof(unk));
-}
-
-static uint64_t
-demo_unk0_3(struct agx_allocator *allocator)
-{
-	/* Probably a 2x2 affine transformation */
-	float unk[] = {
-		1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-	};
-
-	return agx_upload(allocator, unk, sizeof(unk));
-}
-
-static uint64_t
 demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 {
 	/* Remark: framebuffer must be 128-byte aligned. 64-bytes doesn't
@@ -374,23 +341,12 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 static void
 demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation *framebuffer, struct agx_allocator *shader_pool)
 {
-	uint32_t aux0_offs = demo_zero(shader_pool, 8);
 	uint32_t aux1_offs = demo_clear(shader_pool);
 	uint32_t aux2_offs = demo_clear_pre(shader_pool);
 	uint32_t aux3_offs = demo_frag_aux3(shader_pool);
 	uint32_t fs_offs = demo_fragment_shader(shader_pool);
 
 	memset(buf, 0, 128 * 8);
-
-	/* AUX0 */
-	buf[ 0] = PTR40(dd, 00, 10, demo_unk0_0(allocator));
-	buf[ 1] = PTR40(9d, 00, 10, demo_unk0_1(allocator));
-	buf[ 2] = demo_bind_arg_words(demo_unk0_3(allocator), 2, 6);
-	buf[ 3] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (aux0_offs & 0xFFFF) << 48);
-	buf[ 4] = ((uint64_t) aux0_offs >> 16) | (0x18d << 16)  | (0x00880100ull << 32);
-	buf[ 5] = 0;
-	buf[ 6] = 0;
-	buf[ 7] = 0;
 
 	/* AUX1+AUX2 */
 	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 2, 4);
@@ -582,7 +538,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0xffff8212);
 	EMIT32(cmdbuf, 0);
 
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x4);// XXX: dynalloc -- AUX0
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x4);// XXX: dynalloc -- not referenced
 	EMIT64(cmdbuf, 0);
 
 	EMIT32(cmdbuf, 0);

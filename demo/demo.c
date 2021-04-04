@@ -67,6 +67,21 @@ demo_clear_color(struct agx_allocator *allocator)
 	return agx_upload(allocator, colour, sizeof(colour));
 }
 
+struct agx_render_target {
+	unsigned unk0 : 16; // 0xa22
+	unsigned swiz_r : 2;
+	unsigned swiz_g : 2;
+	unsigned swiz_b : 2;
+	unsigned swiz_a : 2;
+	unsigned width : 14; // minus(1)
+	unsigned height : 14; // minus(1)
+	unsigned unk1 : 12; // 0
+
+	uint64_t buffer : 36; // shift(4)
+	unsigned unk2 : 12;
+	unsigned unk3 : 16;
+} __attribute__((packed));
+
 static uint64_t
 demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 {
@@ -74,20 +89,21 @@ demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 	 * suffice, the first 0x40 bytes will just be missed */
 	assert((framebuffer->gpu_va & 0x7F) == 0);
 
-	/* Framebuffer dimensions. Packed with a minus(1) modifier (since they
-	 * must be positive) */
-	uint32_t width = 800;
-	uint32_t height = 600;
-
-	/* Default to BGRA */
-	uint8_t swizzle = (2 << 0) | (1 << 2) | (0 << 4) | (3 << 6);
-
-	uint64_t unk[] = {
-		0x0a22 | (swizzle << 16) | (((uint64_t) (width - 1)) << 24) | ((uint64_t) (height - 1) << 38),
-		(framebuffer->gpu_va >> 4)  | (0x1000ull << 48),
+	struct agx_render_target rt = {
+		.unk0 = 0xa22,
+		.swiz_r = 2,
+		.swiz_g = 1,
+		.swiz_b = 0,
+		.swiz_a = 3,
+		.width = 800 - 1,
+		.height = 800 - 1,
+		.unk1 = 0,
+		.buffer = framebuffer->gpu_va >> 4,
+		.unk2 = 0,
+		.unk3 = 0x1000
 	};
 
-	return agx_upload(allocator, unk, sizeof(unk));
+	return agx_upload(allocator, &rt, sizeof(rt));
 }
 
 static uint64_t

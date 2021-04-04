@@ -121,11 +121,7 @@ demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 static uint64_t
 demo_unk0_5(struct agx_allocator *allocator)
 {
-	uint8_t unk[] = {
-		0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
-
+	uint32_t unk[] = { 0, ~0 };
 	return agx_upload(allocator, unk, sizeof(unk));
 }
 
@@ -404,7 +400,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[14] = 0;
 	buf[15] = 0;
 	buf[16] = PTR40(dd, 00, 10, demo_unk0_4(allocator, framebuffer));
-	buf[17] = PTR40(1d, 04, 40, demo_unk0_5(allocator));
+	buf[17] = demo_bind_arg_words(demo_unk0_5(allocator), 2, 2);
 	buf[18] = 0x2010bd4d | (0x000dull << 32) | ((uint64_t) (aux3_offs & 0xFFFF) << 48);
 	buf[19] = ((uint64_t) aux3_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
 	buf[20] = 0;

@@ -32,8 +32,9 @@ demo_attributes(struct agx_allocator *allocator)
 		0.0f   ,  0.0f   ,  1.0f,     1.0f,
 	};
 
+	/* Read by VS_AUX0 */
 	uint32_t attributes2[] = {
-		800, 600, 0, 0
+		800, 600
 	};
 
 	uint64_t attribs[2] = {

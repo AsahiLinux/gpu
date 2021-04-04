@@ -83,7 +83,7 @@ struct agx_render_target {
 } __attribute__((packed));
 
 static uint64_t
-demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
+demo_render_target(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 {
 	/* Remark: framebuffer must be 128-byte aligned. 64-bytes doesn't
 	 * suffice, the first 0x40 bytes will just be missed */
@@ -380,7 +380,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[15] = 0;
 
 	/* AUX3 */
-	buf[16] = PTR40(dd, 00, 10, demo_unk0_4(allocator, framebuffer));
+	buf[16] = PTR40(dd, 00, 10, demo_render_target(allocator, framebuffer));
 	buf[17] = demo_bind_arg_words(demo_unk0_5(allocator), 2, 2);
 	buf[18] = 0x2010bd4d | (0x000dull << 32) | ((uint64_t) (aux3_offs & 0xFFFF) << 48);
 	buf[19] = ((uint64_t) aux3_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);

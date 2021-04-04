@@ -74,8 +74,13 @@ demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 	 * suffice, the first 0x40 bytes will just be missed */
 	assert((framebuffer->gpu_va & 0x7F) == 0);
 
+	/* Framebuffer dimensions. Packed with a minus(1) modifier (since they
+	 * must be positive) */
+	uint32_t width = 800;
+	uint32_t height = 600;
+
 	uint64_t unk[] = {
-		0x1fc60a22 | (0x95c3ull << 32),
+		0xc60a22 | (((uint64_t) (width - 1)) << 24) | ((uint64_t) (height - 1) << 38),
 		(framebuffer->gpu_va >> 4)  | (0x1000ull << 48),
 		0,
 		0xffffffff00000000ull,

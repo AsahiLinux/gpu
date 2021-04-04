@@ -377,7 +377,6 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 {
 	uint32_t aux0_offs = demo_frag_aux0(shader_pool);
 	uint32_t aux1_offs = demo_frag_aux1(shader_pool);
-	uint32_t aux2_offs = demo_frag_aux2(shader_pool);
 	uint32_t aux3_offs = demo_frag_aux3(shader_pool);
 	uint32_t aux4_offs = demo_frag_aux4(shader_pool);
 	uint32_t fs_offs = demo_fragment_shader(shader_pool);
@@ -397,8 +396,8 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	/* AUX1+AUX2 */
 	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 2, 4);
 	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (aux1_offs & 0xFFFF) << 48);
-	buf[10] = ((uint64_t) aux1_offs >> 16) | (0x18d << 16) | (0x00380100ull << 32);
-	buf[11] = ((uint64_t) aux2_offs << 16) | 0xc080;
+	buf[10] = ((uint64_t) aux1_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
+	buf[11] = 0;
 	buf[12] = 0;
 	buf[13] = 0;
 	buf[14] = 0;

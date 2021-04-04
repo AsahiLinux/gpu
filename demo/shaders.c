@@ -102,35 +102,20 @@ uint8_t frag_aux0[] = {
 /* Clears the tilebuffer, where u6-u7 are preloaded with the FP16 clear colour
  * by the paired compute shader AUX2
 
-   0: 7e018c098040         bitop_mov        r0, u6
-   6: 7e058e098000         bitop_mov        r1, u7
-   c: 09000004f0fc8003     TODO.blend
-   */
 
-uint8_t frag_aux1[] = {
-	0x7e, 0x01, 0x8c, 0x09, 0x80, 0x40,
-	0x7e, 0x05, 0x8e, 0x09, 0x80, 0x00,
-	AGX_BLEND,
-	AGX_STOP
-};
-
-/* Converts the clear colour (u2-u5) to FP16 and stores to the tilebuffer, used
- * when clearing along with aux1.
    0: 2a8484010002         fadd             r1l, u2, -0.0
    6: 2a8686010002         fadd             r1h, u3, -0.0
    c: 2a8088010002         fadd             r0l, u4, -0.0
   12: 2a828a010002         fadd             r0h, u5, -0.0
-  18: c508c03d00803000     uniform_store    2, i16, pair, 0, r1l_r1h, 12
-  20: c500e03d00803000     uniform_store    2, i16, pair, 0, r0l_r0h, 14
-  */
+   c: 09000004f0fc8003     TODO.blend
+   */
 
-uint8_t frag_aux2[] = {
-	0x2a, 0x84, 0x84, 0x01, 0x00, 0x02,
-	0x2a, 0x86, 0x86, 0x01, 0x00, 0x02,
-	0x2a, 0x80, 0x88, 0x01, 0x00, 0x02,
-	0x2a, 0x82, 0x8a, 0x01, 0x00, 0x02,
-	0xc5, 0x08, 0xc0, 0x3d, 0x00, 0x80, 0x30, 0x00,
-	0xc5, 0x00, 0xe0, 0x3d, 0x00, 0x80, 0x30, 0x00,
+uint8_t frag_aux1[] = {
+	0x2a, 0x80, 0x84, 0x01, 0x00, 0x02,
+	0x2a, 0x82, 0x86, 0x01, 0x00, 0x02,
+	0x2a, 0x84, 0x88, 0x01, 0x00, 0x02,
+	0x2a, 0x86, 0x8a, 0x01, 0x00, 0x02,
+	AGX_BLEND,
 	AGX_STOP
 };
 
@@ -208,12 +193,6 @@ uint32_t
 demo_frag_aux1(struct agx_allocator *allocator)
 {
 	return demo_upload_shader("frag_aux1", allocator, frag_aux1, sizeof(frag_aux1));
-}
-
-uint32_t
-demo_frag_aux2(struct agx_allocator *allocator)
-{
-	return demo_upload_shader("frag_aux2", allocator, frag_aux2, sizeof(frag_aux2));
 }
 
 uint32_t

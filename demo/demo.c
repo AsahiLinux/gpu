@@ -383,6 +383,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 
 	memset(buf, 0, 128 * 8);
 
+	/* AUX0 */
 	buf[ 0] = PTR40(dd, 00, 10, demo_unk0_0(allocator));
 	buf[ 1] = PTR40(9d, 00, 10, demo_unk0_1(allocator));
 	buf[ 2] = demo_bind_arg_words(demo_unk0_3(allocator), 2, 6);
@@ -391,6 +392,8 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[ 5] = 0;
 	buf[ 6] = 0;
 	buf[ 7] = 0;
+
+	/* AUX1+AUX2 */
 	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 2, 4);
 	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (aux1_offs & 0xFFFF) << 48);
 	buf[10] = ((uint64_t) aux1_offs >> 16) | (0x18d << 16) | (0x00380100ull << 32);
@@ -399,6 +402,8 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[13] = 0;
 	buf[14] = 0;
 	buf[15] = 0;
+
+	/* AUX3 */
 	buf[16] = PTR40(dd, 00, 10, demo_unk0_4(allocator, framebuffer));
 	buf[17] = demo_bind_arg_words(demo_unk0_5(allocator), 2, 2);
 	buf[18] = 0x2010bd4d | (0x000dull << 32) | ((uint64_t) (aux3_offs & 0xFFFF) << 48);
@@ -407,13 +412,16 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[21] = 0;
 	buf[22] = 0;
 	buf[23] = 0;
-	buf[24] = demo_bind_arg_words(demo_zero(allocator, 8), 2, 2);
 
+	/* FS+AUX4 */
+	buf[24] = demo_bind_arg_words(demo_zero(allocator, 8), 2, 2);
 	buf[25] = 0x2010bd4d | (0x50dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
 	buf[26] = (fs_offs >> 16) | (0x218d << 16) | (0xf3580100ull << 32);
-
 	buf[27] = 0x00380002 | (0xc080ull << 32) | ((uint64_t) (aux4_offs & 0xFFFF) << 48);
 	buf[28] = (aux4_offs >> 16) | (0x1fea << 16) | (0x1ull << 32);
+	buf[29] = 0;
+	buf[30] = 0;
+	buf[31] = 0;
 }
 
 struct cmdbuf {

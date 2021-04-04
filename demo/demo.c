@@ -375,7 +375,7 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 static void
 demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation *framebuffer, struct agx_allocator *shader_pool)
 {
-	uint32_t aux0_offs = demo_frag_aux0(shader_pool);
+	uint32_t aux0_offs = demo_zero(shader_pool, 8);
 	uint32_t aux1_offs = demo_frag_aux1(shader_pool);
 	uint32_t aux2_offs = demo_frag_aux2(shader_pool);
 	uint32_t aux3_offs = demo_frag_aux3(shader_pool);

@@ -45,7 +45,6 @@ uint32_t demo_vertex_shader(struct agx_allocator *allocator);
 uint32_t demo_fragment_shader(struct agx_allocator *allocator);
 uint32_t demo_vert_aux0(struct agx_allocator *allocator);
 uint32_t demo_unk_aux0(struct agx_allocator *allocator);
-uint32_t demo_frag_aux0(struct agx_allocator *allocator);
 uint32_t demo_frag_aux1(struct agx_allocator *allocator);
 uint32_t demo_frag_aux2(struct agx_allocator *allocator);
 uint32_t demo_frag_aux3(struct agx_allocator *allocator);

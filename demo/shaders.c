@@ -95,10 +95,6 @@ uint8_t vert_aux0[] = {
 	AGX_STOP
 };
 
-uint8_t frag_aux0[] = {
-	/* ignored? */
-};
-
 /* Clears the tilebuffer, where u6-u7 are preloaded with the FP16 clear colour
  * by the paired compute shader AUX2
 
@@ -182,12 +178,6 @@ uint32_t
 demo_vert_aux0(struct agx_allocator *allocator)
 {
 	return demo_upload_shader("vert_aux0", allocator, vert_aux0, sizeof(vert_aux0));
-}
-
-uint32_t
-demo_frag_aux0(struct agx_allocator *allocator)
-{
-	return demo_upload_shader("frag_aux0", allocator, frag_aux0, sizeof(frag_aux0));
 }
 
 uint32_t

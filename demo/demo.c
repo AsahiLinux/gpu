@@ -105,10 +105,10 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		.swiz_b = 0,
 		.swiz_a = 3,
 		.width = 800 - 1,
-		.height = 800 - 1,
+		.height = 600 - 1,
 
 		.unk1 = 0,
-		.rotation = AGX_RT_ROTATION_270,
+		.rotation = AGX_RT_ROTATION_0,
 
 		.buffer = framebuffer->gpu_va >> 4,
 		.unk3 = 0x0,

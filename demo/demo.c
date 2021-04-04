@@ -92,8 +92,9 @@ demo_unk0_1(struct agx_allocator *allocator)
 static uint64_t
 demo_unk0_3(struct agx_allocator *allocator)
 {
+	/* Probably a 2x2 affine transformation */
 	float unk[] = {
-		1.0, 0.0, 0.0, 1.0, 0.0, 0.0
+		1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));
@@ -353,7 +354,7 @@ demo_unk6(struct agx_allocator *allocator)
 static uint64_t
 demo_bind_arg_words(uint64_t gpu_va, unsigned start, unsigned sz)
 {
-	assert(sz <= 4);
+	assert(sz < 8);
 	assert(gpu_va < (1ull << 40));
 	assert(start < 0x80); /* TODO: oliver */
 
@@ -388,7 +389,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 
 	buf[ 0] = PTR40(dd, 00, 10, demo_unk0_0(allocator));
 	buf[ 1] = PTR40(9d, 00, 10, demo_unk0_1(allocator));
-	buf[ 2] = PTR40(1d, 04, c0, demo_unk0_3(allocator));
+	buf[ 2] = demo_bind_arg_words(demo_unk0_3(allocator), 2, 6);
 	buf[ 3] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (aux0_offs & 0xFFFF) << 48);
 	buf[ 4] = ((uint64_t) aux0_offs >> 16) | (0x18d << 16)  | (0x00880100ull << 32);
 	buf[ 5] = 0;

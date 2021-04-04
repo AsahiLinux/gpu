@@ -341,18 +341,18 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 static void
 demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation *framebuffer, struct agx_allocator *shader_pool)
 {
-	uint32_t aux1_offs = demo_clear(shader_pool);
-	uint32_t aux2_offs = demo_clear_pre(shader_pool);
+	uint32_t clear_offs = demo_clear(shader_pool);
+	uint32_t clear_pre_offs = demo_clear_pre(shader_pool);
 	uint32_t aux3_offs = demo_frag_aux3(shader_pool);
 	uint32_t fs_offs = demo_fragment_shader(shader_pool);
 
 	memset(buf, 0, 128 * 8);
 
-	/* AUX1+AUX2 */
+	/* Clear shader */
 	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 2, 4);
-	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (aux1_offs & 0xFFFF) << 48);
-	buf[10] = ((uint64_t) aux1_offs >> 16) | (0x18d << 16) | (0x00380100ull << 32);
-	buf[11] = ((uint64_t) aux2_offs << 16) | 0xc080;
+	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (clear_offs & 0xFFFF) << 48);
+	buf[10] = ((uint64_t) clear_offs >> 16) | (0x18d << 16) | (0x00380100ull << 32);
+	buf[11] = ((uint64_t) clear_pre_offs << 16) | 0xc080;
 	buf[12] = 0;
 	buf[13] = 0;
 	buf[14] = 0;
@@ -368,7 +368,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[22] = 0;
 	buf[23] = 0;
 
-	/* FS+AUX4 */
+	/* Fragment shader */
 	buf[24] = demo_bind_arg_words(demo_zero(allocator, 8), 2, 2);
 	buf[25] = 0x2010bd4d | (0x50dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
 	buf[26] = (fs_offs >> 16) | (0x218d << 16) | (0xf3580100ull << 32);

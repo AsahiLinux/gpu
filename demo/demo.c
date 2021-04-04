@@ -85,9 +85,6 @@ demo_unk0_4(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 	uint64_t unk[] = {
 		0x0a22 | (swizzle << 16) | (((uint64_t) (width - 1)) << 24) | ((uint64_t) (height - 1) << 38),
 		(framebuffer->gpu_va >> 4)  | (0x1000ull << 48),
-		0,
-		0xffffffff00000000ull,
-		0, 0, 0
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));

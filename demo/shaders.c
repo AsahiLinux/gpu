@@ -140,20 +140,6 @@ uint8_t frag_aux3[] = {
 	AGX_STOP
 };
 
-/* u2-u3 preloaded with zero in the sample I have
-
-   0: e200003c             mov              $r0l, #1.0
-   4: 120084010000018c     icmpsel          seq, r0l, u2, 0, 0, r0l.discard
-   c: c500603d00801000     uniform_store    2, i16, single, 0, r0l, 6
-   */
-
-uint8_t frag_aux4[] = {
-	0xe2, 0x00, 0x00, 0x3c,
-	0x12, 0x00, 0x84, 0x01, 0x00, 0x00, 0x01, 0x8c,
-	0xc5, 0x00, 0x60, 0x3d, 0x00, 0x80, 0x10, 0x00,
-	AGX_STOP
-};
-
 uint8_t unk_aux0[] = {
 	// XXX: why does this not have a stop? maybe this isn't even code?
 	0x02, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
@@ -220,10 +206,4 @@ uint32_t
 demo_frag_aux3(struct agx_allocator *allocator)
 {
 	return demo_upload_shader("frag_aux3", allocator, frag_aux3, sizeof(frag_aux3));
-}
-
-uint32_t
-demo_frag_aux4(struct agx_allocator *allocator)
-{
-	return demo_upload_shader("frag_aux4", allocator, frag_aux4, sizeof(frag_aux4));
 }

@@ -49,7 +49,6 @@ uint32_t demo_frag_aux0(struct agx_allocator *allocator);
 uint32_t demo_frag_aux1(struct agx_allocator *allocator);
 uint32_t demo_frag_aux2(struct agx_allocator *allocator);
 uint32_t demo_frag_aux3(struct agx_allocator *allocator);
-uint32_t demo_frag_aux4(struct agx_allocator *allocator);
 
 void slowfb_init(uint8_t *framebuffer, int width, int height);
 void slowfb_update(int width, int height);

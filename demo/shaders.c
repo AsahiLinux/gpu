@@ -83,7 +83,7 @@ uint8_t fragment_shader[] = {
   32: c500a03d00803000     uniform_store    2, i16, pair, 0, r0l_r0h, 10
   */
 
-uint8_t vert_aux0[] = {
+uint8_t vertex_pre[] = {
 	0x05, 0x01, 0x04, 0x0d, 0x00, 0xc4, 0x32, 0x00,
 	0x38, 0x00,
 	0xbe, 0x89, 0x0a, 0x04, 0x2c, 0x00,
@@ -103,7 +103,7 @@ uint8_t vert_aux0[] = {
    c: 09000004f0fc8003     TODO.blend
    */
 
-uint8_t frag_aux1[] = {
+uint8_t clear[] = {
 	0x7e, 0x01, 0x8c, 0x09, 0x80, 0x40,
 	0x7e, 0x05, 0x8e, 0x09, 0x80, 0x00,
 	AGX_BLEND,
@@ -120,7 +120,7 @@ uint8_t frag_aux1[] = {
   20: c500e03d00803000     uniform_store    2, i16, pair, 0, r0l_r0h, 14
   */
 
-uint8_t frag_aux2[] = {
+uint8_t clear_pre[] = {
 	0x2a, 0x84, 0x84, 0x01, 0x00, 0x02,
 	0x2a, 0x86, 0x86, 0x01, 0x00, 0x02,
 	0x2a, 0x80, 0x88, 0x01, 0x00, 0x02,
@@ -175,21 +175,21 @@ demo_unk_aux0(struct agx_allocator *allocator)
 }
 
 uint32_t
-demo_vert_aux0(struct agx_allocator *allocator)
+demo_vertex_pre(struct agx_allocator *allocator)
 {
-	return demo_upload_shader("vert_aux0", allocator, vert_aux0, sizeof(vert_aux0));
+	return demo_upload_shader("vertex_pre", allocator, vertex_pre, sizeof(vertex_pre));
 }
 
 uint32_t
-demo_frag_aux1(struct agx_allocator *allocator)
+demo_clear(struct agx_allocator *allocator)
 {
-	return demo_upload_shader("frag_aux1", allocator, frag_aux1, sizeof(frag_aux1));
+	return demo_upload_shader("clear", allocator, clear, sizeof(clear));
 }
 
 uint32_t
-demo_frag_aux2(struct agx_allocator *allocator)
+demo_clear_pre(struct agx_allocator *allocator)
 {
-	return demo_upload_shader("frag_aux2", allocator, frag_aux2, sizeof(frag_aux2));
+	return demo_upload_shader("clear_pre", allocator, clear_pre, sizeof(clear_pre));
 }
 
 uint32_t

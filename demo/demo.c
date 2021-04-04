@@ -362,7 +362,7 @@ static void
 demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator *shader_pool)
 {
 	uint32_t vs_offs = demo_vertex_shader(shader_pool);
-	uint32_t aux0 = demo_vert_aux0(shader_pool);
+	uint32_t aux0 = demo_vertex_pre(shader_pool);
 
 	uint64_t gpu_va = demo_attributes(allocator);
 	buf[0] = demo_bind_arg_words(gpu_va, 0, 2);
@@ -376,8 +376,8 @@ static void
 demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation *framebuffer, struct agx_allocator *shader_pool)
 {
 	uint32_t aux0_offs = demo_zero(shader_pool, 8);
-	uint32_t aux1_offs = demo_frag_aux1(shader_pool);
-	uint32_t aux2_offs = demo_frag_aux2(shader_pool);
+	uint32_t aux1_offs = demo_clear(shader_pool);
+	uint32_t aux2_offs = demo_clear_pre(shader_pool);
 	uint32_t aux3_offs = demo_frag_aux3(shader_pool);
 	uint32_t fs_offs = demo_fragment_shader(shader_pool);
 

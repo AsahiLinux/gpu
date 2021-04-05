@@ -58,11 +58,12 @@ demo_viewport(struct agx_allocator *allocator)
 	return agx_upload(allocator, data, sizeof(data));
 }
 
+/* FP16 */
 static uint64_t
 demo_clear_color(struct agx_allocator *allocator)
 {
-	float colour[] = {
-		0.99, 0.75, 0.53, 1.0
+	__fp16 colour[] = {
+		0.99f, 0.75f, 0.53f, 1.0f
 	};
 
 	return agx_upload(allocator, colour, sizeof(colour));
@@ -379,17 +380,16 @@ static void
 demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation *framebuffer, struct agx_allocator *shader_pool)
 {
 	uint32_t clear_offs = demo_clear(shader_pool);
-	uint32_t clear_pre_offs = demo_clear_pre(shader_pool);
 	uint32_t aux3_offs = demo_frag_aux3(shader_pool);
 	uint32_t fs_offs = demo_fragment_shader(shader_pool);
 
 	memset(buf, 0, 128 * 8);
 
 	/* Clear shader */
-	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 2, 4);
+	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 6, 2);
 	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (clear_offs & 0xFFFF) << 48);
-	buf[10] = ((uint64_t) clear_offs >> 16) | (0x18d << 16) | (0x00380100ull << 32);
-	buf[11] = ((uint64_t) clear_pre_offs << 16) | 0xc080;
+	buf[10] = ((uint64_t) clear_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
+	buf[11] = 0;
 	buf[12] = 0;
 	buf[13] = 0;
 	buf[14] = 0;

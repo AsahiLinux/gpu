@@ -110,26 +110,6 @@ uint8_t clear[] = {
 	AGX_STOP
 };
 
-/* Converts the clear colour (u2-u5) to FP16 and stores to the tilebuffer, used
- * when clearing along with aux1.
-   0: 2a8484010002         fadd             r1l, u2, -0.0
-   6: 2a8686010002         fadd             r1h, u3, -0.0
-   c: 2a8088010002         fadd             r0l, u4, -0.0
-  12: 2a828a010002         fadd             r0h, u5, -0.0
-  18: c508c03d00803000     uniform_store    2, i16, pair, 0, r1l_r1h, 12
-  20: c500e03d00803000     uniform_store    2, i16, pair, 0, r0l_r0h, 14
-  */
-
-uint8_t clear_pre[] = {
-	0x2a, 0x84, 0x84, 0x01, 0x00, 0x02,
-	0x2a, 0x86, 0x86, 0x01, 0x00, 0x02,
-	0x2a, 0x80, 0x88, 0x01, 0x00, 0x02,
-	0x2a, 0x82, 0x8a, 0x01, 0x00, 0x02,
-	0xc5, 0x08, 0xc0, 0x3d, 0x00, 0x80, 0x30, 0x00,
-	0xc5, 0x00, 0xe0, 0x3d, 0x00, 0x80, 0x30, 0x00,
-	AGX_STOP
-};
-
 uint8_t frag_aux3[] = {
 	0x7e, 0x00, 0x04, 0x09, 0x80, 0x00,
 	0xb1, 0x80, 0x00, 0x80, 0x00, 0x4a, 0x00, 0x00, 0x0a, 0x00,
@@ -184,12 +164,6 @@ uint32_t
 demo_clear(struct agx_allocator *allocator)
 {
 	return demo_upload_shader("clear", allocator, clear, sizeof(clear));
-}
-
-uint32_t
-demo_clear_pre(struct agx_allocator *allocator)
-{
-	return demo_upload_shader("clear_pre", allocator, clear_pre, sizeof(clear_pre));
 }
 
 uint32_t

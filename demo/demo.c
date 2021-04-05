@@ -273,7 +273,8 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	 * words pointed to. The data type is inferred at the source. In theory
 	 * this means we can reorder blocks. We can also duplicate blocks.
 	 * Exception: the first block which is tagged 0?  Duplication means
-	 * this isn't by length */
+	 * this isn't by length, instead a special record at the end indicates
+	 * the end. */
 
 	temp = make_ptr40(0x00, 0x00, 0x00, demo_unk15(allocator));
 	memcpy(out, &temp, 8);
@@ -316,16 +317,17 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	uint8_t unk[] = {
+	/* Must be after the rest */
+
+	uint8_t eof[] = {
 		0x06, 0xc0, 0x61, 0x03, 0x00, 0x00, 0x00, 0x01,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	};
 
 
-	memcpy(out, unk, sizeof(unk));
-	out += sizeof(unk);
+	memcpy(out, eof, sizeof(eof));
+	out += sizeof(eof);
 
 	return ptr.gpu_va;
 }

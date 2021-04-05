@@ -119,6 +119,7 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 	return agx_upload(allocator, &rt, sizeof(rt));
 }
 
+/* Fed into fragment writeout */
 static uint64_t
 demo_unk0_5(struct agx_allocator *allocator)
 {
@@ -247,7 +248,7 @@ demo_unk15(struct agx_allocator *allocator)
 static uint64_t
 demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf, struct agx_allocator *shaders)
 {
-	struct agx_ptr ptr = agx_allocate(allocator, 0x80);
+	struct agx_ptr ptr = agx_allocate(allocator, 0x800);
 	uint8_t *out = ptr.map;
 	uint64_t temp = 0;
 
@@ -271,10 +272,8 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	/* Remark: the first argument to each ptr40 is the number of 32-bit
 	 * words pointed to. The data type is inferred at the source. In theory
 	 * this means we can reorder blocks. We can also duplicate blocks.
-	 * Exception: the first block which is tagged 0?
-
-	 * Duplication means this isn't by length, although there's a limit of
-	 * 40(?) records here. */
+	 * Exception: the first block which is tagged 0?  Duplication means
+	 * this isn't by length */
 
 	temp = make_ptr40(0x00, 0x00, 0x00, demo_unk15(allocator));
 	memcpy(out, &temp, 8);

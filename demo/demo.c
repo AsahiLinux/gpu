@@ -8,6 +8,9 @@
 #include "demo.h"
 #include "util.h"
 
+#define WIDTH 1311
+#define HEIGHT 717
+
 static uint64_t
 demo_zero(struct agx_allocator *allocator, size_t count)
 {
@@ -32,9 +35,7 @@ demo_attributes(struct agx_allocator *allocator)
 		0.0f   ,  0.0f   ,  1.0f,     1.0f,
 	};
 
-	uint32_t attributes2[] = {
-		800, 600
-	};
+	uint32_t attributes2[] = { WIDTH, HEIGHT };
 
 	uint64_t attribs[2] = {
 		agx_upload(allocator, attributes1, sizeof(attributes1)),
@@ -49,8 +50,8 @@ demo_viewport(struct agx_allocator *allocator)
 {
 	uint32_t data[] = {
 		0xc00, 0x18, 0x12, 0x0,
-		fui(400.0f), fui(400.0f), // X: translate, scale
-		fui(300.0f), fui(-300.0f), // Y: translate, scale
+		fui(WIDTH / 2), fui(WIDTH / 2), // X: translate, scale
+		fui(HEIGHT / 2), fui(-HEIGHT / 2), // Y: translate, scale
 		fui(0.0f), fui(1.0f), // Z near/far
 	};
 
@@ -104,8 +105,8 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		.swiz_g = 1,
 		.swiz_b = 0,
 		.swiz_a = 3,
-		.width = 800 - 1,
-		.height = 600 - 1,
+		.width = WIDTH - 1,
+		.height = HEIGHT - 1,
 
 		.unk1 = 0,
 		.rotation = AGX_RT_ROTATION_0,
@@ -141,7 +142,7 @@ demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf, struct 
 	uint32_t unk[] = {
 		0x800000,
 		0x11002,
-		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- FS+AUX4
+		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- fragment shader
 		aux0_offs,
 	};
 
@@ -253,6 +254,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	assert(vsbuf->gpu_va < (1ull << 32));
 	assert(fsbuf->gpu_va < (1ull << 32));
 
+	// Vertex pipeline
 	uint32_t unk0[] = {
 		0x4000002e,
 		0x1002,
@@ -282,6 +284,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	memcpy(out, &temp, 8);
 	out += 8;
 
+	// Fragment pipeline
 	temp = make_ptr40(0x05, 0x00, 0x00, demo_unk8(allocator, fsbuf, shaders));
 	memcpy(out, &temp, 8);
 	out += 8;
@@ -483,7 +486,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0x30); /* 0x30 */
 	EMIT32(cmdbuf, 0x01); /* 0x34. Compute: 0x03 */
 
-	/* Pointer to data about the vertex shader */
+	/* Pointer to data about the vertex and fragment shaders */
 	EMIT64(cmdbuf, demo_unk2(allocator, vsbuf, fsbuf, shaders));
 
 	EMIT_ZERO_WORDS(cmdbuf, 20);
@@ -532,12 +535,11 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT32(cmdbuf, 0xffff8002); // 0x270
 	EMIT32(cmdbuf, 0);
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x44);// AUX1+AUX2 -- XXX: dynalloc
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x44);// clear -- XXX: dynalloc
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0x12);
-
 	EMIT64(cmdbuf, fsbuf->gpu_va + 0x84); // AUX3 -- 0x290 -- XXX: dynalloc
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
@@ -549,14 +551,14 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT64(cmdbuf, 0xc000);
 
 	/* Note: making these smallers scissors polygons but not clear colour */
-	EMIT32(cmdbuf, 800); // fb width
-	EMIT32(cmdbuf, 600); // fb height
+	EMIT32(cmdbuf, WIDTH);
+	EMIT32(cmdbuf, HEIGHT);
 	EMIT64(cmdbuf, demo_zero(allocator, 0x8000));
 
 	EMIT_ZERO_WORDS(cmdbuf, 48);
 
 	EMIT64(cmdbuf, 0); // 0x450
-	EMIT32(cmdbuf, 0x3f800000); // fui(1.0f)
+	EMIT32(cmdbuf, fui(1.0)); // fui(1.0f)
 	EMIT32(cmdbuf, 0x300);
 	EMIT64(cmdbuf, 0);
 	EMIT64(cmdbuf, 0x1000000);
@@ -603,8 +605,8 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	 * the clear_ .. bbox maybe */
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
-	EMIT32(cmdbuf, 800); // fb width, can increase up to 16384
-	EMIT32(cmdbuf, 600); // fb height, "
+	EMIT32(cmdbuf, WIDTH); // can increase up to 16384
+	EMIT32(cmdbuf, HEIGHT);
 
 	EMIT32(cmdbuf, 1);
 	EMIT32(cmdbuf, 8);
@@ -713,7 +715,9 @@ void demo(mach_port_t connection, bool offscreen)
 
 	struct agx_allocation vsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
 	struct agx_allocation fsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
-	struct agx_allocation framebuffer = agx_alloc_mem(connection, 1024 * 1024 * 4, AGX_MEMORY_TYPE_FRAMEBUFFER, false);
+	struct agx_allocation framebuffer = agx_alloc_mem(connection, 
+		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 4,
+		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 
 	struct agx_allocation cmdbuf = agx_alloc_cmdbuf(connection, 0x4000, true);
 
@@ -732,10 +736,10 @@ void demo(mach_port_t connection, bool offscreen)
 	demo_mem_map(memmap.map, allocs, sizeof(allocs) / sizeof(allocs[0]),
 			0xDEADBEEF, 0xCAFECAFE); // (unk6 + 1, unk6 + 2) but it doesn't really matter
 
-	uint32_t *linear = malloc(800 * 600 * 4);
+	uint32_t *linear = malloc(WIDTH * HEIGHT * 4);
 
 	if (!offscreen)
-		slowfb_init((uint8_t *) linear, 800, 600);
+		slowfb_init((uint8_t *) linear, WIDTH, HEIGHT);
 
 	for (;;) {
 		demo_cmdbuf(cmdbuf.map, &allocator, &vsbuf, &fsbuf, &framebuffer, &shader_pool);
@@ -748,20 +752,20 @@ void demo(mach_port_t connection, bool offscreen)
 
 		/* Dump the framebuffer */
 		ash_detile(framebuffer.map, linear,
-				800, 32, 800,
-				0, 0, 800, 600);
+				WIDTH, 32, WIDTH,
+				0, 0, WIDTH, HEIGHT);
 
 		shader_pool.offset = 0;
 		allocator.offset = 0;
 
 		if (offscreen) {
 			FILE *fp = fopen("fb.bin", "wb");
-			fwrite(linear, 1, 800 * 600 * 4, fp);
+			fwrite(linear, 1, WIDTH * HEIGHT * 4, fp);
 			fclose(fp);
 
 			break;
 		} else {
-			slowfb_update(800, 600);
+			slowfb_update(WIDTH, HEIGHT);
 		}
 	}
 }

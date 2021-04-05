@@ -137,15 +137,12 @@ make_ptr40(uint8_t tag0, uint8_t tag1, uint8_t tag2, uint64_t ptr)
 }
 
 static uint64_t
-demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf, struct agx_allocator *shaders)
+demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf)
 {
-	uint32_t aux0_offs = demo_unk_aux0(shaders);
-
 	uint32_t unk[] = {
 		0x800000,
-		0x11002,
+		0x1002, // XXX: blob sets 0x10000 bit and adds an extra pointer to unknown data
 		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- fragment shader
-		aux0_offs,
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));
@@ -247,7 +244,7 @@ demo_unk15(struct agx_allocator *allocator)
 }
 
 static uint64_t
-demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf, struct agx_allocator *shaders)
+demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf)
 {
 	struct agx_ptr ptr = agx_allocate(allocator, 0x800);
 	uint8_t *out = ptr.map;
@@ -286,7 +283,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	out += 8;
 
 	// Fragment pipeline
-	temp = make_ptr40(0x05, 0x00, 0x00, demo_unk8(allocator, fsbuf, shaders));
+	temp = make_ptr40(0x05, 0x00, 0x00, demo_unk8(allocator, fsbuf));
 	memcpy(out, &temp, 8);
 	out += 8;
 
@@ -488,7 +485,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0x01); /* 0x34. Compute: 0x03 */
 
 	/* Pointer to data about the vertex and fragment shaders */
-	EMIT64(cmdbuf, demo_unk2(allocator, vsbuf, fsbuf, shaders));
+	EMIT64(cmdbuf, demo_unk2(allocator, vsbuf, fsbuf));
 
 	EMIT_ZERO_WORDS(cmdbuf, 20);
 

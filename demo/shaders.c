@@ -116,13 +116,6 @@ uint8_t frag_aux3[] = {
 	AGX_STOP
 };
 
-uint8_t unk_aux0[] = {
-	// XXX: why does this not have a stop? maybe this isn't even code?
-	0x02, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
-	0x02, 0x01, 0x00, 0x00, 0x18, 0x01, 0x00, 0x00,
-	0x02, 0x01, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00,
-};
-
 uint32_t
 demo_upload_shader(const char *label, struct agx_allocator *allocator, uint8_t *code, size_t sz)
 {
@@ -146,12 +139,6 @@ uint32_t
 demo_fragment_shader(struct agx_allocator *allocator)
 {
 	return demo_upload_shader("fs", allocator, fragment_shader, sizeof(fragment_shader));
-}
-
-uint32_t
-demo_unk_aux0(struct agx_allocator *allocator)
-{
-	return demo_upload_shader("unk", allocator, unk_aux0, sizeof(unk_aux0));
 }
 
 uint32_t

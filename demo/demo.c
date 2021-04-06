@@ -137,7 +137,7 @@ make_ptr40(uint8_t tag0, uint8_t tag1, uint8_t tag2, uint64_t ptr)
 }
 
 static uint64_t
-demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf)
+demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsbuf)
 {
 	uint32_t unk[] = {
 		0x800000,
@@ -148,9 +148,8 @@ demo_unk8(struct agx_allocator *allocator, struct agx_allocation *fsbuf)
 	return agx_upload(allocator, unk, sizeof(unk));
 }
 
-/* TODO: confirm */
 static uint64_t
-demo_vsconsts(struct agx_allocator *allocator)
+demo_unk8(struct agx_allocator *allocator)
 {
 	uint32_t unk[] = {
 		0x100c0000, 0x100, 0x0, 0x0, 0x0,
@@ -235,15 +234,6 @@ demo_unk14(struct agx_allocator *allocator)
 }
 
 static uint64_t
-demo_unk15(struct agx_allocator *allocator)
-{
-	/* This is not actually zero but this seems to work ok for the triangle
-	 * and I see little structure in the random data so far... Maybe not
-	 * driver initialized at all, needs more work */
-	return demo_zero(allocator, 16);
-}
-
-static uint64_t
 demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf)
 {
 	struct agx_ptr ptr = agx_allocate(allocator, 0x800);
@@ -274,16 +264,15 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	 * this isn't by length, instead a special record at the end indicates
 	 * the end. */
 
-	temp = make_ptr40(0x00, 0x00, 0x00, demo_unk15(allocator));
+	temp = make_ptr40(0x00, 0x00, 0x00, demo_zero(allocator, 16));
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	temp = make_ptr40(0x05, 0x00, 0x00, demo_vsconsts(allocator));
+	temp = make_ptr40(0x05, 0x00, 0x00, demo_unk8(allocator));
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	// Fragment pipeline
-	temp = make_ptr40(0x05, 0x00, 0x00, demo_unk8(allocator, fsbuf));
+	temp = make_ptr40(0x05, 0x00, 0x00, demo_launch_fragment(allocator, fsbuf));
 	memcpy(out, &temp, 8);
 	out += 8;
 

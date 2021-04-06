@@ -120,6 +120,9 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		.unk4 = 0x1000
 	};
 
+	bl_unpack(&rt, RENDER_TARGET, unpacked);
+	bl_print(stdout, RENDER_TARGET, unpacked, 0);
+
 	return agx_upload(allocator, &rt, sizeof(rt));
 }
 

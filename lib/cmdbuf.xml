@@ -15,7 +15,7 @@
   </enum>
 
   <struct name="Render Target" size="4">
-    <field name="Unk 0" size="17" start="0" type="uint"/>
+    <field name="Unk 0" size="17" start="0" type="hex"/>
     <field name="Swizzle R" size="2" start="16" type="Channel"/>
     <field name="Swizzle G" size="2" start="18" type="Channel"/>
     <field name="Swizzle B" size="2" start="20" type="Channel"/>
@@ -25,8 +25,8 @@
     <field name="Unk 52" size="1" start="52" type="bool"/>
     <field name="Rotate 90" size="1" start="53" type="bool" default="false"/>
     <field name="Flip vertical" size="1" start="54" type="bool" default="false"/>
-    <field name="Unk 55" size="9" start="55" type="uint"/>
+    <field name="Unk 55" size="9" start="55" type="hex"/>
     <field name="Buffer" size="36" start="64" type="address" modifier="shr(4)"/>
-    <field name="Unk 100" size="28" start="100" type="uint"/>
+    <field name="Unk 100" size="28" start="100" type="hex"/>
   </struct>
 </blxml>

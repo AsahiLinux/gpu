@@ -297,11 +297,11 @@ class Field(object):
             type = 'bool'
         elif self.type == 'float':
             type = 'float'
-        elif self.type == 'uint' and self.end - self.start > 32:
+        elif self.type in ['uint', 'hex'] and self.end - self.start > 32:
             type = 'uint64_t'
         elif self.type == 'int':
             type = 'int32_t'
-        elif self.type in ['uint', 'uint/float']:
+        elif self.type in ['uint', 'uint/float', 'hex']:
             type = 'uint32_t'
         elif self.type in self.parser.structs:
             type = 'struct ' + self.parser.gen_prefix(safe_name(self.type.upper()))
@@ -457,7 +457,7 @@ class Group(object):
                     elif field.modifier[0] == "log2":
                         value = "util_logbase2({})".format(value)
 
-                if field.type in ["uint", "address"]:
+                if field.type in ["uint", "hex", "address"]:
                     s = "__gen_uint(%s, %d, %d)" % \
                         (value, start, end)
                 elif field.type in self.parser.enums:
@@ -528,7 +528,7 @@ class Group(object):
             args.append(str(fieldref.start))
             args.append(str(fieldref.end))
 
-            if field.type in set(["uint", "uint/float", "address", "Pixel Format"]) | self.parser.enums:
+            if field.type in set(["uint", "uint/float", "address", "hex"]) | self.parser.enums:
                 convert = "__gen_unpack_uint"
             elif field.type == "int":
                 convert = "__gen_unpack_sint"
@@ -576,8 +576,10 @@ class Group(object):
                 print('   fprintf(fp, "%*s{}: %s\\n", indent, "", {} ? "true" : "false");'.format(name, val))
             elif field.type == "float":
                 print('   fprintf(fp, "%*s{}: %f\\n", indent, "", {});'.format(name, val))
-            elif field.type == "uint" and (field.end - field.start) >= 32:
+            elif field.type in ["uint", "hex"] and (field.end - field.start) >= 32:
                 print('   fprintf(fp, "%*s{}: 0x%" PRIx64 "\\n", indent, "", {});'.format(name, val))
+            elif field.type == "hex":
+                print('   fprintf(fp, "%*s{}: 0x%" PRIx32 "\\n", indent, "", {});'.format(name, val))
             elif field.type == "uint/float":
                 print('   fprintf(fp, "%*s{}: 0x%X (%f)\\n", indent, "", {}, uif({}));'.format(name, val, val))
             else:

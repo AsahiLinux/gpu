@@ -235,7 +235,10 @@ demo_unk14(struct agx_allocator *allocator)
 	return agx_upload(allocator, unk, sizeof(unk));
 }
 
-/* TODO: any hidden support for line loops? triangle fans? quads? */
+/* TODO: there appears to be hidden support for line loops/triangle fans/quads
+ * but still need to confirm on a more substantive workload, also I can't get
+ * points/lines to work yet.. */
+
 enum agx_primitive {
 	AGX_PRIMITIVE_POINTS = 0,
 	AGX_PRIMITIVE_LINE = 1,
@@ -317,12 +320,16 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 
 	/* Must be after the rest */
 
-	unsigned vertexCount = 4;
+	unsigned vertexCount = 3;
+	unsigned start = 1;
 	enum agx_primitive prim = AGX_PRIMITIVE_TRIANGLE_STRIP;
 
 	uint8_t eof[] = {
+					    /* count-------- */
 		prim, 0xc0, 0x61, vertexCount, 0x00, 0x00, 0x00, 0x01, // issues a draw
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+				  /* start ----------- */
+		0x00, 0x00, 0x00, start, 0x00, 0x00, 0x00, 0x00,
 
 		0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, // Stop
 	};

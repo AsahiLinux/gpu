@@ -257,16 +257,16 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	assert(vsbuf->gpu_va < (1ull << 32));
 	assert(fsbuf->gpu_va < (1ull << 32));
 
-	// Vertex pipeline
-	uint32_t unk0[] = {
+	// Bind vertex pipeline and start queueing commands
+	uint32_t bind_vertex[] = {
 		0x4000002e,
 		0x1002,
 		vsbuf->gpu_va,
 		0x0505,
 	};
 
-	memcpy(out, unk0, sizeof(unk0));
-	out += sizeof(unk0);
+	memcpy(out, bind_vertex, sizeof(bind_vertex));
+	out += sizeof(bind_vertex);
 
 	/* yes, really unaligned */
 	*(out++) = 0x0;
@@ -324,19 +324,23 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	unsigned start = 1;
 	enum agx_primitive prim = AGX_PRIMITIVE_TRIANGLE_STRIP;
 
-	uint8_t eof[] = {
+	uint8_t draw[] = {
 					    /* count-------- */
 		prim, 0xc0, 0x61, vertexCount, 0x00, 0x00, 0x00, 0x01, // issues a draw
 
 				  /* start ----------- */
 		0x00, 0x00, 0x00, start, 0x00, 0x00, 0x00, 0x00,
+	};
 
+	memcpy(out, draw, sizeof(draw));
+	out += sizeof(draw);
+
+	uint8_t stop[] = {
 		0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, // Stop
 	};
 
-
-	memcpy(out, eof, sizeof(eof));
-	out += sizeof(eof);
+	memcpy(out, stop, sizeof(stop));
+	out += sizeof(stop);
 
 	return ptr.gpu_va;
 }

@@ -7,6 +7,7 @@
 #include "tiling.h"
 #include "demo.h"
 #include "util.h"
+#include "../agx_pack.h"
 
 #define WIDTH 1311
 #define HEIGHT 717
@@ -238,14 +239,6 @@ demo_unk14(struct agx_allocator *allocator)
 /* TODO: there appears to be hidden support for line loops/triangle fans/quads
  * but still need to confirm on a more substantive workload, also I can't get
  * points/lines to work yet.. */
-
-enum agx_primitive {
-	AGX_PRIMITIVE_POINTS = 0,
-	AGX_PRIMITIVE_LINE = 1,
-	AGX_PRIMITIVE_LINE_STRIP = 3,
-	AGX_PRIMITIVE_TRIANGLES = 6,
-	AGX_PRIMITIVE_TRIANGLE_STRIP = 9,
-};
 
 static uint64_t
 demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf)

@@ -47,8 +47,6 @@ pack_header = """
 #include <assert.h>
 #include <math.h>
 #include <inttypes.h>
-#include "util/macros.h"
-#include "util/u_math.h"
 
 #define __gen_unpack_float(x, y, z) uif(__gen_unpack_uint(x, y, z))
 
@@ -88,7 +86,7 @@ __gen_unpack_uint(const uint8_t *restrict cl, uint32_t start, uint32_t end)
    const int width = end - start + 1;
    const uint64_t mask = (width == 64 ? ~0 : (1ull << width) - 1 );
 
-   for (int byte = start / 8; byte <= end / 8; byte++) {
+   for (unsigned byte = start / 8; byte <= end / 8; byte++) {
       val |= ((uint64_t) cl[byte]) << ((byte - start / 8) * 8);
    }
 

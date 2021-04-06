@@ -72,58 +72,23 @@ demo_clear_color(struct agx_allocator *allocator)
 	return agx_upload(allocator, colour, sizeof(colour));
 }
 
-/* Probably wrong, just eyeballed it */
-enum agx_rt_rotation {
-	AGX_RT_ROTATION_0 = 0,
-	AGX_RT_ROTATION_180 = 1,
-	AGX_RT_ROTATION_90 = 2,
-	AGX_RT_ROTATION_270 = 3
-};
-
-struct agx_render_target {
-	unsigned unk0 : 16; // 0xa22
-	unsigned swiz_r : 2;
-	unsigned swiz_g : 2;
-	unsigned swiz_b : 2;
-	unsigned swiz_a : 2;
-	unsigned width : 14; // minus(1)
-	unsigned height : 14; // minus(1)
-	unsigned unk1 : 1;
-	enum agx_rt_rotation rotation : 2;
-	unsigned unk2 : 9; // 0
-	uint64_t buffer : 36; // shift(4)
-	unsigned unk3 : 12;
-	unsigned unk4 : 16;
-} __attribute__((packed));
-
 static uint64_t
 demo_render_target(struct agx_allocator *allocator, struct agx_allocation *framebuffer)
 {
-	/* Remark: framebuffer must be 128-byte aligned. 64-bytes doesn't
-	 * suffice, the first 0x40 bytes will just be missed */
-	assert((framebuffer->gpu_va & 0x7F) == 0);
-
-	struct agx_render_target rt = {
-		.unk0 = 0xa22,
-		.swiz_r = 2,
-		.swiz_g = 1,
-		.swiz_b = 0,
-		.swiz_a = 3,
-		.width = WIDTH - 1,
-		.height = HEIGHT - 1,
-
-		.unk1 = 0,
-		.rotation = AGX_RT_ROTATION_0,
-
-		.buffer = framebuffer->gpu_va >> 4,
-		.unk3 = 0x0,
-		.unk4 = 0x1000
+	struct agx_ptr t = agx_allocate(allocator, AGX_RENDER_TARGET_LENGTH);
+	bl_pack(t.map, RENDER_TARGET, cfg) {
+		cfg.unk_0 = 0xa22;
+		cfg.swizzle_r = AGX_CHANNEL_B;
+		cfg.swizzle_g = AGX_CHANNEL_G;
+		cfg.swizzle_b = AGX_CHANNEL_R;
+		cfg.swizzle_a = AGX_CHANNEL_A;
+		cfg.width = WIDTH;
+		cfg.height = WIDTH;
+		cfg.buffer = framebuffer->gpu_va;
+		cfg.unk_100 = 0x1000000;
 	};
 
-	bl_unpack(&rt, RENDER_TARGET, unpacked);
-	bl_print(stdout, RENDER_TARGET, unpacked, 0);
-
-	return agx_upload(allocator, &rt, sizeof(rt));
+	return t.gpu_va;
 }
 
 /* Fed into fragment writeout */
@@ -316,8 +281,8 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 
 	/* Must be after the rest */
 
-	unsigned vertexCount = 3;
-	unsigned start = 1;
+	unsigned vertexCount = 4;
+	unsigned start = 0;
 	enum agx_primitive prim = AGX_PRIMITIVE_TRIANGLE_STRIP;
 
 	uint8_t draw[] = {

@@ -105,42 +105,42 @@ __gen_unpack_sint(const uint8_t *restrict cl, uint32_t start, uint32_t end)
    return (val << (64 - size)) >> (64 - size);
 }
 
-#define pan_prepare(dst, T)                                 \\
-   *(dst) = (struct MALI_ ## T){ MALI_ ## T ## _header }
+#define bl_prepare(dst, T)                                 \\
+   *(dst) = (struct AGX_ ## T){ AGX_ ## T ## _header }
 
-#define pan_pack(dst, T, name)                              \\
-   for (struct MALI_ ## T name = { MALI_ ## T ## _header }, \\
+#define bl_pack(dst, T, name)                              \\
+   for (struct AGX_ ## T name = { AGX_ ## T ## _header }, \\
         *_loop_terminate = (void *) (dst);                  \\
         __builtin_expect(_loop_terminate != NULL, 1);       \\
-        ({ MALI_ ## T ## _pack((uint32_t *) (dst), &name);  \\
+        ({ AGX_ ## T ## _pack((uint32_t *) (dst), &name);  \\
            _loop_terminate = NULL; }))
 
-#define pan_unpack(src, T, name)                        \\
-        struct MALI_ ## T name;                         \\
-        MALI_ ## T ## _unpack((uint8_t *)(src), &name)
+#define bl_unpack(src, T, name)                        \\
+        struct AGX_ ## T name;                         \\
+        AGX_ ## T ## _unpack((uint8_t *)(src), &name)
 
-#define pan_print(fp, T, var, indent)                   \\
-        MALI_ ## T ## _print(fp, &(var), indent)
+#define bl_print(fp, T, var, indent)                   \\
+        AGX_ ## T ## _print(fp, &(var), indent)
 
-#define pan_section_offset(A, S) \\
-        MALI_ ## A ## _SECTION_ ## S ## _OFFSET
+#define bl_section_offset(A, S) \\
+        AGX_ ## A ## _SECTION_ ## S ## _OFFSET
 
-#define pan_section_ptr(base, A, S) \\
-        ((void *)((uint8_t *)(base) + pan_section_offset(A, S)))
+#define bl_section_ptr(base, A, S) \\
+        ((void *)((uint8_t *)(base) + bl_section_offset(A, S)))
 
-#define pan_section_pack(dst, A, S, name)                                                         \\
-   for (MALI_ ## A ## _SECTION_ ## S ## _TYPE name = { MALI_ ## A ## _SECTION_ ## S ## _header }, \\
+#define bl_section_pack(dst, A, S, name)                                                         \\
+   for (AGX_ ## A ## _SECTION_ ## S ## _TYPE name = { AGX_ ## A ## _SECTION_ ## S ## _header }, \\
         *_loop_terminate = (void *) (dst);                                                        \\
         __builtin_expect(_loop_terminate != NULL, 1);                                             \\
-        ({ MALI_ ## A ## _SECTION_ ## S ## _pack(pan_section_ptr(dst, A, S), &name);              \\
+        ({ AGX_ ## A ## _SECTION_ ## S ## _pack(bl_section_ptr(dst, A, S), &name);              \\
            _loop_terminate = NULL; }))
 
-#define pan_section_unpack(src, A, S, name)                               \\
-        MALI_ ## A ## _SECTION_ ## S ## _TYPE name;                       \\
-        MALI_ ## A ## _SECTION_ ## S ## _unpack(pan_section_ptr(src, A, S), &name)
+#define bl_section_unpack(src, A, S, name)                               \\
+        AGX_ ## A ## _SECTION_ ## S ## _TYPE name;                       \\
+        AGX_ ## A ## _SECTION_ ## S ## _unpack(bl_section_ptr(src, A, S), &name)
 
-#define pan_section_print(fp, A, S, var, indent)                          \\
-        MALI_ ## A ## _SECTION_ ## S ## _print(fp, &(var), indent)
+#define bl_section_print(fp, A, S, var, indent)                          \\
+        AGX_ ## A ## _SECTION_ ## S ## _print(fp, &(var), indent)
 
 """
 
@@ -654,9 +654,7 @@ class Parser(object):
         elif name == "aggregate":
             self.emit_aggregate()
             self.aggregate = None
-        elif name == "panxml":
-            # Include at the end so it can depend on us but not the converse
-            print('#include "panfrost-job.h"')
+        elif name == "blxml":
             print('#endif')
 
     def emit_header(self, name):

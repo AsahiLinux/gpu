@@ -1,0 +1,32 @@
+<blxml>
+  <enum name="Channel">
+    <value name="R" value="0"/>
+    <value name="G" value="1"/>
+    <value name="B" value="2"/>
+    <value name="A" value="3"/>
+  </enum>
+
+  <enum name="Primitive">
+    <value name="Points" value="0"/>
+    <value name="Lines" value="1"/>
+    <value name="Line strip" value="3"/>
+    <value name="Triangles" value="6"/>
+    <value name="Triangle strip" value="9"/>
+  </enum>
+
+  <struct name="Render Target" size="4">
+    <field name="Unk 0" size="17" start="0" type="uint"/>
+    <field name="Swizzle R" size="2" start="16" type="Channel"/>
+    <field name="Swizzle G" size="2" start="18" type="Channel"/>
+    <field name="Swizzle B" size="2" start="20" type="Channel"/>
+    <field name="Swizzle A" size="2" start="22" type="Channel"/>
+    <field name="Width" size="14" start="24" type="uint" modifier="minus(1)"/>
+    <field name="Height" size="14" start="38" type="uint" modifier="minus(1)"/>
+    <field name="Unk 52" size="1" start="52" type="bool"/>
+    <field name="Rotate 90" size="1" start="53" type="bool" default="false"/>
+    <field name="Flip vertical" size="1" start="54" type="bool" default="false"/>
+    <field name="Unk 55" size="9" start="55" type="uint"/>
+    <field name="Buffer" size="36" start="64" type="address" modifier="shr(4)"/>
+    <field name="Unk 100" size="28" start="100" type="uint"/>
+  </struct>
+</blxml>

@@ -33,6 +33,8 @@ demo_attributes(struct agx_allocator *allocator)
 		0.0f   ,  1.0f   ,  0.0f,     1.0f,
 		0.0f   ,  250.0f ,  0.0f,     0.0f,
 		0.0f   ,  0.0f   ,  1.0f,     1.0f,
+		250.0f   ,  250.0f ,  0.0f,     0.0f,
+		0.0f   ,  0.0f   ,  1.0f,     1.0f,
 	};
 
 	uint32_t attributes2[] = { WIDTH, HEIGHT };
@@ -233,6 +235,15 @@ demo_unk14(struct agx_allocator *allocator)
 	return agx_upload(allocator, unk, sizeof(unk));
 }
 
+/* TODO: any hidden support for line loops? triangle fans? quads? */
+enum agx_primitive {
+	AGX_PRIMITIVE_POINTS = 0,
+	AGX_PRIMITIVE_LINE = 1,
+	AGX_PRIMITIVE_LINE_STRIP = 3,
+	AGX_PRIMITIVE_TRIANGLES = 6,
+	AGX_PRIMITIVE_TRIANGLE_STRIP = 9,
+};
+
 static uint64_t
 demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf)
 {
@@ -306,10 +317,14 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 
 	/* Must be after the rest */
 
+	unsigned vertexCount = 4;
+	enum agx_primitive prim = AGX_PRIMITIVE_TRIANGLE_STRIP;
+
 	uint8_t eof[] = {
-		0x06, 0xc0, 0x61, 0x03, 0x00, 0x00, 0x00, 0x01,
+		prim, 0xc0, 0x61, vertexCount, 0x00, 0x00, 0x00, 0x01, // issues a draw
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+		0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, // Stop
 	};
 
 

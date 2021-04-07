@@ -36,4 +36,12 @@ fui(float f)
 	return u;
 }
 
+static float
+uif(uint32_t u)
+{
+	float f = 0;
+	memcpy(&f, &u, 4);
+	return f;
+}
+
 #endif

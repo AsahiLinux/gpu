@@ -46,4 +46,23 @@ uif(uint32_t u)
 	return f;
 }
 
+/* Pretty-printer */
+static void
+hexdump(FILE *fp, const uint8_t *hex, size_t cnt)
+{
+	for (unsigned i = 0; i < cnt; ++i) {
+		fprintf(fp, "%02X ", hex[i]);
+		if (i && (i & 0xF) == 0xF) {
+			fprintf(fp, " | ");
+			for (unsigned j = i & ~0xF; j <= i; ++j) {
+				uint8_t c = hex[j];
+				fputc((c < 32 || c > 128) ? '.' : c, fp);
+			}
+			fprintf(fp, "\n");
+		}
+	}
+
+	fprintf(fp, "\n");
+}
+
 #endif

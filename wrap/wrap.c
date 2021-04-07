@@ -40,24 +40,7 @@
 #include "cmdstream.h"
 #include "io.h"
 #include "decode.h"
-
-static void
-hexdump(const uint8_t *hex, size_t cnt)
-{
-	for (unsigned i = 0; i < cnt; ++i) {
-		printf("%02X ", hex[i]);
-		if (i && (i & 0xF) == 0xF) {
-			printf(" | ");
-			for (unsigned j = i & ~0xF; j <= i; ++j) {
-				uint8_t c = hex[j];
-				putchar((c < 32 || c > 128) ? '.' : c);
-			}
-			printf("\n");
-		}
-	}
-
-	printf("\n");
-}
+#include "util.h"
 
 /* Apple macro */
 
@@ -129,7 +112,7 @@ wrap_IOConnectCallMethod(
 
 		if(inputStructCnt) {
 			printf(", struct:\n");
-			hexdump(inputStruct, inputStructCnt);
+			hexdump(stdout, inputStruct, inputStructCnt);
 		} else {
 			printf("\n");
 		}
@@ -154,12 +137,12 @@ wrap_IOConnectCallMethod(
 
 	if(outputStructCntP) {
 		printf(" struct\n");
-		hexdump(outputStruct, *outputStructCntP);
+		hexdump(stdout, outputStruct, *outputStructCntP);
 
 		if (selector == 2) {
 			/* Dump linked buffer as well */
 			void **o = outputStruct;
-			hexdump(*o, 64);
+			hexdump(stdout, *o, 64);
 		}
 	}
 
@@ -250,7 +233,7 @@ wrap_IOConnectCallAsyncMethod(
 
 	if(inputStructCnt) {
 		printf(", struct:\n");
-		hexdump(inputStruct, inputStructCnt);
+		hexdump(stdout, inputStruct, inputStructCnt);
 	} else {
 		printf("\n");
 	}
@@ -275,12 +258,12 @@ wrap_IOConnectCallAsyncMethod(
 
 	if(outputStructCntP) {
 		printf(" struct\n");
-		hexdump(outputStruct, *outputStructCntP);
+		hexdump(stdout, outputStruct, *outputStructCntP);
 
 		if (selector == 2) {
 			/* Dump linked buffer as well */
 			void **o = outputStruct;
-			hexdump(*o, 64);
+			hexdump(stdout, *o, 64);
 		}
 	}
 

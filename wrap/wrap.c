@@ -39,6 +39,7 @@
 #include "selectors.h"
 #include "cmdstream.h"
 #include "io.h"
+#include "decode.h"
 
 static void
 hexdump(const uint8_t *hex, size_t cnt)
@@ -56,26 +57,6 @@ hexdump(const uint8_t *hex, size_t cnt)
 	}
 
 	printf("\n");
-}
-
-unsigned MAP_COUNT = 0;
-#define MAX_MAPPINGS 4096
-struct agx_allocation mappings[MAX_MAPPINGS];
-
-static void
-dump_mappings(void)
-{
-	for (unsigned i = 0; i < MAP_COUNT; ++i) {
-		if (!mappings[i].map || !mappings[i].size)
-			continue;
-
-		char *name = NULL;
-		assert(mappings[i].type < AGX_NUM_ALLOC);
-		asprintf(&name, "%s_%llx_%u.bin", agx_alloc_types[mappings[i].type], mappings[i].gpu_va, mappings[i].index);
-		FILE *fp = fopen(name, "wb");
-		fwrite(mappings[i].map, 1, mappings[i].size, fp);
-		fclose(fp);
-	}
 }
 
 /* Apple macro */
@@ -136,7 +117,7 @@ wrap_IOConnectCallMethod(
 		
 		printf("%X: SUBMIT_COMMAND_BUFFERS command queue id:%llx %p\n", connection, input[0], inputStruct);
 
-		dump_mappings();
+		pandecode_dump_mappings();
 
 		/* fallthrough */
 	default:
@@ -192,14 +173,13 @@ wrap_IOConnectCallMethod(
 		assert(inp[1] == 1 || inp[1] == 0);
 		uint64_t *ptr = (uint64_t *) outputStruct;
 		uint32_t *words = (uint32_t *) (ptr + 1);
-		unsigned mapping = MAP_COUNT++;
-		assert(mapping < MAX_MAPPINGS);
-		mappings[mapping] = (struct agx_allocation) {
+
+		pandecode_track_alloc((struct agx_allocation) {
 			.index = words[1],
 			.map = (void *) *ptr,
 			.size = words[0],
 			.type = inp[1] ? AGX_ALLOC_CMDBUF : AGX_ALLOC_MEMMAP
-		};
+		});
 		break;
 	}
 	
@@ -216,23 +196,21 @@ wrap_IOConnectCallMethod(
 		else if (cpu == 0)
 			cpu = cpu_fixed_1;
 		uint64_t size = ptrs[4];
-		unsigned mapping = MAP_COUNT++;
 		uint32_t *iwords = (uint32_t *) inputStruct;
 		const char *type = agx_memory_type_name(iwords[20]);
-		printf("allocate gpu va %llx, cpu %llx, 0x%llx bytes (%u) ", gpu_va, cpu, size, mapping);
+		printf("allocate gpu va %llx, cpu %llx, 0x%llx bytes ", gpu_va, cpu, size);
 		if (type)
 			printf(" %s\n", type);
 		else
 			printf(" unknown type %08X\n", iwords[20]);
 
-		assert(mapping < MAX_MAPPINGS);
-		mappings[mapping] = (struct agx_allocation) {
+		pandecode_track_alloc((struct agx_allocation) {
 			.type = AGX_ALLOC_REGULAR,
 			.size = size,
 			.index = ptrs[3] >> 32ull,
 			.gpu_va = gpu_va,
 			.map = (void *) cpu,
-		};
+		});
 	}
 
 	default:

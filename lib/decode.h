@@ -26,15 +26,18 @@
 #ifndef __PAN_DECODE_H__
 #define __PAN_DECODE_H__
 
+#include "io.h"
+
 void pandecode_next_frame(void);
 
 void pandecode_close(void);
 
-void
-pandecode_inject_mmap(uint64_t gpu_va, void *cpu, unsigned sz, const char *name);
-
 void pandecode_cmdstream(uint64_t cmdstream);
 
 void pandecode_dump_file_open(void);
+
+void pandecode_track_alloc(struct agx_allocation alloc);
+
+void pandecode_dump_mappings(void);
 
 #endif /* __MMAP_TRACE_H__ */

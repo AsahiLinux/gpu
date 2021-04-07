@@ -46,6 +46,22 @@ unsigned mmap_count = 0;
 struct agx_allocation *ro_mappings[MAX_MAPPINGS];
 unsigned ro_mapping_count = 0;
 
+void
+pandecode_dump_mappings(void)
+{
+	for (unsigned i = 0; i < mmap_count; ++i) {
+		if (!mmap_array[i].map || !mmap_array[i].size)
+			continue;
+
+		char *name = NULL;
+		assert(mmap_array[i].type < AGX_NUM_ALLOC);
+		asprintf(&name, "%s_%llx_%u.bin", agx_alloc_types[mmap_array[i].type], mmap_array[i].gpu_va, mmap_array[i].index);
+		FILE *fp = fopen(name, "wb");
+		fwrite(mmap_array[i].map, 1, mmap_array[i].size, fp);
+		fclose(fp);
+	}
+}
+
 static struct agx_allocation *
 pandecode_find_mapped_gpu_mem_containing_rw(uint64_t addr)
 {
@@ -208,26 +224,10 @@ pandecode_add_name(struct agx_allocation *mem, uint64_t gpu_va, const char *name
 }
 
 void
-pandecode_inject_mmap(uint64_t gpu_va, void *cpu, unsigned sz, const char *name)
+pandecode_track_alloc(struct agx_allocation alloc)
 {
-        /* First, search if we already mapped this and are just updating an address */
-
-        struct agx_allocation *existing =
-                pandecode_find_mapped_gpu_mem_containing_rw(gpu_va);
-
-        if (existing && existing->gpu_va == gpu_va) {
-                existing->size = sz;
-                existing->map = cpu;
-                pandecode_add_name(existing, gpu_va, name);
-                return;
-        }
-
         assert((mmap_count + 1) < MAX_MAPPINGS);
-        mmap_array[mmap_count++] = (struct agx_allocation) {
-                .map = cpu,
-                .gpu_va = gpu_va,
-                .size = sz,
-        };
+        mmap_array[mmap_count++] = alloc;
 }
 
 static char *

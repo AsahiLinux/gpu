@@ -51,6 +51,6 @@
     <field name="Vertex count" size="32" start="0:24" type="uint"/>
     <field name="Instance count" size="32" start="1:24" type="uint"/> <!-- must be nonzero -->
     <field name="Vertex start" size="32" start="2:24" type="uint"/>
-    <field name="Unk 2" size="8" start="3:24" type="uint"/>
+    <field name="Unk 2" size="8" start="3:24" type="uint" default="0"/>
   </struct>
 </blxml>

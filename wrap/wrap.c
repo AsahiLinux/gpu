@@ -117,7 +117,8 @@ wrap_IOConnectCallMethod(
 		
 		printf("%X: SUBMIT_COMMAND_BUFFERS command queue id:%llx %p\n", connection, input[0], inputStruct);
 
-		pandecode_dump_mappings();
+		//pandecode_dump_mappings();
+		pandecode_cmdstream(input[0]);
 
 		/* fallthrough */
 	default:

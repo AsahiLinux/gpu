@@ -32,7 +32,7 @@ void pandecode_next_frame(void);
 
 void pandecode_close(void);
 
-void pandecode_cmdstream(uint64_t cmdstream);
+void pandecode_cmdstream(unsigned cmdbuf_index);
 
 void pandecode_dump_file_open(void);
 

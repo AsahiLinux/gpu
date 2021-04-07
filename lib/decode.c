@@ -198,13 +198,30 @@ pandecode_validate_buffer(uint64_t addr, size_t sz)
         }
 }
 
+static struct agx_allocation *
+pandecode_find_cmdbuf(unsigned cmdbuf_index)
+{
+	for (unsigned i = 0; i < mmap_count; ++i) {
+		if (mmap_array[i].type != AGX_ALLOC_CMDBUF)
+			continue;
+
+		if (mmap_array[i].index != cmdbuf_index)
+			continue;
+
+		return &mmap_array[i];
+	}
+
+	return NULL;
+}
+
 void
-pandecode_cmdstream(uint64_t gpu_va)
+pandecode_cmdstream(unsigned cmdbuf_index)
 {
         pandecode_dump_file_open();
 
-	printf("Dumping %"PRIx64, gpu_va);
-	/* Do whatever */
+	struct agx_allocation *cmdbuf = pandecode_find_cmdbuf(cmdbuf_index);
+	assert(cmdbuf != NULL && "nonexistant command buffer");
+	printf("Dumping %p\n", cmdbuf);
 
         pandecode_map_read_write();
 }

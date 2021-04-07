@@ -281,20 +281,13 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 
 	/* Must be after the rest */
 
-	unsigned vertexCount = 4;
-	unsigned start = 0;
-	enum agx_primitive prim = AGX_PRIMITIVE_TRIANGLE_STRIP;
-
-	uint8_t draw[] = {
-					    /* count-------- */
-		prim, 0xc0, 0x61, vertexCount, 0x00, 0x00, 0x00, 0x01, // issues a draw
-
-				  /* start ----------- */
-		0x00, 0x00, 0x00, start, 0x00, 0x00, 0x00, 0x00,
+	bl_pack(out, DRAW, cfg) {
+		cfg.primitive = AGX_PRIMITIVE_TRIANGLE_STRIP;
+		cfg.vertex_start = 0;
+		cfg.vertex_count = 4;
 	};
 
-	memcpy(out, draw, sizeof(draw));
-	out += sizeof(draw);
+	out += AGX_DRAW_LENGTH;
 
 	uint8_t stop[] = {
 		0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, // Stop

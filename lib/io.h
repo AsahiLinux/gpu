@@ -55,6 +55,12 @@ struct agx_allocation {
 
 	/* If type REGULAR, mapped GPU address */
 	uint64_t gpu_va;
+
+	/* Human-readable label, or NULL if none */
+	char *name;
+
+	/* Used while decoding, marked read-only */
+	bool ro;
 };
 
 struct agx_notification_queue {

@@ -6,17 +6,21 @@ clean:
 	rm -f wrap.dylib demo-bin agx_pack.h
 
 CFLAGS := -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function
+WRAP_HDRS := $(wildcard lib/*.h)\
+
 WRAP_SRCS := $(wildcard lib/*.c)\
              $(wildcard wrap/*.c)
 
-wrap.dylib: $(WRAP_SRCS) Makefile agx_pack.h
+wrap.dylib: $(WRAP_SRCS) $(WRAP_HDRS) Makefile agx_pack.h
 	clang -o $@ $(WRAP_SRCS) -I lib/ -I . -dynamiclib -framework IOKit $(CFLAGS)
 
 DEMO_SRCS := $(wildcard lib/*.c)\
              $(wildcard demo/*.c)\
              $(wildcard disasm/*.c)
 
-demo-bin: $(DEMO_SRCS) Makefile agx_pack.h
+DEMO_HDRS := $(wildcard lib/*.h)\
+
+demo-bin: $(DEMO_SRCS) $(DEMO_HDRS) Makefile agx_pack.h
 	clang -o $@ $(DEMO_SRCS) -I lib/ -I . -I /opt/X11/include -L /opt/X11/lib/ -lX11 -framework IOKit $(CFLAGS)
 
 agx_pack.h: lib/gen_pack.py lib/cmdbuf.xml Makefile

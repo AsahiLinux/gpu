@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021 Alyssa Rosenzweig <alyssa@rosenzweig.io>
+ * Copyright (C) 2017-2019 Lyude Paul
+ * Copyright (C) 2017-2019 Alyssa Rosenzweig
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -19,31 +20,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-#ifndef __UTIL_H
-#define __UTIL_H
+#ifndef __PAN_DECODE_H__
+#define __PAN_DECODE_H__
 
-#include <string.h>
+void pandecode_initialize(bool to_stderr);
 
-#define MAX2(x, y) (((x) > (y)) ? (x) : (y))
-#define MIN2(x, y) (((x) < (y)) ? (x) : (y))
-#define ALIGN_POT(v, pot) (((v) + ((pot) - 1)) & ~((pot) - 1))
+void pandecode_next_frame(void);
 
-static uint32_t
-fui(float f)
-{
-	uint32_t u = 0;
-	memcpy(&u, &f, 4);
-	return u;
-}
+void pandecode_close(void);
 
-static float
-uif(uint32_t u)
-{
-	float f = 0;
-	memcpy(&f, &u, 4);
-	return f;
-}
+void
+pandecode_inject_mmap(uint64_t gpu_va, void *cpu, unsigned sz, const char *name);
 
-#endif
+void pandecode_cmdstream(uint64_t cmdstream);
+
+void pandecode_dump_file_open(void);
+
+#endif /* __MMAP_TRACE_H__ */

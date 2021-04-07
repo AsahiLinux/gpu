@@ -47,7 +47,7 @@ pack_header = """
 #include <assert.h>
 #include <math.h>
 #include <inttypes.h>
-#include "util.h"
+#include "lib/util.h"
 
 #define __gen_unpack_float(x, y, z) uif(__gen_unpack_uint(x, y, z))
 

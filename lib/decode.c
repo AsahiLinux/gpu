@@ -33,45 +33,37 @@
 #include <sys/mman.h>
 
 #include "decode.h"
-
-/* Infrastructure for tracking mapped memory */
-struct pandecode_mapped_memory {
-        size_t length;
-        void *addr;
-        uint64_t gpu_va;
-        bool ro;
-        char name[32];
-};
+#include "io.h"
 
 /* Memory handling, this can't pull in proper data structures so hardcode some
  * things, it should be "good enough" for most use cases */
 
 #define MAX_MAPPINGS 4096
 
-struct pandecode_mapped_memory mmap_array[MAX_MAPPINGS];
+struct agx_allocation mmap_array[MAX_MAPPINGS];
 unsigned mmap_count = 0;
 
-struct pandecode_mapped_memory *ro_mappings[MAX_MAPPINGS];
+struct agx_allocation *ro_mappings[MAX_MAPPINGS];
 unsigned ro_mapping_count = 0;
 
-static struct pandecode_mapped_memory *
+static struct agx_allocation *
 pandecode_find_mapped_gpu_mem_containing_rw(uint64_t addr)
 {
         for (unsigned i = 0; i < mmap_count; ++i) {
-                if (addr >= mmap_array[i].gpu_va && (addr - mmap_array[i].gpu_va) < mmap_array[i].length)
+                if (addr >= mmap_array[i].gpu_va && (addr - mmap_array[i].gpu_va) < mmap_array[i].size)
                         return mmap_array + i;
         }
 
         return NULL;
 }
 
-struct pandecode_mapped_memory *
+struct agx_allocation *
 pandecode_find_mapped_gpu_mem_containing(uint64_t addr)
 {
-        struct pandecode_mapped_memory *mem = pandecode_find_mapped_gpu_mem_containing_rw(addr);
+        struct agx_allocation *mem = pandecode_find_mapped_gpu_mem_containing_rw(addr);
 
-        if (mem && mem->addr && !mem->ro) {
-                mprotect(mem->addr, mem->length, PROT_READ);
+        if (mem && mem->map && !mem->ro) {
+                mprotect(mem->map, mem->size, PROT_READ);
                 mem->ro = true;
                 ro_mappings[ro_mapping_count++] = mem;
                 assert(ro_mapping_count < MAX_MAPPINGS);
@@ -81,7 +73,7 @@ pandecode_find_mapped_gpu_mem_containing(uint64_t addr)
 }
 
 static inline void *
-__pandecode_fetch_gpu_mem(const struct pandecode_mapped_memory *mem,
+__pandecode_fetch_gpu_mem(const struct agx_allocation *mem,
                           uint64_t gpu_va, size_t size,
                           int line, const char *filename)
 {
@@ -95,9 +87,9 @@ __pandecode_fetch_gpu_mem(const struct pandecode_mapped_memory *mem,
         }
 
         assert(mem);
-        assert(size + (gpu_va - mem->gpu_va) <= mem->length);
+        assert(size + (gpu_va - mem->gpu_va) <= mem->size);
 
-        return mem->addr + gpu_va - mem->gpu_va;
+        return mem->map + gpu_va - mem->gpu_va;
 }
 
 #define pandecode_fetch_gpu_mem(mem, gpu_va, size) \
@@ -108,7 +100,7 @@ pandecode_map_read_write(void)
 {
         for (unsigned i = 0; i < ro_mapping_count; ++i) {
                 ro_mappings[i]->ro = false;
-                mprotect(ro_mappings[i]->addr, ro_mappings[i]->length,
+                mprotect(ro_mappings[i]->map, ro_mappings[i]->size,
                                 PROT_READ | PROT_WRITE);
         }
 
@@ -136,7 +128,7 @@ pandecode_map_read_write(void)
 #define MAP_ADDR(T, addr, cl) \
         const uint8_t *cl = 0; \
         { \
-                struct pandecode_mapped_memory *mapped_mem = pandecode_find_mapped_gpu_mem_containing(addr); \
+                struct agx_allocation *mapped_mem = pandecode_find_mapped_gpu_mem_containing(addr); \
                 cl = pandecode_fetch_gpu_mem(mapped_mem, addr, MALI_ ## T ## _LENGTH); \
         }
 
@@ -168,7 +160,7 @@ pandecode_validate_buffer(uint64_t addr, size_t sz)
 
         /* Find a BO */
 
-        struct pandecode_mapped_memory *bo =
+        struct agx_allocation *bo =
                 pandecode_find_mapped_gpu_mem_containing(addr);
 
         if (!bo) {
@@ -181,11 +173,11 @@ pandecode_validate_buffer(uint64_t addr, size_t sz)
         unsigned offset = addr - bo->gpu_va;
         unsigned total = offset + sz;
 
-        if (total > bo->length) {
+        if (total > bo->size) {
                 fprintf(pandecode_dump_stream, "// XXX: buffer overrun. "
                                 "Chunk of size %zu at offset %d in buffer of size %zu. "
                                 "Overrun by %zu bytes. \n",
-                                sz, offset, bo->length, total - bo->length);
+                                sz, offset, bo->size, total - bo->size);
                 return;
         }
 }
@@ -202,7 +194,7 @@ pandecode_cmdstream(uint64_t gpu_va)
 }
 
 static void
-pandecode_add_name(struct pandecode_mapped_memory *mem, uint64_t gpu_va, const char *name)
+pandecode_add_name(struct agx_allocation *mem, uint64_t gpu_va, const char *name)
 {
         if (!name) {
                 /* If we don't have a name, assign one */
@@ -220,28 +212,28 @@ pandecode_inject_mmap(uint64_t gpu_va, void *cpu, unsigned sz, const char *name)
 {
         /* First, search if we already mapped this and are just updating an address */
 
-        struct pandecode_mapped_memory *existing =
+        struct agx_allocation *existing =
                 pandecode_find_mapped_gpu_mem_containing_rw(gpu_va);
 
         if (existing && existing->gpu_va == gpu_va) {
-                existing->length = sz;
-                existing->addr = cpu;
+                existing->size = sz;
+                existing->map = cpu;
                 pandecode_add_name(existing, gpu_va, name);
                 return;
         }
 
         assert((mmap_count + 1) < MAX_MAPPINGS);
-        mmap_array[mmap_count++] = (struct pandecode_mapped_memory) {
-                .addr = cpu,
+        mmap_array[mmap_count++] = (struct agx_allocation) {
+                .map = cpu,
                 .gpu_va = gpu_va,
-                .length = sz,
+                .size = sz,
         };
 }
 
 static char *
 pointer_as_memory_reference(uint64_t ptr)
 {
-        struct pandecode_mapped_memory *mapped;
+        struct agx_allocation *mapped;
         char *out = malloc(128);
 
         /* Try to find the corresponding mapped zone */

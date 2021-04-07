@@ -285,6 +285,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 		cfg.primitive = AGX_PRIMITIVE_TRIANGLE_STRIP;
 		cfg.vertex_start = 0;
 		cfg.vertex_count = 4;
+		cfg.instance_count = 1;
 	};
 
 	out += AGX_DRAW_LENGTH;

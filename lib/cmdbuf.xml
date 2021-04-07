@@ -30,12 +30,12 @@
     <field name="Unk 100" size="28" start="100" type="hex"/>
   </struct>
 
-  <!--- Command to issue a direct non-indexed non-instanced draw -->
+  <!--- Command to issue a direct non-indexed draw -->
   <struct name="Draw" size="4">
     <field name="Primitive" size="8" start="0:0" type="Primitive"/>
     <field name="Command" size="16" start="0:8" type="hex" default="0x61c0"/>
     <field name="Vertex count" size="32" start="0:24" type="uint"/>
-    <field name="Unk 1" size="32" start="1:24" type="hex" default="0x01"/>
+    <field name="Instance count" size="32" start="1:24" type="uint"/> <!-- must be nonzero -->
     <field name="Vertex start" size="32" start="2:24" type="uint"/>
     <field name="Unk 2" size="8" start="3:24" type="uint"/>
   </struct>

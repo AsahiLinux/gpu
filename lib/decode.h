@@ -26,8 +26,6 @@
 #ifndef __PAN_DECODE_H__
 #define __PAN_DECODE_H__
 
-void pandecode_initialize(bool to_stderr);
-
 void pandecode_next_frame(void);
 
 void pandecode_close(void);

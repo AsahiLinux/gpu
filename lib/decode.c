@@ -262,8 +262,6 @@ pointer_as_memory_reference(uint64_t ptr)
 
 static int pandecode_dump_frame_count = 0;
 
-static bool force_stderr = false;
-
 void
 pandecode_dump_file_open(void)
 {
@@ -274,7 +272,7 @@ pandecode_dump_file_open(void)
          * setenv to change the base at runtime.
          */
         const char *dump_file_base = getenv("PANDECODE_DUMP_FILE") ?: "pandecode.dump";
-        if (force_stderr || !strcmp(dump_file_base, "stderr"))
+        if (!strcmp(dump_file_base, "stderr"))
                 pandecode_dump_stream = stderr;
         else {
                 char buffer[1024];
@@ -295,12 +293,6 @@ pandecode_dump_file_close(void)
                 fclose(pandecode_dump_stream);
                 pandecode_dump_stream = NULL;
         }
-}
-
-void
-pandecode_initialize(bool to_stderr)
-{
-        force_stderr = to_stderr;
 }
 
 void

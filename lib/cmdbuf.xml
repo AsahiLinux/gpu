@@ -30,6 +30,20 @@
     <field name="Unk 100" size="28" start="100" type="hex"/>
   </struct>
 
+  <!--- Identified by tag? -->
+  <struct name="Viewport" size="10">
+    <field name="Tag 1" size="32" start="0:0" type="hex" default="0xc00"/>
+    <field name="Tag 2" size="32" start="1:0" type="hex" default="0x18"/>
+    <field name="Tag 3" size="32" start="2:0" type="hex" default="0x12"/>
+    <field name="Tag 4" size="32" start="3:0" type="hex" default="0x0"/>
+    <field name="Translate X" size="32" start="4:0" type="float"/>
+    <field name="Scale X" size="32" start="5:0" type="float"/>
+    <field name="Translate Y" size="32" start="6:0" type="float"/>
+    <field name="Scale Y" size="32" start="7:0" type="float"/>
+    <field name="Near Z" size="32" start="8:0" type="float"/>
+    <field name="Far Z" size="32" start="9:0" type="float"/>
+  </struct>
+
   <!--- Command to issue a direct non-indexed draw -->
   <struct name="Draw" size="4">
     <field name="Primitive" size="8" start="0:0" type="Primitive"/>

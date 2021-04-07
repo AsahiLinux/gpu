@@ -51,14 +51,17 @@ demo_attributes(struct agx_allocator *allocator)
 static uint64_t
 demo_viewport(struct agx_allocator *allocator)
 {
-	uint32_t data[] = {
-		0xc00, 0x18, 0x12, 0x0,
-		fui(WIDTH / 2), fui(WIDTH / 2), // X: translate, scale
-		fui(HEIGHT / 2), fui(-HEIGHT / 2), // Y: translate, scale
-		fui(0.0f), fui(1.0f), // Z near/far
+	struct agx_ptr t = agx_allocate(allocator, AGX_VIEWPORT_LENGTH);
+	bl_pack(t.map, VIEWPORT, cfg) {
+		cfg.translate_x = WIDTH / 2;
+		cfg.scale_x = WIDTH / 2;
+		cfg.translate_y = HEIGHT / 2;
+		cfg.scale_y = -(HEIGHT / 2);
+		cfg.near_z = 0.0f;
+		cfg.far_z = 1.0f;
 	};
 
-	return agx_upload(allocator, data, sizeof(data));
+	return t.gpu_va;
 }
 
 /* FP16 */

@@ -117,6 +117,8 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 		0x800000,
 		0x1002, // XXX: blob sets 0x10000 bit and adds an extra pointer to unknown data
 		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- fragment shader
+		0x1440,
+		0x0,
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));

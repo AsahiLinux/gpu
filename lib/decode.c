@@ -251,9 +251,15 @@ static void
 pandecode_record(uint64_t va, size_t size)
 {
 	uint8_t *map = pandecode_fetch_gpu_mem(va, size);
+	uint32_t tag = 0;
+	memcpy(&tag, map, 4);
 
-	fprintf(pandecode_dump_stream, "Record %" PRIx64 "\n", va);
-	hexdump(pandecode_dump_stream, map, size, false);
+	if (tag == 0x00000C00) {
+		DUMP_CL(VIEWPORT, map, "Viewport");
+	} else {
+		fprintf(pandecode_dump_stream, "Record %" PRIx64 "\n", va);
+		hexdump(pandecode_dump_stream, map, size, false);
+	}
 }
 
 static unsigned

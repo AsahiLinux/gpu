@@ -200,6 +200,7 @@ pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder, bool verb
 {
 	struct agx_allocation *alloc = pandecode_find_mapped_gpu_mem_containing(va);
 	assert(alloc != NULL && "nonexistant object");
+	fprintf(pandecode_dump_stream, "%s\n", label);
 
 	uint8_t *map = pandecode_fetch_gpu_mem(va, 64);
 	uint8_t *end = map + alloc->size;
@@ -232,8 +233,10 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 		bl_unpack(map, SET_SHADER, cmd);
 		DUMP_UNPACKED(SET_SHADER, cmd, "Set shader\n");
 
+		pandecode_log("\n");
 		agx_disassemble(pandecode_fetch_gpu_mem(cmd.code, 8192),
 			8192, pandecode_dump_stream);
+		pandecode_log("\n");
 
 		return AGX_SET_SHADER_LENGTH;
 	} else if (map[0] == 0x1D) {
@@ -248,14 +251,25 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 }
 
 static void
-pandecode_record(uint64_t va, size_t size)
+pandecode_record(uint64_t va, size_t size, bool verbose)
 {
 	uint8_t *map = pandecode_fetch_gpu_mem(va, size);
 	uint32_t tag = 0;
 	memcpy(&tag, map, 4);
 
 	if (tag == 0x00000C00) {
+		assert(size == AGX_VIEWPORT_LENGTH);
 		DUMP_CL(VIEWPORT, map, "Viewport");
+	} else if (tag == 0x800000) {
+		assert(size == (AGX_BIND_PIPELINE_LENGTH + 4));
+//		XXX: why does this raise a bus error?
+//		uint32_t unk = 0;
+//		memcpy(map + AGX_BIND_PIPELINE_LENGTH, &unk, 4);
+
+		 bl_unpack(map, BIND_PIPELINE, cmd);
+		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
+		 DUMP_UNPACKED(BIND_PIPELINE, cmd, "Bind fragment pipeline\n");
+//		 fprintf(pandecode_dump_stream, "Unk: %X\n", unk);
 	} else {
 		fprintf(pandecode_dump_stream, "Record %" PRIx64 "\n", va);
 		hexdump(pandecode_dump_stream, map, size, false);
@@ -271,13 +285,13 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 DUMP_UNPACKED(LAUNCH, cmd, "Launch\n");
 		 return AGX_LAUNCH_LENGTH;
 	} else if (map[0] == 0x2E && map[1] == 0x00 && map[2] == 0x00 && map[3] == 0x40) {
-		 bl_unpack(map, BIND_VERTEX_PIPELINE, cmd);
+		 bl_unpack(map, BIND_PIPELINE, cmd);
 		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
-		 DUMP_UNPACKED(BIND_VERTEX_PIPELINE, cmd, "Bind vertex pipeline\n");
+		 DUMP_UNPACKED(BIND_PIPELINE, cmd, "Bind vertex pipeline\n");
 
 		 /* Random unaligned null byte, it's pretty awful.. */
-		 assert(map[AGX_BIND_VERTEX_PIPELINE_LENGTH] == 0);
-		 return AGX_BIND_VERTEX_PIPELINE_LENGTH + 1;
+		 assert(map[AGX_BIND_PIPELINE_LENGTH] == 0);
+		 return AGX_BIND_PIPELINE_LENGTH + 1;
 	} else if (map[1] == 0xc0 && map[2] == 0x61) {
 		 DUMP_CL(DRAW, map, "Draw");
 		 return AGX_DRAW_LENGTH;
@@ -287,7 +301,7 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 struct agx_allocation *mem = pandecode_find_mapped_gpu_mem_containing(cmd.data);
 
 		 if (mem)
-			 pandecode_record(cmd.data, cmd.size_words * 4);
+			 pandecode_record(cmd.data, cmd.size_words * 4, verbose);
 		 else
 			 DUMP_UNPACKED(RECORD, cmd, "Non-existant record (XXX)\n");
 

@@ -63,7 +63,7 @@
   </struct>
 
   <!--- Command to bind a vertex pipeline, followed by subcommands -->
-  <struct name="Bind vertex pipeline" size="4">
+  <struct name="Bind pipeline" size="4">
     <field name="Tag" size="32" start="0:0" type="hex" default="0x4000002e"/>
     <field name="Unk 1" size="32" start="1:0" type="hex" default="0x1002"/>
     <field name="Pipeline" size="32" start="2:0" type="address"/>

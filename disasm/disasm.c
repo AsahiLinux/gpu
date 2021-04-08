@@ -68,7 +68,7 @@ enum agx_opcodes {
 	OPC_MOVI = 0x62,
 	OPC_LD_COMPUTE = 0x72,
 	OPC_BITOP = 0x7E,
-	OPC_UNK38 = 0x38, // seen after loads?
+	OPC_WAIT = 0x38, // seen after loads?
 	OPC_STOP = 0x08,
 
 	OPC_LD_VAR_NO_PERSPECTIVE = 0xA1,
@@ -135,7 +135,7 @@ static struct {
 	[OPC_BLEND] = { "blend", 8, I },
 	[OPC_STOP] = { "stop", 4, I },
 
-	[OPC_UNK38] = { "unk38", 2, I },
+	[OPC_WAIT] = { "wait", 2, I },
 	[OPC_UNK48] = { "unk48", 4, I },
 	[OPC_UNK42] = { "unk42", 6, I },
 	[OPC_UNK52] = { "unk52", 6, I },
@@ -173,10 +173,11 @@ agx_print_src(FILE *fp, struct agx_src s)
 	/* Known source types: immediates (8-bit only?), constant memory
 	 * (indexing 64-bits at a time from preloaded memory), and general
 	 * purpose registers */
-	const char *types[] = { "#", "unk1:", "const_", "" };
+	const char *types[] = { "#", "unk1:", "u", "" };
 
-	fprintf(fp, ", %s%s%u%s%s%s", s.size32 ? "w" : "h",
+	fprintf(fp, ", %s%u%s%s%s%s",
 			types[s.type], s.reg,
+			(s.size32 || s.type == 0) ? "" : ((s.reg & 1) ? "h" : "l"),
 			s.abs ? ".abs" : "", s.neg ? ".neg" : "",
 			s.unk ? ".unk" : "");
 }

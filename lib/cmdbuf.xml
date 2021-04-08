@@ -62,6 +62,14 @@
     <field name="Unk 4" size="24" start="3:0" type="hex" default="0x880100"/> <!-- TODO differs with aux -->
   </struct>
 
+  <!--- Command to bind a vertex pipeline, followed by subcommands -->
+  <struct name="Bind vertex pipeline" size="4">
+    <field name="Tag" size="32" start="0:0" type="hex" default="0x4000002e"/>
+    <field name="Unk 1" size="32" start="1:0" type="hex" default="0x1002"/>
+    <field name="Pipeline" size="32" start="2:0" type="address"/>
+    <field name="Unk 2" size="32" start="3:0" type="hex" default="0x0505"/>
+  </struct>
+
   <!--- Command to issue a direct non-indexed draw -->
   <struct name="Draw" size="4">
     <field name="Primitive" size="8" start="0:0" type="Primitive"/>

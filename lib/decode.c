@@ -277,6 +277,14 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
 		 DUMP_UNPACKED(LAUNCH, cmd, "Launch\n");
 		 return AGX_LAUNCH_LENGTH;
+	} else if (map[0] == 0x2E && map[1] == 0x00 && map[2] == 0x00 && map[3] == 0x40) {
+		 bl_unpack(map, BIND_VERTEX_PIPELINE, cmd);
+		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
+		 DUMP_UNPACKED(BIND_VERTEX_PIPELINE, cmd, "Bind vertex pipeline\n");
+
+		 /* Random unaligned null byte, it's pretty awful.. */
+		 assert(map[AGX_BIND_VERTEX_PIPELINE_LENGTH] == 0);
+		 return AGX_BIND_VERTEX_PIPELINE_LENGTH + 1;
 	} else {
 		return 0;
 	}

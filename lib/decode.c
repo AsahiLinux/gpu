@@ -221,7 +221,9 @@ pandecode_cmdstream(unsigned cmdbuf_index)
 
 	struct agx_allocation *cmdbuf = pandecode_find_cmdbuf(cmdbuf_index);
 	assert(cmdbuf != NULL && "nonexistant command buffer");
-	printf("Dumping %p\n", cmdbuf);
+
+	fprintf(pandecode_dump_stream, "Command buffer %s (%u)\n", cmdbuf->name ?: "", cmdbuf->index);
+	hexdump(pandecode_dump_stream, cmdbuf->map, cmdbuf->size, false);
 
         pandecode_map_read_write();
 }

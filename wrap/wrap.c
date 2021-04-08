@@ -112,7 +112,7 @@ wrap_IOConnectCallMethod(
 
 		if(inputStructCnt) {
 			printf(", struct:\n");
-			hexdump(stdout, inputStruct, inputStructCnt);
+			hexdump(stdout, inputStruct, inputStructCnt, true);
 		} else {
 			printf("\n");
 		}
@@ -137,12 +137,12 @@ wrap_IOConnectCallMethod(
 
 	if(outputStructCntP) {
 		printf(" struct\n");
-		hexdump(stdout, outputStruct, *outputStructCntP);
+		hexdump(stdout, outputStruct, *outputStructCntP, true);
 
 		if (selector == 2) {
 			/* Dump linked buffer as well */
 			void **o = outputStruct;
-			hexdump(stdout, *o, 64);
+			hexdump(stdout, *o, 64, true);
 		}
 	}
 
@@ -233,7 +233,7 @@ wrap_IOConnectCallAsyncMethod(
 
 	if(inputStructCnt) {
 		printf(", struct:\n");
-		hexdump(stdout, inputStruct, inputStructCnt);
+		hexdump(stdout, inputStruct, inputStructCnt, true);
 	} else {
 		printf("\n");
 	}
@@ -258,12 +258,12 @@ wrap_IOConnectCallAsyncMethod(
 
 	if(outputStructCntP) {
 		printf(" struct\n");
-		hexdump(stdout, outputStruct, *outputStructCntP);
+		hexdump(stdout, outputStruct, *outputStructCntP, true);
 
 		if (selector == 2) {
 			/* Dump linked buffer as well */
 			void **o = outputStruct;
-			hexdump(stdout, *o, 64);
+			hexdump(stdout, *o, 64, true);
 		}
 	}
 

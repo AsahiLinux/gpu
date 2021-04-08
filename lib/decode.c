@@ -111,11 +111,11 @@ pandecode_map_read_write(void)
 
 #define DUMP_UNPACKED(T, var, str) { \
         pandecode_log(str); \
-        pan_print(pandecode_dump_stream, T, var, (pandecode_indent + 1) * 2); \
+        bl_print(pandecode_dump_stream, T, var, (pandecode_indent + 1) * 2); \
 }
 
 #define DUMP_CL(T, cl, str) {\
-        pan_unpack(cl, T, temp); \
+        bl_unpack(cl, T, temp); \
         DUMP_UNPACKED(T, temp, str); \
 }
 
@@ -198,6 +198,32 @@ pandecode_find_cmdbuf(unsigned cmdbuf_index)
 	return NULL;
 }
 
+static void
+pandecode_dump_bo(struct agx_allocation *bo, const char *name)
+{
+	fprintf(pandecode_dump_stream, "%s %s (%u)\n", name, bo->name ?: "", bo->index);
+	hexdump(pandecode_dump_stream, bo->map, bo->size, false);
+}
+
+static void
+pandecode_encoder(uint64_t encoder_va)
+{
+	struct agx_allocation *encoder = pandecode_find_mapped_gpu_mem_containing(encoder_va);
+	assert(encoder != NULL && "nonexistant encoder");
+
+	pandecode_dump_bo(encoder, "Encoder");
+
+	uint8_t *map = encoder->map;
+
+	/* Stateful decoding.. we don't really know how to do this 'correctly'
+	 * yet, but this is a good guess! */
+
+	 if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
+		 DUMP_CL(LAUNCH, map, "Launch");
+		 map += AGX_LAUNCH_LENGTH;
+	 }
+}
+
 void
 pandecode_cmdstream(unsigned cmdbuf_index)
 {
@@ -206,8 +232,11 @@ pandecode_cmdstream(unsigned cmdbuf_index)
 	struct agx_allocation *cmdbuf = pandecode_find_cmdbuf(cmdbuf_index);
 	assert(cmdbuf != NULL && "nonexistant command buffer");
 
-	fprintf(pandecode_dump_stream, "Command buffer %s (%u)\n", cmdbuf->name ?: "", cmdbuf->index);
-	hexdump(pandecode_dump_stream, cmdbuf->map, cmdbuf->size, false);
+	pandecode_dump_bo(cmdbuf, "Command buffer");
+
+	/* TODO: What else is in here? */
+	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;
+	pandecode_encoder(*encoder);
 
         pandecode_map_read_write();
 }

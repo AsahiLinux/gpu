@@ -102,8 +102,8 @@ wrap_IOConnectCallMethod(
 
 		const struct agx_submit_cmdbuf_req *req = inputStruct;
 
-		pandecode_dump_mappings();
-		//pandecode_cmdstream(req->cmdbuf);
+		//pandecode_dump_mappings();
+		pandecode_cmdstream(req->cmdbuf);
 
 		/* fallthrough */
 	default:

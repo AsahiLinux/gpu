@@ -208,6 +208,8 @@ pandecode_dump_bo(struct agx_allocation *bo, const char *name)
 /* Abstraction for command stream parsing */
 typedef unsigned (*decode_cmd)(const uint8_t *map);
 
+#define STATE_DONE (0xFFFFFFFFu)
+
 static void
 pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder)
 {
@@ -234,14 +236,23 @@ pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder)
 		 }
 
 		 map += count;
+
+		 if (count == STATE_DONE)
+			 break;
 	 }
 }
 
 static unsigned
 pandecode_pipeline(UNUSED const uint8_t *map)
 {
-	if (0) {
-		return 0;
+	uint8_t zeroes[16] = { 0 };
+
+	if (map[0] == 0x4D && map[1] == 0x90 && map[2] == 0x00) {
+		hexdump(pandecode_dump_stream, map, 16, false);
+		return 16;
+	} else if (memcmp(map, zeroes, 16) == 0) {
+		/* TODO: Termination */
+		return STATE_DONE;
 	} else {
 		return 0;
 	}

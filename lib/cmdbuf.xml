@@ -70,6 +70,13 @@
     <field name="Unk 2" size="32" start="3:0" type="hex" default="0x0505"/>
   </struct>
 
+  <!-- Subcommands are packed inside sized records -->
+  <struct name="Record" size="2">
+    <field name="Size (words)" size="8" start="0:0" type="uint"/>
+    <field name="Tag" size="16" start="0:8" type="hex" default="0x0000"/>
+    <field name="Data" size="40" start="0:24" type="address"/>
+  </struct>
+
   <!--- Command to issue a direct non-indexed draw -->
   <struct name="Draw" size="4">
     <field name="Primitive" size="8" start="0:0" type="Primitive"/>

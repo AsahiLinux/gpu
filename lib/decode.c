@@ -285,6 +285,10 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 /* Random unaligned null byte, it's pretty awful.. */
 		 assert(map[AGX_BIND_VERTEX_PIPELINE_LENGTH] == 0);
 		 return AGX_BIND_VERTEX_PIPELINE_LENGTH + 1;
+	} else if (map[1] == 0x00 && map[2] == 0x00) {
+		 bl_unpack(map, RECORD, cmd);
+		 DUMP_UNPACKED(RECORD, cmd, "Record\n");
+		 return AGX_RECORD_LENGTH;
 	} else {
 		return 0;
 	}

@@ -35,6 +35,8 @@
 #include "decode.h"
 #include "io.h"
 
+extern void agx_disassemble(void *_code, size_t maxlen, FILE *fp);
+
 /* Memory handling, this can't pull in proper data structures so hardcode some
  * things, it should be "good enough" for most use cases */
 
@@ -92,8 +94,8 @@ __pandecode_fetch_gpu_mem(const struct agx_allocation *mem,
         return mem->map + gpu_va - mem->gpu_va;
 }
 
-#define pandecode_fetch_gpu_mem(mem, gpu_va, size) \
-	__pandecode_fetch_gpu_mem(mem, gpu_va, size, __LINE__, __FILE__)
+#define pandecode_fetch_gpu_mem(gpu_va, size) \
+	__pandecode_fetch_gpu_mem(NULL, gpu_va, size, __LINE__, __FILE__)
 
 static void
 pandecode_map_read_write(void)
@@ -249,7 +251,12 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 	uint8_t zeroes[16] = { 0 };
 
 	if (map[0] == 0x4D) {
-		DUMP_CL(SET_SHADER, map, "Set shader");
+		bl_unpack(map, SET_SHADER, cmd);
+		DUMP_UNPACKED(SET_SHADER, cmd, "Set shader\n");
+
+		agx_disassemble(pandecode_fetch_gpu_mem(cmd.code, 8192),
+			8192, pandecode_dump_stream);
+
 		return AGX_SET_SHADER_LENGTH;
 	} else if (map[0] == 0x1D) {
 		DUMP_CL(BIND_UNIFORM, map, "Bind uniform");

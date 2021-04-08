@@ -9,7 +9,8 @@ CFLAGS := -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function
 WRAP_HDRS := $(wildcard lib/*.h)\
 
 WRAP_SRCS := $(wildcard lib/*.c)\
-             $(wildcard wrap/*.c)
+             $(wildcard wrap/*.c)\
+	     $(wildcard disasm/*.c)\
 
 wrap.dylib: $(WRAP_SRCS) $(WRAP_HDRS) Makefile agx_pack.h
 	clang -o $@ $(WRAP_SRCS) -I lib/ -I . -dynamiclib -framework IOKit $(CFLAGS)

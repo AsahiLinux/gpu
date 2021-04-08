@@ -206,17 +206,18 @@ pandecode_dump_bo(struct agx_allocation *bo, const char *name)
 }
 
 /* Abstraction for command stream parsing */
-typedef unsigned (*decode_cmd)(const uint8_t *map);
+typedef unsigned (*decode_cmd)(const uint8_t *map, bool verbose);
 
 #define STATE_DONE (0xFFFFFFFFu)
 
 static void
-pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder)
+pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder, bool verbose)
 {
 	struct agx_allocation *alloc = pandecode_find_mapped_gpu_mem_containing(va);
 	assert(alloc != NULL && "nonexistant object");
 
-	pandecode_dump_bo(alloc, label);
+	if (verbose)
+		pandecode_dump_bo(alloc, label);
 
 	uint8_t *map = alloc->map;
 	uint8_t *end = map;
@@ -227,7 +228,7 @@ pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder)
 	 }
 
 	 while (map < end) {
-		 unsigned count = decoder(map);
+		 unsigned count = decoder(map, verbose);
 
 		 /* If we fail to decode, default to a hexdump (don't hang) */
 		 if (count == 0) {
@@ -243,13 +244,13 @@ pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder)
 }
 
 static unsigned
-pandecode_pipeline(UNUSED const uint8_t *map)
+pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 {
 	uint8_t zeroes[16] = { 0 };
 
 	if (map[0] == 0x4D) {
-		hexdump(pandecode_dump_stream, map, 16, false);
-		return 16;
+		DUMP_CL(SET_SHADER, map, "Set shader");
+		return AGX_SET_SHADER_LENGTH;
 	} else if (map[0] == 0x1D) {
 		DUMP_CL(BIND_UNIFORM, map, "Bind uniform");
 		return AGX_BIND_UNIFORM_LENGTH;
@@ -262,12 +263,12 @@ pandecode_pipeline(UNUSED const uint8_t *map)
 }
 
 static unsigned
-pandecode_cmd(const uint8_t *map)
+pandecode_cmd(const uint8_t *map, bool verbose)
 {
 	if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
 		 bl_unpack(map, LAUNCH, cmd);
+		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
 		 DUMP_UNPACKED(LAUNCH, cmd, "Launch\n");
-		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline);
 		 return AGX_LAUNCH_LENGTH;
 	} else {
 		return 0;
@@ -275,18 +276,19 @@ pandecode_cmd(const uint8_t *map)
 }
 
 void
-pandecode_cmdstream(unsigned cmdbuf_index)
+pandecode_cmdstream(unsigned cmdbuf_index, bool verbose)
 {
         pandecode_dump_file_open();
 
 	struct agx_allocation *cmdbuf = pandecode_find_cmdbuf(cmdbuf_index);
 	assert(cmdbuf != NULL && "nonexistant command buffer");
 
-	pandecode_dump_bo(cmdbuf, "Command buffer");
+	if (verbose)
+		pandecode_dump_bo(cmdbuf, "Command buffer");
 
 	/* TODO: What else is in here? */
 	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;
-	pandecode_stateful(*encoder, "Encoder", pandecode_cmd);
+	pandecode_stateful(*encoder, "Encoder", pandecode_cmd, verbose);
 
         pandecode_map_read_write();
 }

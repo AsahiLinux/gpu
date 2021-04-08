@@ -53,4 +53,17 @@
     <field name="Vertex start" size="32" start="2:24" type="uint"/>
     <field name="Unk 2" size="8" start="3:24" type="uint" default="0"/>
   </struct>
+
+  <!--- Command to launch a direct compute kernel -->
+  <struct name="Launch" size="9">
+    <field name="Command" size="32" start="0:0" type="hex" default="0x1002"/>
+    <field name="Pipeline" size="32" start="1:0" type="address"/>
+    <field name="Group count X" size="32" start="2:0" type="uint"/>
+    <field name="Group count Y" size="32" start="3:0" type="uint"/>
+    <field name="Group count Z" size="32" start="4:0" type="uint"/>
+    <field name="Local size X" size="32" start="5:0" type="uint"/>
+    <field name="Local size Y" size="32" start="6:0" type="uint"/>
+    <field name="Local size Z" size="32" start="7:0" type="uint"/>
+    <field name="Unk" size="32" start="8:0" type="hex" default="0x60000160"/>
+  </struct>
 </blxml>

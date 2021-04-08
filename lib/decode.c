@@ -116,7 +116,7 @@ pandecode_map_read_write(void)
 
 #define DUMP_CL(T, cl, str) {\
         bl_unpack(cl, T, temp); \
-        DUMP_UNPACKED(T, temp, str); \
+        DUMP_UNPACKED(T, temp, str "\n"); \
 }
 
 #define DUMP_SECTION(A, S, cl, str) { \
@@ -205,35 +205,58 @@ pandecode_dump_bo(struct agx_allocation *bo, const char *name)
 	hexdump(pandecode_dump_stream, bo->map, bo->size, false);
 }
 
+/* Abstraction for command stream parsing */
+typedef unsigned (*decode_cmd)(const uint8_t *map);
+
 static void
-pandecode_encoder(uint64_t encoder_va)
+pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder)
 {
-	struct agx_allocation *encoder = pandecode_find_mapped_gpu_mem_containing(encoder_va);
-	assert(encoder != NULL && "nonexistant encoder");
+	struct agx_allocation *alloc = pandecode_find_mapped_gpu_mem_containing(va);
+	assert(alloc != NULL && "nonexistant object");
 
-	pandecode_dump_bo(encoder, "Encoder");
+	pandecode_dump_bo(alloc, label);
 
-	uint8_t *map = encoder->map;
+	uint8_t *map = alloc->map;
+	uint8_t *end = map;
 
-	/* Stateful decoding.. we don't really know how to do this 'correctly'
-	 * yet, but this is a good guess! First find the last nonzero byte to
-	 * bound things */
-
-	 uint8_t *end = map;
-
-	 for (unsigned i = 0; i < encoder->size; ++i) {
+	 for (unsigned i = 0; i < alloc->size; ++i) {
 		 if (map[i] != 0)
 			 end = map + i;
 	 }
 
 	 while (map < end) {
-		 if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
-			 DUMP_CL(LAUNCH, map, "Launch");
-			 map += AGX_LAUNCH_LENGTH;
-		 } else {
+		 unsigned count = decoder(map);
+
+		 /* If we fail to decode, default to a hexdump (don't hang) */
+		 if (count == 0) {
 			hexdump(pandecode_dump_stream, map, 8, false);
-			map += 8;
+			count = 8;
 		 }
+
+		 map += count;
+	 }
+}
+
+static unsigned
+pandecode_pipeline(UNUSED const uint8_t *map)
+{
+	if (0) {
+		return 0;
+	} else {
+		return 0;
+	}
+}
+
+static unsigned
+pandecode_cmd(const uint8_t *map)
+{
+	if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
+		 bl_unpack(map, LAUNCH, cmd);
+		 DUMP_UNPACKED(LAUNCH, cmd, "Launch\n");
+		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline);
+		 return AGX_LAUNCH_LENGTH;
+	} else {
+		return 0;
 	}
 }
 
@@ -249,7 +272,7 @@ pandecode_cmdstream(unsigned cmdbuf_index)
 
 	/* TODO: What else is in here? */
 	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;
-	pandecode_encoder(*encoder);
+	pandecode_stateful(*encoder, "Encoder", pandecode_cmd);
 
         pandecode_map_read_write();
 }

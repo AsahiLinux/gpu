@@ -46,22 +46,6 @@ unsigned mmap_count = 0;
 struct agx_allocation *ro_mappings[MAX_MAPPINGS];
 unsigned ro_mapping_count = 0;
 
-void
-pandecode_dump_mappings(void)
-{
-	for (unsigned i = 0; i < mmap_count; ++i) {
-		if (!mmap_array[i].map || !mmap_array[i].size)
-			continue;
-
-		char *name = NULL;
-		assert(mmap_array[i].type < AGX_NUM_ALLOC);
-		asprintf(&name, "%s_%llx_%u.bin", agx_alloc_types[mmap_array[i].type], mmap_array[i].gpu_va, mmap_array[i].index);
-		FILE *fp = fopen(name, "wb");
-		fwrite(mmap_array[i].map, 1, mmap_array[i].size, fp);
-		fclose(fp);
-	}
-}
-
 static struct agx_allocation *
 pandecode_find_mapped_gpu_mem_containing_rw(uint64_t addr)
 {
@@ -227,6 +211,28 @@ pandecode_cmdstream(unsigned cmdbuf_index)
 
         pandecode_map_read_write();
 }
+
+void
+pandecode_dump_mappings(void)
+{
+        pandecode_dump_file_open();
+
+	for (unsigned i = 0; i < mmap_count; ++i) {
+		if (!mmap_array[i].map || !mmap_array[i].size)
+			continue;
+
+		assert(mmap_array[i].type < AGX_NUM_ALLOC);
+
+		fprintf(pandecode_dump_stream, "Buffer: type %s, gpu %llx, index %u.bin:\n\n",
+			agx_alloc_types[mmap_array[i].type],
+			mmap_array[i].gpu_va, mmap_array[i].index);
+
+		hexdump(pandecode_dump_stream, mmap_array[i].map, mmap_array[i].size, false);
+		fprintf(pandecode_dump_stream, "\n");
+	}
+}
+
+
 
 static void
 pandecode_add_name(struct agx_allocation *mem, uint64_t gpu_va, const char *name)

@@ -53,14 +53,42 @@
     <field name="Buffer" size="40" start="0:24" type="address"/>
   </struct>
 
-  <struct name="Set shader" size="4">
+  <enum name="Preshader mode">
+    <value name="Preshader" value="3"/>
+    <value name="No preshader" value="8"/>
+  </enum>
+
+  <struct name="Set shader" size="6">
     <field name="Tag" size="8" start="0:0" type="hex" default="0x4d"/>
     <field name="Unk 1" size="24" start="0:8" type="hex" default="0x90"/>
     <field name="Unk 2" size="16" start="1:0" type="hex" default="0x40d"/> <!-- TODO differs with stage -->
     <field name="Code" size="32" start="1:16" type="address"/>
     <field name="Unk 3" size="16" start="2:16" type="hex" default="0x28d"/>
-    <field name="Unk 4" size="24" start="3:0" type="hex" default="0x880100"/> <!-- TODO differs with aux -->
+    <field name="Unk 4" size="20" start="3:0" type="hex" default="0x80100"/>
+    <field name="Preshader mode" size="4" start="3:20" type="Preshader mode" default="No preshader"/>
+    <field name="Unk 6" size="8" start="3:24" type="hex" default="0x0"/>
+    <field name="Preshader unk" size="32" start="4:0" type="hex" default="0x0"/>
+    <field name="Preshader code" size="32" start="4:16" type="address"/>
+    <field name="Unk 7" size="16" start="5:16" type="hex" default="0x0"/>
   </struct>
+
+  <struct name="Set shader extended" size="8">
+    <field name="Tag" size="8" start="0:0" type="hex" default="0x4d"/>
+    <field name="Unk 1" size="24" start="0:8" type="hex" default="0x2010bd"/>
+    <field name="Unk 2" size="16" start="1:0" type="hex" default="0x50d"/>
+    <field name="Code" size="32" start="1:16" type="address"/>
+    <field name="Unk 3" size="16" start="2:16" type="hex" default="0x28d"/>
+    <field name="Frag unk" size="32" start="3:0" type="hex" default="0xf3580100"/>
+    <field name="Unk 4" size="20" start="4:0" type="hex" default="0x80100"/>
+    <field name="Preshader mode" size="4" start="4:20" type="Preshader mode" default="No preshader"/>
+    <field name="Unk 6" size="8" start="4:24" type="hex" default="0x0"/>
+    <field name="Preshader unk" size="32" start="5:0" type="hex" default="0x0"/>
+    <field name="Preshader code" size="32" start="5:16" type="address"/>
+    <field name="Unk 7" size="16" start="6:16" type="hex" default="0x0"/>
+    <field name="Unk 8" size="32" start="7:0" type="hex" default="0x0"/>
+  </struct>
+
+
 
   <!--- Command to bind a vertex pipeline, followed by subcommands -->
   <struct name="Bind pipeline" size="4">

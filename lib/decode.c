@@ -229,7 +229,18 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 {
 	uint8_t zeroes[16] = { 0 };
 
-	if (map[0] == 0x4D) {
+	if (map[0] == 0x4D && map[1] == 0xbd) {
+		/* TODO: Disambiguation for extended is a guess */
+		bl_unpack(map, SET_SHADER_EXTENDED, cmd);
+		DUMP_UNPACKED(SET_SHADER_EXTENDED, cmd, "Set shader\n");
+
+		pandecode_log("\n");
+		agx_disassemble(pandecode_fetch_gpu_mem(cmd.code, 8192),
+			8192, pandecode_dump_stream);
+		pandecode_log("\n");
+
+		return AGX_SET_SHADER_EXTENDED_LENGTH;
+	} else if (map[0] == 0x4D) {
 		bl_unpack(map, SET_SHADER, cmd);
 		DUMP_UNPACKED(SET_SHADER, cmd, "Set shader\n");
 

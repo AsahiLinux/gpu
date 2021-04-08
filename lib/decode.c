@@ -216,12 +216,25 @@ pandecode_encoder(uint64_t encoder_va)
 	uint8_t *map = encoder->map;
 
 	/* Stateful decoding.. we don't really know how to do this 'correctly'
-	 * yet, but this is a good guess! */
+	 * yet, but this is a good guess! First find the last nonzero byte to
+	 * bound things */
 
-	 if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
-		 DUMP_CL(LAUNCH, map, "Launch");
-		 map += AGX_LAUNCH_LENGTH;
+	 uint8_t *end = map;
+
+	 for (unsigned i = 0; i < encoder->size; ++i) {
+		 if (map[i] != 0)
+			 end = map + i;
 	 }
+
+	 while (map < end) {
+		 if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
+			 DUMP_CL(LAUNCH, map, "Launch");
+			 map += AGX_LAUNCH_LENGTH;
+		 } else {
+			hexdump(pandecode_dump_stream, map, 8, false);
+			map += 8;
+		 }
+	}
 }
 
 void

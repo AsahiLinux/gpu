@@ -234,6 +234,13 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 		bl_unpack(map, SET_SHADER_EXTENDED, cmd);
 		DUMP_UNPACKED(SET_SHADER_EXTENDED, cmd, "Set shader\n");
 
+		if (cmd.preshader_mode == AGX_PRESHADER_MODE_PRESHADER) {
+			pandecode_log("Preshader\n");
+			agx_disassemble(pandecode_fetch_gpu_mem(cmd.preshader_code, 8192),
+				8192, pandecode_dump_stream);
+			pandecode_log("\n---\n");
+		}
+
 		pandecode_log("\n");
 		agx_disassemble(pandecode_fetch_gpu_mem(cmd.code, 8192),
 			8192, pandecode_dump_stream);
@@ -243,6 +250,13 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 	} else if (map[0] == 0x4D) {
 		bl_unpack(map, SET_SHADER, cmd);
 		DUMP_UNPACKED(SET_SHADER, cmd, "Set shader\n");
+
+		if (cmd.preshader_mode == AGX_PRESHADER_MODE_PRESHADER) {
+			pandecode_log("Preshader\n");
+			agx_disassemble(pandecode_fetch_gpu_mem(cmd.preshader_code, 8192),
+				8192, pandecode_dump_stream);
+			pandecode_log("\n---\n");
+		}
 
 		pandecode_log("\n");
 		agx_disassemble(pandecode_fetch_gpu_mem(cmd.code, 8192),

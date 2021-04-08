@@ -262,10 +262,17 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 /* Random unaligned null byte, it's pretty awful.. */
 		 assert(map[AGX_BIND_VERTEX_PIPELINE_LENGTH] == 0);
 		 return AGX_BIND_VERTEX_PIPELINE_LENGTH + 1;
+	} else if (map[1] == 0xc0 && map[2] == 0x61) {
+		 DUMP_CL(DRAW, map, "Draw");
+		 return AGX_DRAW_LENGTH;
 	} else if (map[1] == 0x00 && map[2] == 0x00) {
 		 bl_unpack(map, RECORD, cmd);
 		 DUMP_UNPACKED(RECORD, cmd, "Record\n");
 		 return AGX_RECORD_LENGTH;
+	} else if (map[0] == 0 && map[1] == 0 && map[2] == 0xC0 && map[3] == 0x00) {
+		unsigned zero[16] = { 0 };
+		assert(memcmp(map + 4, zero, sizeof(zero)) == 0);
+		return STATE_DONE;
 	} else {
 		return 0;
 	}

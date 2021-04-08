@@ -247,9 +247,12 @@ pandecode_pipeline(UNUSED const uint8_t *map)
 {
 	uint8_t zeroes[16] = { 0 };
 
-	if (map[0] == 0x4D && map[1] == 0x90 && map[2] == 0x00) {
+	if (map[0] == 0x4D) {
 		hexdump(pandecode_dump_stream, map, 16, false);
 		return 16;
+	} else if (map[0] == 0x1D) {
+		DUMP_CL(BIND_UNIFORM, map, "Bind uniform");
+		return AGX_BIND_UNIFORM_LENGTH;
 	} else if (memcmp(map, zeroes, 16) == 0) {
 		/* TODO: Termination */
 		return STATE_DONE;

@@ -100,8 +100,10 @@ wrap_IOConnectCallMethod(
 		
 		printf("%X: SUBMIT_COMMAND_BUFFERS command queue id:%llx %p\n", connection, input[0], inputStruct);
 
+		const struct agx_submit_cmdbuf_req *req = inputStruct;
+
 		//pandecode_dump_mappings();
-		pandecode_cmdstream(input[0]);
+		pandecode_cmdstream(req->cmdbuf);
 
 		/* fallthrough */
 	default:

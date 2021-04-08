@@ -121,24 +121,6 @@ pandecode_map_read_write(void)
         DUMP_UNPACKED(T, temp, str "\n"); \
 }
 
-#define DUMP_SECTION(A, S, cl, str) { \
-        pan_section_unpack(cl, A, S, temp); \
-        pandecode_log(str); \
-        pan_section_print(pandecode_dump_stream, A, S, temp, (pandecode_indent + 1) * 2); \
-}
-
-#define MAP_ADDR(T, addr, cl) \
-        const uint8_t *cl = 0; \
-        { \
-                struct agx_allocation *mapped_mem = pandecode_find_mapped_gpu_mem_containing(addr); \
-                cl = pandecode_fetch_gpu_mem(mapped_mem, addr, MALI_ ## T ## _LENGTH); \
-        }
-
-#define DUMP_ADDR(T, addr, str) {\
-        MAP_ADDR(T, addr, cl) \
-        DUMP_CL(T, cl, str); \
-}
-
 FILE *pandecode_dump_stream;
 
 #define pandecode_log(str) fputs(str, pandecode_dump_stream)
@@ -218,16 +200,11 @@ pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder, bool verb
 	struct agx_allocation *alloc = pandecode_find_mapped_gpu_mem_containing(va);
 	assert(alloc != NULL && "nonexistant object");
 
+	uint8_t *map = pandecode_fetch_gpu_mem(va, 64);
+	uint8_t *end = map + alloc->size;
+
 	if (verbose)
 		pandecode_dump_bo(alloc, label);
-
-	uint8_t *map = alloc->map;
-	uint8_t *end = map;
-
-	 for (unsigned i = 0; i < alloc->size; ++i) {
-		 if (map[i] != 0)
-			 end = map + i;
-	 }
 
 	 while (map < end) {
 		 unsigned count = decoder(map, verbose);

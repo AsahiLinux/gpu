@@ -37,6 +37,8 @@
 
 extern void agx_disassemble(void *_code, size_t maxlen, FILE *fp);
 
+FILE *pandecode_dump_stream;
+
 /* Memory handling, this can't pull in proper data structures so hardcode some
  * things, it should be "good enough" for most use cases */
 
@@ -85,6 +87,7 @@ __pandecode_fetch_gpu_mem(const struct agx_allocation *mem,
         if (!mem) {
                 fprintf(stderr, "Access to unknown memory %" PRIx64 " in %s:%d\n",
                         gpu_va, filename, line);
+		fflush(pandecode_dump_stream);
                 assert(0);
         }
 
@@ -120,8 +123,6 @@ pandecode_map_read_write(void)
         bl_unpack(cl, T, temp); \
         DUMP_UNPACKED(T, temp, str "\n"); \
 }
-
-FILE *pandecode_dump_stream;
 
 #define pandecode_log(str) fputs(str, pandecode_dump_stream)
 #define pandecode_msg(str) fprintf(pandecode_dump_stream, "// %s", str)
@@ -246,6 +247,15 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 	}
 }
 
+static void
+pandecode_record(uint64_t va, size_t size)
+{
+	uint8_t *map = pandecode_fetch_gpu_mem(va, size);
+
+	fprintf(pandecode_dump_stream, "Record %" PRIx64 "\n", va);
+	hexdump(pandecode_dump_stream, map, size, false);
+}
+
 static unsigned
 pandecode_cmd(const uint8_t *map, bool verbose)
 {
@@ -266,8 +276,15 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 DUMP_CL(DRAW, map, "Draw");
 		 return AGX_DRAW_LENGTH;
 	} else if (map[1] == 0x00 && map[2] == 0x00) {
+		/* No need to explicitly dump the record */
 		 bl_unpack(map, RECORD, cmd);
-		 DUMP_UNPACKED(RECORD, cmd, "Record\n");
+		 struct agx_allocation *mem = pandecode_find_mapped_gpu_mem_containing(cmd.data);
+
+		 if (mem)
+			 pandecode_record(cmd.data, cmd.size_words * 4);
+		 else
+			 DUMP_UNPACKED(RECORD, cmd, "Non-existant record (XXX)\n");
+
 		 return AGX_RECORD_LENGTH;
 	} else if (map[0] == 0 && map[1] == 0 && map[2] == 0xC0 && map[3] == 0x00) {
 		unsigned zero[16] = { 0 };

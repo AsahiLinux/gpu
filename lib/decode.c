@@ -285,6 +285,9 @@ pandecode_record(uint64_t va, size_t size, bool verbose)
 	if (tag == 0x00000C00) {
 		assert(size == AGX_VIEWPORT_LENGTH);
 		DUMP_CL(VIEWPORT, map, "Viewport");
+	} else if (tag == 0x0C020000) {
+		assert(size == AGX_LINKAGE_LENGTH);
+		DUMP_CL(LINKAGE, map, "Linkage");
 	} else if (tag == 0x800000) {
 		assert(size == (AGX_BIND_PIPELINE_LENGTH + 4));
 //		XXX: why does this raise a bus error?

@@ -558,7 +558,7 @@ class Parser(object):
 
             self.group = Group(self, None, 0, 1, name)
             if "size" in attrs:
-                self.group.length = int(attrs["size"]) * 4
+                self.group.length = int(attrs["size"])
             self.group.align = int(attrs["align"]) if "align" in attrs else None
             self.structs[attrs["name"]] = self.group
         elif name == "field":

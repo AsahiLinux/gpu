@@ -618,9 +618,6 @@ class Parser(object):
 
         print("}\n\n")
 
-        # Should be a whole number of words
-        assert((self.group.length % 4) == 0)
-
         print('#define {} {}'.format (name + "_LENGTH", self.group.length))
         if self.group.align != None:
             print('#define {} {}'.format (name + "_ALIGN", self.group.align))

@@ -118,7 +118,7 @@
   </struct>
 
   <!--- Command to issue a direct non-indexed draw -->
-  <struct name="Draw" size="16">
+  <struct name="Draw" size="15">
     <field name="Primitive" size="8" start="0:0" type="Primitive"/>
     <field name="Command" size="16" start="0:8" type="hex" default="0x61c0"/>
     <field name="Vertex count" size="32" start="0:24" type="uint"/>

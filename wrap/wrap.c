@@ -104,7 +104,9 @@ wrap_IOConnectCallMethod(
 		const struct agx_submit_cmdbuf_req *req = inputStruct;
 
 		pandecode_cmdstream(req->cmdbuf, false);
-//		pandecode_dump_mappings();
+
+		if (getenv("ASAHI_DUMP"))
+			pandecode_dump_mappings();
 
 		/* fallthrough */
 	default:

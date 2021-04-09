@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <dlfcn.h>
 #include <assert.h>
+#include <inttypes.h>
 
 #include <mach/mach.h>
 #include <IOKit/IOKitLib.h>
@@ -179,8 +180,11 @@ wrap_IOConnectCallMethod(
 		uint64_t cpu_fixed_2 = iptrs[7]; /* xxx what's the diff? */
 		if (cpu && cpu_fixed_1)
 			assert(cpu == cpu_fixed_1);
+#if 0
+		/* TODO: what about this case? */
 		else if (cpu == 0)
 			cpu = cpu_fixed_1;
+#endif
 		uint64_t size = ptrs[4];
 		uint32_t *iwords = (uint32_t *) inputStruct;
 		const char *type = agx_memory_type_name(iwords[20]);

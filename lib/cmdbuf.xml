@@ -75,7 +75,7 @@
     <field name="Unk 4" size="20" start="3:0" type="hex" default="0x80100"/>
     <field name="Preshader mode" size="4" start="3:20" type="Preshader mode" default="No preshader"/>
     <field name="Unk 6" size="8" start="3:24" type="hex" default="0x0"/>
-    <field name="Preshader unk" size="32" start="4:0" type="hex" default="0x0"/>
+    <field name="Preshader unk" size="16" start="4:0" type="hex" default="0x0"/>
     <field name="Preshader code" size="32" start="4:16" type="address"/>
     <field name="Unk 7" size="16" start="5:16" type="hex" default="0x0"/> <!-- blob is inconsistent -->
   </struct>
@@ -90,7 +90,7 @@
     <field name="Unk 4" size="20" start="4:0" type="hex" default="0x80100"/>
     <field name="Preshader mode" size="4" start="4:20" type="Preshader mode" default="No preshader"/>
     <field name="Unk 6" size="8" start="4:24" type="hex" default="0x0"/>
-    <field name="Preshader unk" size="32" start="5:0" type="hex" default="0x0"/>
+    <field name="Preshader unk" size="16" start="5:0" type="hex" default="0x0"/>
     <field name="Preshader code" size="32" start="5:16" type="address"/>
     <field name="Unk 7" size="16" start="6:16" type="hex" default="0x0"/> <!-- blob is inconsistent -->
     <field name="Unk 8" size="32" start="7:0" type="hex" default="0x0"/> <!-- may not exist -->

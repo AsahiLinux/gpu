@@ -323,6 +323,8 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 	} else if (map[1] == 0xc0 && map[2] == 0x61) {
 		 DUMP_CL(DRAW, map, "Draw");
 		 return AGX_DRAW_LENGTH;
+	} else if (map[0] == 0x00 && map[1] == 0x00 && map[2] == 0x00 && map[3] == 0xc0) {
+		return STATE_DONE;
 	} else if (map[1] == 0x00 && map[2] == 0x00) {
 		/* No need to explicitly dump the record */
 		 bl_unpack(map, RECORD, cmd);

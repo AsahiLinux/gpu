@@ -71,8 +71,9 @@
     <field name="Unk 2" size="16" start="1:0" type="hex" default="0x40d"/> <!-- TODO differs with stage -->
     <field name="Code" size="32" start="1:16" type="address"/>
     <field name="Unk 3" size="8" start="2:16" type="hex" default="0x8d"/>
-    <field name="Register usage" size="8" start="2:24" type="uint" default="0"/> <!-- TODO: what units/cutoffs? -->
-    <field name="Unk 4" size="20" start="3:0" type="hex" default="0x80100"/> <!-- if there is spilling, 0x80118 -->
+    <field name="Register quadwords" size="8" start="2:24" type="uint"/> <!-- 0 with spilling -->
+    <field name="Spill size" size="8" start="3:0" type="hex" default="0"/> <!-- TODO: determine relation, see docs/table.py -->
+    <field name="Unk 4" size="12" start="3:8" type="hex" default="0x801"/>
     <field name="Preshader mode" size="4" start="3:20" type="Preshader mode" default="No preshader"/>
     <field name="Unk 6" size="8" start="3:24" type="hex" default="0x0"/>
     <field name="Preshader unk" size="16" start="4:0" type="hex" default="0x0"/>

@@ -540,6 +540,9 @@ agx_disassemble_instr(uint8_t *code, bool *stop, bool verbose, FILE *fp)
 
 /* Disassembles a shader */
 
+unsigned
+agx_disasm_instr(FILE *fp, uint8_t *code, bool *stop);
+
 void
 agx_disassemble(void *_code, size_t maxlen, FILE *fp)
 {

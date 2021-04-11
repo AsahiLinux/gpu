@@ -246,6 +246,10 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 			8192, pandecode_dump_stream);
 		pandecode_log("\n");
 
+		FILE *fp = fopen("fragment.bin", "wb");
+		fwrite(pandecode_fetch_gpu_mem(cmd.code, 8192), 1, 8192, fp);
+		fclose(fp);
+
 		return AGX_SET_SHADER_EXTENDED_LENGTH;
 	} else if (map[0] == 0x4D) {
 		bl_unpack(map, SET_SHADER, cmd);

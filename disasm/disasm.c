@@ -556,7 +556,7 @@ agx_disassemble(void *_code, size_t maxlen, FILE *fp)
 	bool verbose = getenv("ASAHI_VERBOSE") != NULL;
 
 	while((bytes + 8) < maxlen && !stop)
-		bytes += agx_disasm_instr(fp, code + bytes, &stop);
+		bytes += agx_disassemble_instr(code + bytes, &stop, verbose, fp);
 
 	if (!stop)
 		fprintf(fp, "// error: stop instruction not found\n");

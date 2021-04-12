@@ -138,7 +138,16 @@ demo_vertex_shader(struct agx_allocator *allocator)
 uint32_t
 demo_fragment_shader(struct agx_allocator *allocator)
 {
-	return demo_upload_shader("fs", allocator, fragment_shader, sizeof(fragment_shader));
+	FILE *fp = fopen("/Users/bloom/simple/shader_1.bin", "rb");
+	fseek(fp, 0, SEEK_END);
+	unsigned size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	struct agx_ptr ptr = agx_allocate(allocator, size);
+	fread(ptr.map, 1, size, fp);
+	fclose(fp);
+
+	return ptr.gpu_va;
 }
 
 uint32_t

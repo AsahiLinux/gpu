@@ -224,6 +224,7 @@ pandecode_stateful(uint64_t va, const char *label, decode_cmd decoder, bool verb
 	 }
 }
 
+unsigned COUNTER = 0;
 static unsigned
 pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 {
@@ -261,9 +262,12 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 		pandecode_log("\n");
 		agx_disassemble(pandecode_fetch_gpu_mem(cmd.code, 8192),
 			8192, pandecode_dump_stream);
-		FILE *fp = fopen("vertex.bin", "wb");
+		char *name;
+		asprintf(&name, "file%u.bin", COUNTER++);
+		FILE *fp = fopen(name, "wb");
 		fwrite(pandecode_fetch_gpu_mem(cmd.code, 8192), 1, 8192, fp);
 		fclose(fp);
+		free(name);
 		pandecode_log("\n");
 
 		return AGX_SET_SHADER_LENGTH;

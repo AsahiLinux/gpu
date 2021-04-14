@@ -303,6 +303,13 @@ pandecode_record(uint64_t va, size_t size, bool verbose)
 
 		 bl_unpack(map, BIND_PIPELINE, cmd);
 		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
+
+		 /* TODO: parse */
+		 if (cmd.fs_varyings) {
+			 uint8_t *map = pandecode_fetch_gpu_mem(cmd.fs_varyings, 128);
+			 hexdump(pandecode_dump_stream, map, 128, false);
+		 }
+
 		 DUMP_UNPACKED(BIND_PIPELINE, cmd, "Bind fragment pipeline\n");
 //		 fprintf(pandecode_dump_stream, "Unk: %X\n", unk);
 	} else {

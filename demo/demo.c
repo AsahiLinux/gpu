@@ -111,13 +111,20 @@ make_ptr40(uint8_t tag0, uint8_t tag1, uint8_t tag2, uint64_t ptr)
 }
 
 static uint64_t
-demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsbuf)
+demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsbuf, struct agx_allocator *shaders)
 {
+	/* Varying descriptor */
+	uint8_t unk_aux0[] = {
+	       0x02, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+	       0x02, 0x01, 0x00, 0x00, 0x18, 0x01, 0x00, 0x00,
+	       0x02, 0x01, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00,
+	};
+
 	uint32_t unk[] = {
 		0x800000,
-		0x1002, // XXX: blob sets 0x10000 bit and adds an extra pointer to unknown data
+		0x11002, // upper nibble is input count TODO: xmlify
 		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- fragment shader
-		0x1440,
+		agx_upload(shaders, unk_aux0, sizeof(unk_aux0)),
 		0x0,
 	};
 
@@ -214,7 +221,7 @@ demo_unk14(struct agx_allocator *allocator)
  * points/lines to work yet.. */
 
 static uint64_t
-demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf)
+demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct agx_allocation *vsbuf, struct agx_allocation *fsbuf)
 {
 	struct agx_ptr ptr = agx_allocate(allocator, 0x800);
 	uint8_t *out = ptr.map;
@@ -252,7 +259,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocation *vsbuf, struct 
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	temp = make_ptr40(0x05, 0x00, 0x00, demo_launch_fragment(allocator, fsbuf));
+	temp = make_ptr40(0x05, 0x00, 0x00, demo_launch_fragment(allocator, fsbuf, shaders));
 	memcpy(out, &temp, 8);
 	out += 8;
 
@@ -460,7 +467,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0x01); /* 0x34. Compute: 0x03 */
 
 	/* Pointer to data about the vertex and fragment shaders */
-	EMIT64(cmdbuf, demo_unk2(allocator, vsbuf, fsbuf));
+	EMIT64(cmdbuf, demo_unk2(allocator, shaders, vsbuf, fsbuf));
 
 	EMIT_ZERO_WORDS(cmdbuf, 20);
 

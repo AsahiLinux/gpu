@@ -144,8 +144,9 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 static uint64_t
 demo_unk8(struct agx_allocator *allocator)
 {
+	/* Varying related */
 	uint32_t unk[] = {
-		0x100c0000, 0x100, 0x0, 0x0, 0x0,
+		0x100c0000, 0x004, 0x0, 0x0, 0x0,
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));

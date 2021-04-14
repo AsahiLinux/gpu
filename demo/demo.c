@@ -119,6 +119,10 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+
 #if 0
 	       0x02, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
 	       0x02, 0x01, 0x00, 0x00, 0x18, 0x01, 0x00, 0x00,
@@ -148,13 +152,13 @@ demo_unk8(struct agx_allocator *allocator)
 }
 
 static uint64_t
-demo_unk9(struct agx_allocator *allocator)
+demo_linkage(struct agx_allocator *allocator)
 {
 	uint8_t unk[] = {
 		0x00, 0x00, 0x02, 0x0c,
 		0x00, 0x00, 0x01, 0x00,
 		0x00, 0x00, 0x00, 0x00,
-		0x05, 0x00, 0x00, 0x00
+		0x08, 0x00, 0x00, 0x00 // varying count
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));
@@ -241,7 +245,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 		0x4000002e,
 		0x1002,
 		vsbuf->gpu_va,
-		0x0505,
+		0x0808,
 	};
 
 	memcpy(out, bind_vertex, sizeof(bind_vertex));
@@ -269,7 +273,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	temp = make_ptr40(0x04, 0x00, 0x00, demo_unk9(allocator));
+	temp = make_ptr40(0x04, 0x00, 0x00, demo_linkage(allocator));
 	memcpy(out, &temp, 8);
 	out += 8;
 
@@ -392,7 +396,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 
 	/* Fragment shader */
 	buf[24] = demo_bind_arg_words(demo_zero(allocator, 8), 2, 2);
-	buf[25] = 0x2010bd4d | (0x50dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
+	buf[25] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
 	buf[26] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
 	buf[27] = 0x00880002 | (0xc080ull << 32);
 	buf[28] = 0;
@@ -584,7 +588,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 1);
 	EMIT32(cmdbuf, 0);
 	EMIT64(cmdbuf, 0);
-	EMIT64(cmdbuf, 0 /* demo_unk6(allocator) */);
+	EMIT64(cmdbuf, demo_unk6(allocator) );
 
 	/* note: width/height act like scissor, but changing the 0s doesn't
 	 * seem to affect (maybe scissor enable bit missing), _and this affects

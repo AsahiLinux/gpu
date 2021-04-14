@@ -69,7 +69,7 @@ static uint64_t
 demo_clear_color(struct agx_allocator *allocator)
 {
 	__fp16 colour[] = {
-		0.99f, 0.75f, 0.53f, 1.0f
+		0.1f, 0.1f, 0.1f, 1.0f
 	};
 
 	return agx_upload(allocator, colour, sizeof(colour));
@@ -305,9 +305,9 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	/* Must be after the rest */
 
 	bl_pack(out, DRAW, cfg) {
-		cfg.primitive = AGX_PRIMITIVE_TRIANGLE_STRIP;
+		cfg.primitive = AGX_PRIMITIVE_TRIANGLES;
 		cfg.vertex_start = 0;
-		cfg.vertex_count = 4;
+		cfg.vertex_count = 3;
 		cfg.instance_count = 1;
 	};
 

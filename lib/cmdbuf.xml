@@ -102,16 +102,19 @@
   </struct>
 
   <!--- Command to bind a vertex pipeline, followed by subcommands. Counts are
-        specified in 32-bit word units. Intepretation per-shader stage. Unknown what
-        output counts mean for fragment yet -->
+	specified in 32-bit word units. Intepretation per-shader stage.
+	Probably actually 17 bytes. -->
   <struct name="Bind pipeline" size="16">
     <field name="Tag" size="32" start="0:0" type="hex" default="0x4000002e"/>
     <field name="Unk 1" size="16" start="1:0" type="hex" default="0x1002"/>
     <field name="Input count" size="8" start="1:16" type="uint" default="0"/>
     <field name="Padding 1" size="8" start="1:24" type="hex" default="0x0"/>
     <field name="Pipeline" size="32" start="2:0" type="address"/>
-    <field name="Output count 1" size="8" start="3:0" type="uint" default="0"/>
-    <field name="Output count 2" size="8" start="3:8" type="uint" default="0"/>
+
+    <!-- Overlaps -->
+    <field name="FS Varyings" size="32" start="3:0" type="address"/>
+    <field name="VS Output count 1" size="8" start="3:0" type="uint" default="0"/>
+    <field name="VS Output count 2" size="8" start="3:8" type="uint" default="0"/>
     <field name="Padding 2" size="16" start="3:16" type="hex" default="0x0"/>
   </struct>
 

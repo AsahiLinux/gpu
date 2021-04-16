@@ -30,10 +30,13 @@ demo_attributes(struct agx_allocator *allocator)
 	float attributes1[] = {
 		t++   , -250.0 ,  0.0f,     0.0f,
 		1.0f   ,  0.0f   ,  0.0f,     1.0f,
+
 		-250.0f,  -250.0f,  0.0f,     0.0f,
 		0.0f   ,  1.0f   ,  0.0f,     1.0f,
+
 		0.0f   ,  250.0f ,  0.0f,     0.0f,
 		0.0f   ,  0.0f   ,  1.0f,     1.0f,
+
 		250.0f   ,  250.0f ,  0.0f,     0.0f,
 		0.0f   ,  0.0f   ,  1.0f,     1.0f,
 	};
@@ -362,7 +365,7 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 	buf[0] = demo_bind_arg_words(gpu_va, 0, 2);
 	buf[1] = demo_bind_arg_words(gpu_va + 8, 2, 2);
 	buf[2] = 0x0000904d | (0x80dull << 32) | ((uint64_t) (vs_offs & 0xFFFF) << 48);
-	buf[3] = (vs_offs >> 16) | (0x028d << 16) | (0x00380100ull << 32);
+	buf[3] = (vs_offs >> 16) | (0x008d << 16) | (0x00380100ull << 32);
 	buf[4] = (0xc080) | ((uint64_t) aux0 << 16);
 }
 

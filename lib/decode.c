@@ -247,6 +247,7 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 			8192, pandecode_dump_stream);
 		pandecode_log("\n");
 
+		char *name;
 		asprintf(&name, "file%u.bin", COUNTER++);
 		FILE *fp = fopen(name, "wb");
 		fwrite(pandecode_fetch_gpu_mem(cmd.code, 8192), 1, 8192, fp);

@@ -1,0 +1,30 @@
+Register quadwords: <=13
+	maxTotalThreadsPerThreadgroup = 1024
+
+Register quadwords: 14					****
+	maxTotalThreadsPerThreadgroup = 896
+
+Register quadwords: 15, 16
+	maxTotalThreadsPerThreadgroup = 832
+
+Register quadwords: 17
+	maxTotalThreadsPerThreadgroup = 768
+
+Register quadwords: 18
+	maxTotalThreadsPerThreadgroup = 704
+
+Register quadwords: 19, 20
+	maxTotalThreadsPerThreadgroup = 640
+
+Register quadwords: 21, 22, 23
+	maxTotalThreadsPerThreadgroup = 576
+
+Register quadwords: 24, 25, 26
+	maxTotalThreadsPerThreadgroup = 512
+
+Register quadwords: 27, 28, 29
+	maxTotalThreadsPerThreadgroup = 448
+
+Register quadwords: 30, 31, 0 (= 32)
+	maxTotalThreadsPerThreadgroup = 384
+

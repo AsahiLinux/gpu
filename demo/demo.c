@@ -28,24 +28,15 @@ static uint64_t
 demo_attributes(struct agx_allocator *allocator)
 {
 	float attributes1[] = {
-		t++   , -250.0 ,  0.0f,     0.0f,
-		1.0f   ,  0.0f   ,  0.0f,     1.0f,
-
-		-250.0f,  -250.0f,  0.0f,     0.0f,
-		0.0f   ,  1.0f   ,  0.0f,     1.0f,
-
-		0.0f   ,  250.0f ,  0.0f,     0.0f,
-		0.0f   ,  0.0f   ,  1.0f,     1.0f,
-
-		250.0f   ,  250.0f ,  0.0f,     0.0f,
-		0.0f   ,  0.0f   ,  1.0f,     1.0f,
+		-0.5, +0.5f, 0.0f, 1.0f,
+		+0.5, +0.5f, 0.0f, 1.0f,
+		-0.5, -0.5f, 0.0f, 1.0f,
+		+0.5, -0.5f, 0.0f, 1.0f,
 	};
 
-	uint32_t attributes2[] = { WIDTH, HEIGHT };
-
-	uint64_t attribs[2] = {
-		agx_upload(allocator, attributes1, sizeof(attributes1)),
-		agx_upload(allocator, attributes2, sizeof(attributes2))
+	uint64_t attribs[1] = {
+		fui(0.5f),
+		//agx_upload(allocator, attributes1, sizeof(attributes1)),
 	};
 
 	return agx_upload(allocator, attribs, sizeof(attribs));
@@ -310,7 +301,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	bl_pack(out, DRAW, cfg) {
 		cfg.primitive = AGX_PRIMITIVE_TRIANGLES;
 		cfg.vertex_start = 0;
-		cfg.vertex_count = 3;
+		cfg.vertex_count = 36;
 		cfg.instance_count = 1;
 	};
 
@@ -359,14 +350,63 @@ static void
 demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator *shader_pool)
 {
 	uint32_t vs_offs = demo_vertex_shader(shader_pool);
-	uint32_t aux0 = demo_vertex_pre(shader_pool);
+
+	float uni[4 * 36 * 2];
+	unsigned count = 0;
+
+	float pos[6][2] = {
+		{ -1, -1, },
+		{ -1, +1, },
+		{ +1, +1, },
+		{ +1, +1, },
+		{ +1, -1, },
+		{ -1, -1  }
+	};
+
+	float face_colours[6][4] = {
+		{ 1.0, 0.0, 0.0, 1.0 },
+		{ 0.0, 1.0, 0.0, 1.0 },
+		{ 0.0, 0.0, 1.0, 1.0 },
+		{ 1.0, 1.0, 0.0, 1.0 },
+		{ 1.0, 0.0, 1.0, 1.0 },
+		{ 0.0, 1.0, 1.0, 1.0 },
+	};
+
+	for (unsigned i = 0; i < 3; ++i) {
+		for (unsigned j = 0; j < 2; ++j) {
+			unsigned face = (i << 1) | j;
+	
+			for (unsigned v = 0; v < 6; ++v) {
+				float temp[4] = { +1, +1, +1, +1 };
+
+				temp[(i == 0) ? 1 : 0] *= pos[v][0];
+				temp[(i != 2) ? 2 : 1] *= pos[v][1];
+				temp[i] *= (j ? 1.0 : -1.0);
+
+				memcpy(uni + count, temp, sizeof(temp));
+				count += 4;
+
+				memcpy(uni + count, face_colours[face], sizeof(face_colours[0]));
+				count += 4;
+			}
+		}
+	}
+
+
+	uint64_t colour_ptr = agx_upload(allocator, uni, sizeof(uni));
+	uint64_t colour_ptr_ptr = agx_upload(allocator, &colour_ptr, sizeof(colour_ptr));
+
+	float time = t;
+	t += 0.1f;
+	printf("time %f\n", t);
+	uint64_t time_ptr = agx_upload(allocator, &time, sizeof(time));
+	uint64_t time_ptr_ptr = agx_upload(allocator, &time_ptr, sizeof(time_ptr));
 
 	uint64_t gpu_va = demo_attributes(allocator);
-	buf[0] = demo_bind_arg_words(gpu_va, 0, 2);
-	buf[1] = demo_bind_arg_words(gpu_va + 8, 2, 2);
+	buf[0] = demo_bind_arg_words(time_ptr_ptr, 0, 2);
+	buf[1] = demo_bind_arg_words(colour_ptr_ptr, 2, 2);
 	buf[2] = 0x0000904d | (0x80dull << 32) | ((uint64_t) (vs_offs & 0xFFFF) << 48);
-	buf[3] = (vs_offs >> 16) | (0x008d << 16) | (0x00380100ull << 32);
-	buf[4] = (0xc080) | ((uint64_t) aux0 << 16);
+	buf[3] = (vs_offs >> 16) | (0x0F8d << 16) | (0x00880100ull << 32);
 }
 
 static void

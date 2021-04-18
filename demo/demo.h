@@ -47,7 +47,12 @@ uint32_t demo_vertex_pre(struct agx_allocator *allocator);
 uint32_t demo_clear(struct agx_allocator *allocator);
 uint32_t demo_frag_aux3(struct agx_allocator *allocator);
 
-void slowfb_init(uint8_t *framebuffer, int width, int height);
+struct slowfb {
+	void *map;
+	unsigned stride;
+};
+
+struct slowfb slowfb_init(int width, int height);
 void slowfb_update(int width, int height);
 
 #endif

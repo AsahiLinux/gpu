@@ -22,16 +22,38 @@
  */
 
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/errno.h>
+#include <X11/extensions/XShm.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
+#include "demo.h"
 
 Display *d;
 Window w;
 XImage *image;
+XShmSegmentInfo shminfo;
 GC gc;
 
-void slowfb_init(uint8_t *framebuffer, int width, int height) {
+
+void slowfb_cleanup() {
+	XShmDetach(d, &shminfo);
+	XDestroyImage(image);
+	shmdt(shminfo.shmaddr);
+	shmctl(shminfo.shmid, IPC_RMID, 0);
+}
+
+void handle_sig(int sig) {
+	slowfb_cleanup();
+	exit(0);
+}
+
+struct slowfb slowfb_init(int width, int height) {
 	d = XOpenDisplay(NULL);
 	assert(d != NULL);
 	int black = BlackPixel(d, DefaultScreen(d));
@@ -44,9 +66,35 @@ void slowfb_init(uint8_t *framebuffer, int width, int height) {
 		XNextEvent(d, &e);
 		if (e.type == MapNotify) break;
 	}
-	image = XCreateImage(d, DefaultVisual(d, 0), 24, ZPixmap, 0, (void *) framebuffer, width, height, 32, 0);
+	printf("ok\n");
+	image = XShmCreateImage(d, DefaultVisual(d, 0), 24, ZPixmap, 0, &shminfo, width, height);
+	assert(image != NULL);
+	shminfo.shmid = shmget(IPC_PRIVATE, image->bytes_per_line * image->height, IPC_CREAT|S_IRUSR|S_IWUSR);
+	if (shminfo.shmid < 0) {
+		printf("uh oh %u\n", errno);
+		exit(1);
+	}
+	printf("shm id %u of size %u\n", shminfo.shmid, image->bytes_per_line * image->height);
+	shminfo.shmaddr = image->data = shmat(shminfo.shmid, 0, 0);
+	printf("shmat %p\n", image->data);
+	shminfo.readOnly = 0;
+	XShmAttach(d, &shminfo);
+	if (!image->data)
+		assert(0);
+	signal(SIGINT, handle_sig);
+	return (struct slowfb) {
+		.map = image->data,
+		.stride = image->bytes_per_line
+	};
 }
 
 void slowfb_update(int width, int height) {
-	XPutImage(d, w, gc, image, 0, 0, 0, 0, width, height);
+	XShmPutImage(d, w, gc, image, 0, 0, 0, 0, width, height, 1);
+	for (;;) {
+		XEvent e;
+		XNextEvent(d, &e);
+		if (e.type == (XShmGetEventBase(d) + ShmCompletion)) break;
+	}
+
 }
+

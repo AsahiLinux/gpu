@@ -22,7 +22,7 @@ DEMO_SRCS := $(wildcard lib/*.c)\
 DEMO_HDRS := $(wildcard lib/*.h)\
 
 demo-bin: $(DEMO_SRCS) $(DEMO_HDRS) Makefile agx_pack.h
-	clang -o $@ $(DEMO_SRCS) -I lib/ -I . -I /opt/X11/include -L /opt/X11/lib/ -lX11 -framework IOKit $(CFLAGS)
+	clang -o $@ $(DEMO_SRCS) -I lib/ -I . -I /opt/X11/include -L /opt/X11/lib/ -lX11 -lXext -framework IOKit $(CFLAGS)
 
 agx_pack.h: lib/gen_pack.py lib/cmdbuf.xml Makefile
 	python3 lib/gen_pack.py lib/cmdbuf.xml > agx_pack.h

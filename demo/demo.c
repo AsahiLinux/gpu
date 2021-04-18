@@ -9,8 +9,8 @@
 #include "util.h"
 #include "../agx_pack.h"
 
-#define WIDTH 1311
-#define HEIGHT 717
+#define WIDTH 800
+#define HEIGHT 600
 
 static uint64_t
 demo_zero(struct agx_allocator *allocator, size_t count)
@@ -358,51 +358,50 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 	float uni[4 * 36 * 2];
 	unsigned count = 0;
 
-	float pos[6][2] = {
-		{ -1, -1, },
-		{ -1, +1, },
-		{ +1, +1, },
-		{ +1, +1, },
-		{ +1, -1, },
-		{ -1, -1  }
+	float verts[8][4] = {
+		{ -1.0, -1.0, -1.0, 1.0 },
+		{ +1.0, -1.0, -1.0, 1.0 },
+		{ -1.0, +1.0, -1.0, 1.0 },
+		{ +1.0, +1.0, -1.0, 1.0 },
+		{ -1.0, -1.0, +1.0, 1.0 },
+		{ +1.0, -1.0, +1.0, 1.0 },
+		{ -1.0, +1.0, +1.0, 1.0 },
+		{ +1.0, +1.0, +1.0, 1.0 },
 	};
 
 	float face_colours[6][4] = {
 		{ 1.0, 0.0, 0.0, 1.0 },
 		{ 0.0, 1.0, 0.0, 1.0 },
 		{ 0.0, 0.0, 1.0, 1.0 },
-		{ 1.0, 1.0, 0.0, 1.0 },
-		{ 1.0, 0.0, 1.0, 1.0 },
-		{ 0.0, 1.0, 1.0, 1.0 },
+		{ 1.0, 1.0, 1.0, 1.0 },
+		{ 1.0, 0.5, 0.2, 1.0 },
+		{ 0.0, 0.2, 0.5, 1.0 },
 	};
 
-	for (unsigned i = 0; i < 3; ++i) {
-		for (unsigned j = 0; j < 2; ++j) {
-			unsigned face = (i << 1) | j;
-	
-			for (unsigned v = 0; v < 6; ++v) {
-				float temp[4] = { +1, +1, +1, +1 };
+	unsigned quads[6][4] = {
+		{ 0, 2, 3, 1 },
+		{ 1, 3, 7, 5 },
+		{ 5, 7, 6, 4 },
+		{ 4, 6, 2, 0 },
+		{ 4, 0, 1, 5 },
+		{ 2, 6, 7, 3 }
+	};
 
-				temp[(i == 0) ? 1 : 0] *= pos[v][0];
-				temp[(i != 2) ? 2 : 1] *= pos[v][1];
-				temp[i] *= (j ? 1.0 : -1.0);
-
-				memcpy(uni + count, temp, sizeof(temp));
-				count += 4;
-
-				memcpy(uni + count, face_colours[face], sizeof(face_colours[0]));
-				count += 4;
-			}
+	unsigned visit[6] = {0, 1, 2, 2, 3, 0 };
+	for (unsigned i = 0; i < 6; ++i) {
+		for (unsigned j = 0; j < 6; ++j) {
+			unsigned vert = quads[i][visit[j]];
+			memcpy(uni + count + 0, verts[vert], 16);
+			memcpy(uni + count + 4, face_colours[i], 16);
+			count += 8;
 		}
 	}
-
 
 	uint64_t colour_ptr = agx_upload(allocator, uni, sizeof(uni));
 	uint64_t colour_ptr_ptr = agx_upload(allocator, &colour_ptr, sizeof(colour_ptr));
 
 	float time = t;
-	t += 0.1f;
-	printf("time %f\n", t);
+	t += 0.05f;
 	uint64_t time_ptr = agx_upload(allocator, &time, sizeof(time));
 	uint64_t time_ptr_ptr = agx_upload(allocator, &time_ptr, sizeof(time_ptr));
 
@@ -781,10 +780,16 @@ void demo(mach_port_t connection, bool offscreen)
 	demo_mem_map(memmap.map, allocs, sizeof(allocs) / sizeof(allocs[0]),
 			0xDEADBEEF, 0xCAFECAFE); // (unk6 + 1, unk6 + 2) but it doesn't really matter
 
-	uint32_t *linear = malloc(WIDTH * HEIGHT * 4);
+	uint32_t *linear;
+	unsigned stride = WIDTH * 4;
 
-	if (!offscreen)
-		slowfb_init((uint8_t *) linear, WIDTH, HEIGHT);
+	if (offscreen) {
+		linear = malloc(WIDTH * HEIGHT * 4);
+	} else {
+		struct slowfb fb = slowfb_init(WIDTH, HEIGHT);
+		linear = fb.map;
+		stride = fb.stride;
+	}
 
 	for (;;) {
 		demo_cmdbuf(cmdbuf.map, &allocator, &vsbuf, &fsbuf, &framebuffer, &shader_pool);
@@ -797,7 +802,7 @@ void demo(mach_port_t connection, bool offscreen)
 
 		/* Dump the framebuffer */
 		ash_detile(framebuffer.map, linear,
-				WIDTH, 32, WIDTH,
+				WIDTH, 32, stride / 4,
 				0, 0, WIDTH, HEIGHT);
 
 		shader_pool.offset = 0;

@@ -142,7 +142,7 @@ ash_detile_32(uint32_t *tiled, uint32_t *linear,
 		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
 {
 	if (sx & TILE_MASK) {
-		ash_detile_unaligned_32(tiled, linear, width, linear_pitch, sx, sy,
+		ash_detile_unaligned_32(tiled, linear, width, linear_pitch, sx & ~TILE_MASK, sy,
 				MIN2(TILE_WIDTH - (sx & TILE_MASK), smaxx - sx), smaxy);
 		sx = (sx & ~TILE_MASK) + 1;
 	}

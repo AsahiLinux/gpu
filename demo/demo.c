@@ -204,8 +204,12 @@ demo_unk12(struct agx_allocator *allocator)
 static uint64_t
 demo_unk13(struct agx_allocator *allocator)
 {
+	/* Some rasterizer state */
+#define CULL_NONE (0x0)
+#define CULL_FRONT (0x1)
+#define CULL_BACK (0x2)
 	uint32_t unk[] = {
-		0x200000, 0x480,
+		0x200000, 0x480 | CULL_BACK,
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));

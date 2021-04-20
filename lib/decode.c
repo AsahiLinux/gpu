@@ -305,6 +305,9 @@ pandecode_record(uint64_t va, size_t size, bool verbose)
 	} else if (tag == 0x0C020000) {
 		assert(size == AGX_LINKAGE_LENGTH);
 		DUMP_CL(LINKAGE, map, "Linkage");
+	} else if (tag == 0x10000b5) {
+		assert(size == AGX_RASTERIZER_LENGTH);
+		DUMP_CL(RASTERIZER, map, "Rasterizer");
 	} else if (tag == 0x800000) {
 		assert(size == (AGX_BIND_PIPELINE_LENGTH + 4));
 //		XXX: why does this raise a bus error?

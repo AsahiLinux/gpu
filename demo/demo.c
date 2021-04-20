@@ -160,32 +160,15 @@ demo_linkage(struct agx_allocator *allocator)
 }
 
 static uint64_t
-demo_unk10(struct agx_allocator *allocator)
+demo_rasterizer(struct agx_allocator *allocator)
 {
-#define UNK10_FILLMODE_LINES_UNK1 (0x4 << 24)
-#define UNK10_STENCIL_REF(ref) (ref << 0)
-#define UNK10_FILLMODE_LINES_UNK2 (0x4 << 16)
-#define UNK10_NO_WRITE_Z (0x20 << 16)
-#define UNK10_ZSA_UNK (0x4 << 16)
-#define UNK10_Z_FUNC(func) ((AGX_FUNC_ ## func) << 24)
+	struct agx_ptr t = agx_allocate(allocator, AGX_RASTERIZER_LENGTH);
 
-#define UNK10_S_COMPARE(func) ((AGX_FUNC_ ## func) << 25)
-#define UNK10_S_ZPASS(op) ((AGX_STENCIL_OP_ ## op) << 16)
-#define UNK10_S_ZFAIL(op) ((AGX_STENCIL_OP_ ## op) << 19)
-#define UNK10_S_SFAIL(op) ((AGX_STENCIL_OP_ ## op) << 22)
-#define UNK10_S_WRMASK(mask) (mask << 0)
-#define UNK10_S_READMASK(mask) (mask << 8)
-	uint32_t unk[] = {
-		0x10000b5,
-		0x200 | UNK10_ZSA_UNK | UNK10_FILLMODE_LINES_UNK1, // 0xC0000 is a stencil state
-		0xf00 | UNK10_STENCIL_REF(0) | UNK10_Z_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // front face
-		UNK10_S_COMPARE(ALWAYS), // stencil state
-		0xf00 | UNK10_Z_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // back face
-		UNK10_S_COMPARE(ALWAYS),
-		0,
+	bl_pack(t.map, RASTERIZER, cfg) {
+		/* Defaults are fine */
 	};
 
-	return agx_upload(allocator, unk, sizeof(unk));
+	return t.gpu_va;
 }
 
 static uint64_t
@@ -296,7 +279,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	temp = make_ptr40(0x07, 0x00, 0x00, demo_unk10(allocator));
+	temp = make_ptr40(0x07, 0x00, 0x00, demo_rasterizer(allocator));
 	memcpy(out, &temp, 8);
 	out += 8;
 

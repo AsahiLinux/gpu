@@ -457,8 +457,8 @@ class Group(object):
             ALL_ONES = 0xffffffff
 
             if mask != ALL_ONES:
-                TMPL = '   if (((const uint32_t *) cl)[{}] & {}) fprintf(fp, "XXX: Unknown field of {} unpacked at word {}: got %X, expected mask {}\\n", ((const uint32_t *) cl)[{}]);'
-                print(TMPL.format(index, hex(mask ^ ALL_ONES), self.label, index, hex(mask ^ ALL_ONES), index))
+                TMPL = '   if (((const uint32_t *) cl)[{}] & {}) fprintf(fp, "XXX: Unknown field of {} unpacked at word {}: got %X, bad mask %X\\n", ((const uint32_t *) cl)[{}], ((const uint32_t *) cl)[{}] & {});'
+                print(TMPL.format(index, hex(mask ^ ALL_ONES), self.label, index, index, index, hex(mask ^ ALL_ONES)))
 
         fieldrefs = []
         self.collect_fields(self.fields, 0, '', fieldrefs)

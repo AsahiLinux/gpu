@@ -164,12 +164,15 @@ demo_unk10(struct agx_allocator *allocator)
 {
 #define UNK10_FILLMODE_LINES_UNK1 (0x4 << 24)
 #define UNK10_FILLMODE_LINES_UNK2 (0x4 << 16)
+#define UNK10_NO_WRITE_Z (0x20 << 16)
+#define UNK10_ZSA_UNK (0x4 << 16)
+#define UNK10_ZSA_FUNC(func) ((AGX_FUNC_ ## func) << 24)
 	uint32_t unk[] = {
 		0x10000b5,
-		0x40200 | UNK10_FILLMODE_LINES_UNK1,
-		0x7200f00 | UNK10_FILLMODE_LINES_UNK2, // front face
+		0x200 | UNK10_ZSA_UNK | UNK10_FILLMODE_LINES_UNK1,
+		0xf00 | UNK10_ZSA_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // front face
 		0xe000000,
-		0x7200f00 | UNK10_FILLMODE_LINES_UNK2, // back face
+		0xf00 | UNK10_ZSA_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // back face
 		0xe000000,
 		0,
 	};

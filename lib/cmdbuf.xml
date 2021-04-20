@@ -6,6 +6,17 @@
     <value name="A" value="3"/>
   </enum>
 
+  <enum name="Func">
+    <value name="Never" value="0"/>
+    <value name="Less" value="1"/>
+    <value name="Equal" value="2"/>
+    <value name="Lequal" value="3"/>
+    <value name="Greater" value="4"/>
+    <value name="Not Equal" value="5"/>
+    <value name="Gequal" value="6"/>
+    <value name="Always" value="7"/>
+  </enum>
+
   <enum name="Primitive">
     <value name="Points" value="0"/>
     <value name="Lines" value="1"/>

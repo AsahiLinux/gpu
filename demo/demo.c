@@ -162,13 +162,15 @@ demo_linkage(struct agx_allocator *allocator)
 static uint64_t
 demo_unk10(struct agx_allocator *allocator)
 {
+#define UNK10_FILLMODE_LINES_UNK1 (0x4 << 24)
+#define UNK10_FILLMODE_LINES_UNK2 (0x4 << 16)
 	uint32_t unk[] = {
 		0x10000b5,
-		0x40200,
-		0x7200f00,
+		0x40200 | UNK10_FILLMODE_LINES_UNK1,
+		0x7200f00 | UNK10_FILLMODE_LINES_UNK2, // front face
 		0xe000000,
-		0x7200f00,
-		0x0e000000,
+		0x7200f00 | UNK10_FILLMODE_LINES_UNK2, // back face
+		0xe000000,
 		0,
 	};
 

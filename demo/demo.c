@@ -214,9 +214,11 @@ demo_unk13(struct agx_allocator *allocator)
 #define CULL_FRONT (0x1)
 #define CULL_BACK (0x2)
 #define FRONTFACE_CCW (0x10000) /* default CCW */
+#define DEPTH_CLIP (0x400)
+#define DEPTH_CLAMP (0x800)
 
 	uint32_t unk[] = {
-		0x200000, 0x480 | CULL_FRONT | FRONTFACE_CCW,
+		0x200000, 0x80 | DEPTH_CLIP | CULL_FRONT | FRONTFACE_CCW,
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));

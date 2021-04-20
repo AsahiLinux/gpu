@@ -175,14 +175,20 @@ static uint64_t
 demo_unk11(struct agx_allocator *allocator)
 {
 	/* OR'd with the rasterizer bits Metal sets this together but purpose unknown */
-#define UNK11_FILL_MODE_LINES_1 (0x4 << 24)
+#define UNK11_READS_TIB (1 << 25)
+#define UNK11_FILL_MODE_LINES_1 (1 << 26)
+
 #define UNK11_FILL_MODE_LINES_2 (0x5004 << 16)
 	uint32_t unk[] = {
 		0x200004a,
-		0x200 /*| UNK11_FILL_MODE_LINES_1*/,
+		0x200 /*| UNK11_READS_TIB*/ /*| UNK11_FILL_MODE_LINES_1*/,
 		0x7e00000 /*| UNK11_FILL_MODE_LINES_2*/,
 		0x7e00000 /*| UNK11_FILL_MODE_LINES_2*/,
-		0x1ffff
+
+		/* if colour mask is all 0x1ffff. but if it's not all, just the
+		 * colour mask in the first few bits, shifted over by the ffs()
+		 * of the channels.. not really sure what happens to the others */
+		0x1ffff /* 
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));
@@ -600,9 +606,12 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT_ZERO_WORDS(cmdbuf, 48);
 
+	float depth_clear = 1.0;
+	uint8_t stencil_clear = 0;
+
 	EMIT64(cmdbuf, 0); // 0x450
-	EMIT32(cmdbuf, fui(1.0)); // fui(1.0f)
-	EMIT32(cmdbuf, 0x300);
+	EMIT32(cmdbuf, fui(depth_clear);
+	EMIT32(cmdbuf, (0x3 << 8) | stencil_clear);
 	EMIT64(cmdbuf, 0);
 	EMIT64(cmdbuf, 0x1000000);
 	EMIT32(cmdbuf, 0xffffffff);

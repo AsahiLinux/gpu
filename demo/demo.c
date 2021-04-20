@@ -174,14 +174,14 @@ demo_rasterizer(struct agx_allocator *allocator)
 static uint64_t
 demo_unk11(struct agx_allocator *allocator)
 {
-	/* Metal sets this together but purpose unknown */
+	/* OR'd with the rasterizer bits Metal sets this together but purpose unknown */
 #define UNK11_FILL_MODE_LINES_1 (0x4 << 24)
 #define UNK11_FILL_MODE_LINES_2 (0x5004 << 16)
 	uint32_t unk[] = {
 		0x200004a,
-		0x200 | UNK11_FILL_MODE_LINES_1,
-		0x7e00000 | UNK11_FILL_MODE_LINES_2,
-		0x7e00000 | UNK11_FILL_MODE_LINES_2,
+		0x200 /*| UNK11_FILL_MODE_LINES_1*/,
+		0x7e00000 /*| UNK11_FILL_MODE_LINES_2*/,
+		0x7e00000 /*| UNK11_FILL_MODE_LINES_2*/,
 		0x1ffff
 	};
 
@@ -201,21 +201,16 @@ demo_unk12(struct agx_allocator *allocator)
 }
 
 static uint64_t
-demo_unk13(struct agx_allocator *allocator)
+demo_cull(struct agx_allocator *allocator)
 {
-	/* Some rasterizer state */
-#define CULL_NONE (0x0)
-#define CULL_FRONT (0x1)
-#define CULL_BACK (0x2)
-#define FRONTFACE_CCW (0x10000) /* default CCW */
-#define DEPTH_CLIP (0x400)
-#define DEPTH_CLAMP (0x800)
+	struct agx_ptr t = agx_allocate(allocator, AGX_CULL_LENGTH);
 
-	uint32_t unk[] = {
-		0x200000, 0x80 | DEPTH_CLIP | CULL_FRONT | FRONTFACE_CCW,
+	bl_pack(t.map, CULL, cfg) {
+		cfg.cull_back = true;
+		cfg.depth_clip = true;
 	};
 
-	return agx_upload(allocator, unk, sizeof(unk));
+	return t.gpu_va;
 }
 
 static uint64_t
@@ -295,7 +290,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	memcpy(out, &temp, 8);
 	out += 8;
 
-	temp = make_ptr40(0x02, 0x00, 0x00, demo_unk13(allocator));
+	temp = make_ptr40(0x02, 0x00, 0x00, demo_cull(allocator));
 	memcpy(out, &temp, 8);
 	out += 8;
 

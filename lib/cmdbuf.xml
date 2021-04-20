@@ -28,7 +28,6 @@
     <value name="Decr Wrap" value="7"/>
   </enum>
 
-
   <enum name="Primitive">
     <value name="Points" value="0"/>
     <value name="Lines" value="1"/>
@@ -89,6 +88,15 @@
     <field name="Unk fill lines" size="1" start="1:26" type="hex" default="0x0"/>
     <field name="Front" size="64" start="2:0" type="Rasterizer face"/>
     <field name="Back" size="64" start="4:0" type="Rasterizer face"/>
+  </struct>
+
+  <struct name="Cull" size="8">
+    <field name="Tag" size="32" start="0:0" type="hex" default="0x200000"/>
+    <field name="Cull front" size="1" start="1:0" type="bool"/>
+    <field name="Cull back" size="1" start="1:1" type="bool"/>
+    <field name="Depth clip" size="1" start="1:10" type="bool"/>
+    <field name="Depth clamp" size="1" start="1:11" type="bool"/>
+    <field name="Front face CCW" size="1" start="1:16" type="bool"/>
   </struct>
 
   <struct name="Linkage" size="16">

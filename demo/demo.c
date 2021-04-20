@@ -180,11 +180,14 @@ demo_unk10(struct agx_allocator *allocator)
 static uint64_t
 demo_unk11(struct agx_allocator *allocator)
 {
+	/* Metal sets this together but purpose unknown */
+#define UNK11_FILL_MODE_LINES_1 (0x4 << 24)
+#define UNK11_FILL_MODE_LINES_2 (0x5004 << 16)
 	uint32_t unk[] = {
 		0x200004a,
-		0x200,
-		0x7e00000,
-		0x7e00000,
+		0x200 | UNK11_FILL_MODE_LINES_1,
+		0x7e00000 | UNK11_FILL_MODE_LINES_2,
+		0x7e00000 | UNK11_FILL_MODE_LINES_2,
 		0x1ffff
 	};
 

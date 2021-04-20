@@ -678,14 +678,16 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT_ZERO_WORDS(cmdbuf, 72);
 
 	EMIT32(cmdbuf, 0); // 0x760
-	EMIT32(cmdbuf, 0x1);
-	EMIT64(cmdbuf, 0x100 | (framebuffer->gpu_va << 16));
+	EMIT32(cmdbuf, 0x1); // number of attachments (includes depth/stencil) stored to
 
-	EMIT32(cmdbuf, 0xa0000);
-	EMIT32(cmdbuf, 0x4c000000);
-	EMIT32(cmdbuf, 0x0c001d);
-
-	EMIT32(cmdbuf, 0x640000);
+	/* A single attachment follows, depth/stencil have their own attachments */
+	{
+		EMIT64(cmdbuf, 0x100 | (framebuffer->gpu_va << 16));
+		EMIT32(cmdbuf, 0xa0000);
+		EMIT32(cmdbuf, 0x4c000000); // 80000000 also observed, and 8c000 and.. offset into the tilebuffer I imagine
+		EMIT32(cmdbuf, 0x0c001d); // C0020  also observed
+		EMIT32(cmdbuf, 0x640000);
+	}
 }
 
 static struct agx_map_entry

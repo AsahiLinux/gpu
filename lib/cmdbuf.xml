@@ -17,6 +17,18 @@
     <value name="Always" value="7"/>
   </enum>
 
+  <enum name="Stencil Op">
+    <value name="Keep" value="0"/>
+    <value name="Zero" value="1"/>
+    <value name="Replace" value="2"/>
+    <value name="Incr Sat" value="3"/>
+    <value name="Decr Sat" value="4"/>
+    <value name="Invert" value="5"/>
+    <value name="Incr Wrap" value="6"/>
+    <value name="Decr Wrap" value="7"/>
+  </enum>
+
+
   <enum name="Primitive">
     <value name="Points" value="0"/>
     <value name="Lines" value="1"/>

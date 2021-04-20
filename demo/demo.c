@@ -163,18 +163,25 @@ static uint64_t
 demo_unk10(struct agx_allocator *allocator)
 {
 #define UNK10_FILLMODE_LINES_UNK1 (0x4 << 24)
+#define UNK10_STENCIL_REF(ref) (ref << 0)
 #define UNK10_FILLMODE_LINES_UNK2 (0x4 << 16)
 #define UNK10_NO_WRITE_Z (0x20 << 16)
 #define UNK10_ZSA_UNK (0x4 << 16)
 #define UNK10_Z_FUNC(func) ((AGX_FUNC_ ## func) << 24)
+
 #define UNK10_S_COMPARE(func) ((AGX_FUNC_ ## func) << 25)
+#define UNK10_S_ZPASS(op) ((AGX_STENCIL_OP_ ## op) << 16)
+#define UNK10_S_ZFAIL(op) ((AGX_STENCIL_OP_ ## op) << 19)
+#define UNK10_S_SFAIL(op) ((AGX_STENCIL_OP_ ## op) << 22)
+#define UNK10_S_WRMASK(mask) (mask << 0)
+#define UNK10_S_READMASK(mask) (mask << 8)
 	uint32_t unk[] = {
 		0x10000b5,
 		0x200 | UNK10_ZSA_UNK | UNK10_FILLMODE_LINES_UNK1, // 0xC0000 is a stencil state
-		0xf00 | UNK10_Z_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // front face
-		0xe000000 | UNK10_S_COMPARE(NEVER), // stencil state
+		0xf00 | UNK10_STENCIL_REF(0) | UNK10_Z_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // front face
+		UNK10_S_COMPARE(ALWAYS), // stencil state
 		0xf00 | UNK10_Z_FUNC(ALWAYS) | UNK10_NO_WRITE_Z | UNK10_FILLMODE_LINES_UNK2, // back face
-		0xe000000 | UNK10_S_COMPARE(NEVER),
+		UNK10_S_COMPARE(ALWAYS),
 		0,
 	};
 

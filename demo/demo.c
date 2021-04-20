@@ -278,6 +278,7 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	memcpy(out, &temp, 8);
 	out += 8;
 
+	/* Note can be omitted */
 	temp = make_ptr40(0x05, 0x00, 0x00, demo_unk11(allocator));
 	memcpy(out, &temp, 8);
 	out += 8;

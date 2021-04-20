@@ -28,6 +28,12 @@
     <value name="Decr Wrap" value="7"/>
   </enum>
 
+  <enum name="Polygon Mode">
+    <value name="Fill" value="0"/>
+    <value name="Line" value="1"/>
+    <value name="Point" value="2"/>
+  </enum>
+
   <enum name="Primitive">
     <value name="Points" value="0"/>
     <value name="Lines" value="1"/>
@@ -69,7 +75,7 @@
   <struct name="Rasterizer face" size="8">
     <field name="Stencil reference" size="8" start="0:0" type="hex" default="0x00"/>
     <field name="Unk 1" size="8" start="0:8" type="hex" default="0xF"/>
-    <field name="Fill triangles as lines" size="1" start="0:18" type="bool"/>
+    <field name="Polygon mode" size="2" start="0:18" type="Polygon Mode" default="Fill"/>
     <field name="Disable depth write" size="1" start="0:21" type="bool"/>
     <field name="Depth function" size="3" start="0:24" type="Func" default="Always"/>
     <field name="Stencil write mask" size="8" start="1:0" type="hex" default="0xFF"/>

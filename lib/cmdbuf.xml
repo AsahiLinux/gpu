@@ -71,6 +71,7 @@
     <field name="Stencil reference" size="8" start="0:0" type="hex" default="0x00"/>
     <field name="Unk 1" size="8" start="0:8" type="hex" default="0xF"/>
     <field name="Fill triangles as lines" size="1" start="0:18" type="bool"/>
+    <field name="Unk 2" size="1" start="0:21" type="bool"/>
     <field name="Depth function" size="3" start="0:24" type="Func" default="Always"/>
     <field name="Stencil write mask" size="8" start="1:0" type="hex" default="0xFF"/>
     <field name="Stencil read mask" size="8" start="1:8" type="hex" default="0xFF"/>
@@ -82,7 +83,7 @@
 
   <struct name="Rasterizer" size="28">
     <field name="Tag" size="32" start="0:0" type="hex" default="0x10000b5"/>
-    <field name="Unk 1" size="1" start="1:17" type="hex" default="0x1"/>
+    <field name="Unk 1" size="1" start="1:9" type="hex" default="0x1"/>
     <field name="Unk ZS" size="1" start="1:18" type="hex" default="0x1"/>
     <field name="Unk 2" size="2" start="1:19" type="hex" default="0x0"/>
     <field name="Unk fill lines" size="1" start="1:26" type="hex" default="0x0"/>

@@ -120,7 +120,7 @@ pandecode_map_read_write(void)
 }
 
 #define DUMP_CL(T, cl, str) {\
-        bl_unpack(cl, T, temp); \
+        bl_unpack(pandecode_dump_stream, cl, T, temp); \
         DUMP_UNPACKED(T, temp, str "\n"); \
 }
 
@@ -232,7 +232,7 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 
 	if (map[0] == 0x4D && map[1] == 0xbd) {
 		/* TODO: Disambiguation for extended is a guess */
-		bl_unpack(map, SET_SHADER_EXTENDED, cmd);
+		bl_unpack(pandecode_dump_stream, map, SET_SHADER_EXTENDED, cmd);
 		DUMP_UNPACKED(SET_SHADER_EXTENDED, cmd, "Set shader\n");
 
 		if (cmd.preshader_mode == AGX_PRESHADER_MODE_PRESHADER) {
@@ -259,7 +259,7 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 
 		return AGX_SET_SHADER_EXTENDED_LENGTH;
 	} else if (map[0] == 0x4D) {
-		bl_unpack(map, SET_SHADER, cmd);
+		bl_unpack(pandecode_dump_stream, map, SET_SHADER, cmd);
 		DUMP_UNPACKED(SET_SHADER, cmd, "Set shader\n");
 
 		if (cmd.preshader_mode == AGX_PRESHADER_MODE_PRESHADER) {
@@ -314,7 +314,7 @@ pandecode_record(uint64_t va, size_t size, bool verbose)
 //		uint32_t unk = 0;
 //		memcpy(map + AGX_BIND_PIPELINE_LENGTH, &unk, 4);
 
-		 bl_unpack(map, BIND_PIPELINE, cmd);
+		 bl_unpack(pandecode_dump_stream, map, BIND_PIPELINE, cmd);
 		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
 
 		 /* TODO: parse */
@@ -335,12 +335,12 @@ static unsigned
 pandecode_cmd(const uint8_t *map, bool verbose)
 {
 	if (map[0] == 0x02 && map[1] == 0x10 && map[2] == 0x00 && map[3] == 0x00) {
-		 bl_unpack(map, LAUNCH, cmd);
+		 bl_unpack(pandecode_dump_stream, map, LAUNCH, cmd);
 		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
 		 DUMP_UNPACKED(LAUNCH, cmd, "Launch\n");
 		 return AGX_LAUNCH_LENGTH;
 	} else if (map[0] == 0x2E && map[1] == 0x00 && map[2] == 0x00 && map[3] == 0x40) {
-		 bl_unpack(map, BIND_PIPELINE, cmd);
+		 bl_unpack(pandecode_dump_stream, map, BIND_PIPELINE, cmd);
 		 pandecode_stateful(cmd.pipeline, "Pipeline", pandecode_pipeline, verbose);
 		 DUMP_UNPACKED(BIND_PIPELINE, cmd, "Bind vertex pipeline\n");
 
@@ -354,7 +354,7 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		return STATE_DONE;
 	} else if (map[1] == 0x00 && map[2] == 0x00) {
 		/* No need to explicitly dump the record */
-		 bl_unpack(map, RECORD, cmd);
+		 bl_unpack(pandecode_dump_stream, map, RECORD, cmd);
 		 struct agx_allocation *mem = pandecode_find_mapped_gpu_mem_containing(cmd.data);
 
 		 if (mem)

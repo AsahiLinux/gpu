@@ -114,9 +114,9 @@ __gen_unpack_sint(const uint8_t *restrict cl, uint32_t start, uint32_t end)
         ({ AGX_ ## T ## _pack((uint32_t *) (dst), &name);  \\
            _loop_terminate = NULL; }))
 
-#define bl_unpack(src, T, name)                        \\
+#define bl_unpack(fp, src, T, name)                        \\
         struct AGX_ ## T name;                         \\
-        AGX_ ## T ## _unpack((uint8_t *)(src), &name)
+        AGX_ ## T ## _unpack(fp, (uint8_t *)(src), &name)
 
 #define bl_print(fp, T, var, indent)                   \\
         AGX_ ## T ## _print(fp, &(var), indent)
@@ -457,8 +457,8 @@ class Group(object):
             ALL_ONES = 0xffffffff
 
             if mask != ALL_ONES:
-                TMPL = '   if (((const uint32_t *) cl)[{}] & {}) fprintf(stderr, "XXX: Invalid field of {} unpacked at word {}\\n");'
-                print(TMPL.format(index, hex(mask ^ ALL_ONES), self.label, index))
+                TMPL = '   if (((const uint32_t *) cl)[{}] & {}) fprintf(fp, "XXX: Unknown field of {} unpacked at word {}: got %X, expected mask {}\\n", ((const uint32_t *) cl)[{}]);'
+                print(TMPL.format(index, hex(mask ^ ALL_ONES), self.label, index, hex(mask ^ ALL_ONES), index))
 
         fieldrefs = []
         self.collect_fields(self.fields, 0, '', fieldrefs)
@@ -625,7 +625,7 @@ class Parser(object):
 
     def emit_unpack_function(self, name, group):
         print("static inline void")
-        print("%s_unpack(const uint8_t * restrict cl,\n%sstruct %s * restrict values)\n{" %
+        print("%s_unpack(FILE *fp, const uint8_t * restrict cl,\n%sstruct %s * restrict values)\n{" %
               (name.upper(), ' ' * (len(name) + 8), name))
 
         group.emit_unpack_function()

@@ -146,7 +146,7 @@
   <struct name="Set shader extended" size="32">
     <field name="Tag" size="8" start="0:0" type="hex" default="0x4d"/>
     <field name="Unk 1" size="24" start="0:8" type="hex" default="0x2010bd"/>
-    <field name="Unk 2" size="16" start="1:0" type="hex" default="0x50d"/> <!-- 90d if ld_tile or discard is used (to disable opts), 50d for other frag, 80d for vert..? -40d for compute..? ->
+    <field name="Unk 2" size="16" start="1:0" type="hex" default="0x50d"/> <!-- 90d if ld_tile or discard is used (to disable opts), 50d for other frag, 80d for vert..? 40d for compute..? -->
     <field name="Code" size="32" start="1:16" type="address"/>
     <field name="Unk 3" size="8" start="2:16" type="hex" default="0x28d"/>
     <field name="Register quadwords" size="5" start="2:24" type="uint"/> <!-- 0 for max -->

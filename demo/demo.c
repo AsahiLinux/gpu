@@ -188,7 +188,7 @@ demo_unk11(struct agx_allocator *allocator)
 		/* if colour mask is all 0x1ffff. but if it's not all, just the
 		 * colour mask in the first few bits, shifted over by the ffs()
 		 * of the channels.. not really sure what happens to the others */
-		0x1ffff /* 
+		0x1ffff
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));
@@ -610,7 +610,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	uint8_t stencil_clear = 0;
 
 	EMIT64(cmdbuf, 0); // 0x450
-	EMIT32(cmdbuf, fui(depth_clear);
+	EMIT32(cmdbuf, fui(depth_clear));
 	EMIT32(cmdbuf, (0x3 << 8) | stencil_clear);
 	EMIT64(cmdbuf, 0);
 	EMIT64(cmdbuf, 0x1000000);

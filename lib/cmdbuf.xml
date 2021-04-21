@@ -121,6 +121,20 @@
     <field name="Buffer" size="40" start="0:24" type="address"/>
   </struct>
 
+  <struct name="Bind texture" size="8">
+    <field name="Tag" size="8" start="0:0" type="hex" default="0xdd"/>
+    <field name="Start" size="8" start="0:8" type="uint"/>
+    <field name="Count" size="4" start="0:20" type="uint"/>
+    <field name="Buffer" size="40" start="0:24" type="address"/>
+  </struct>
+
+  <struct name="Bind sampler" size="8">
+    <field name="Tag" size="8" start="0:0" type="hex" default="0x9d"/>
+    <field name="Start" size="8" start="0:8" type="uint"/>
+    <field name="Count" size="4" start="0:20" type="uint"/>
+    <field name="Buffer" size="40" start="0:24" type="address"/>
+  </struct>
+
   <enum name="Preshader mode">
     <value name="Preshader" value="3"/>
     <value name="No preshader" value="8"/>

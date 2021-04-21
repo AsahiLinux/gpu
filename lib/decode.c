@@ -281,6 +281,22 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 		pandecode_log("\n");
 
 		return AGX_SET_SHADER_LENGTH;
+	} else if (map[0] == 0xDD) {
+		bl_unpack(pandecode_dump_stream, map, BIND_TEXTURE, temp);
+		DUMP_UNPACKED(BIND_TEXTURE, temp, "Bind texture\n");
+
+		uint8_t *tex = pandecode_fetch_gpu_mem(temp.buffer, 64);
+		hexdump(pandecode_dump_stream, tex, 64, false);
+
+		return AGX_BIND_TEXTURE_LENGTH;
+	} else if (map[0] == 0x9D) {
+		bl_unpack(pandecode_dump_stream, map, BIND_SAMPLER, temp);
+		DUMP_UNPACKED(BIND_SAMPLER, temp, "Bind sampler\n");
+
+		uint8_t *samp = pandecode_fetch_gpu_mem(temp.buffer, 64);
+		hexdump(pandecode_dump_stream, samp, 64, false);
+
+		return AGX_BIND_SAMPLER_LENGTH;
 	} else if (map[0] == 0x1D) {
 		DUMP_CL(BIND_UNIFORM, map, "Bind uniform");
 		return AGX_BIND_UNIFORM_LENGTH;

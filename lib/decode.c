@@ -286,7 +286,8 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 		DUMP_UNPACKED(BIND_TEXTURE, temp, "Bind texture\n");
 
 		uint8_t *tex = pandecode_fetch_gpu_mem(temp.buffer, 64);
-		hexdump(pandecode_dump_stream, tex, 64, false);
+		DUMP_CL(TEXTURE, tex, "Texture");
+		hexdump(pandecode_dump_stream, tex + AGX_TEXTURE_LENGTH, 64 - AGX_TEXTURE_LENGTH, false);
 
 		return AGX_BIND_TEXTURE_LENGTH;
 	} else if (map[0] == 0x9D) {

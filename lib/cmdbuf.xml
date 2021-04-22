@@ -62,13 +62,18 @@
 
   <!-- Payloads follow, left-shifted by 4 because of course -->
   <struct name="Texture" size="16">
+    <!-- See notes for a listing, TODO: enumify -->
+    <field name="Format" size="16" start="0" type="hex"/>
     <field name="Swizzle R" size="3" start="16" type="Channel" default="R"/>
     <field name="Swizzle G" size="3" start="19" type="Channel" default="G"/>
     <field name="Swizzle B" size="3" start="22" type="Channel" default="B"/>
     <field name="Swizzle A" size="3" start="25" type="Channel" default="A"/>
     <field name="Width" size="14" start="28" type="uint" modifier="minus(1)"/>
     <field name="Height" size="14" start="42" type="uint" modifier="minus(1)"/>
+    <field name="Depth" size="14" start="56" type="uint" modifier="minus(1)"/> <!-- TODO: confirm -->
+    <field name="Unk 1" size="38" start="70" type="hex"/>
     <field name="sRGB" size="1" start="108" type="bool"/>
+    <field name="Unk 2" size="19" start="109" type="hex"/>
   </struct>
 
   <!--- Identified by tag? -->

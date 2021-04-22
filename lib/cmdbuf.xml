@@ -4,6 +4,8 @@
     <value name="G" value="1"/>
     <value name="B" value="2"/>
     <value name="A" value="3"/>
+    <value name="1" value="4"/>
+    <value name="0" value="5"/>
   </enum>
 
   <enum name="Func">
@@ -56,6 +58,17 @@
     <field name="Unk 55" size="9" start="55" type="hex"/>
     <field name="Buffer" size="36" start="64" type="address" modifier="shr(4)"/>
     <field name="Unk 100" size="28" start="100" type="hex"/>
+  </struct>
+
+  <!-- Payloads follow, left-shifted by 4 because of course -->
+  <struct name="Texture" size="16">
+    <field name="Swizzle R" size="3" start="16" type="Channel" default="R"/>
+    <field name="Swizzle G" size="3" start="19" type="Channel" default="G"/>
+    <field name="Swizzle B" size="3" start="22" type="Channel" default="B"/>
+    <field name="Swizzle A" size="3" start="25" type="Channel" default="A"/>
+    <field name="Width" size="14" start="28" type="uint" modifier="minus(1)"/>
+    <field name="Height" size="14" start="42" type="uint" modifier="minus(1)"/>
+    <field name="sRGB" size="1" start="108" type="bool"/>
   </struct>
 
   <!--- Identified by tag? -->

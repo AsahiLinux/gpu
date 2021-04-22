@@ -1,0 +1,65 @@
+first 2
+
+8unorm1		22 00
+8snorm1		22 20
+8unorm2 	A2 02
+16unorm1 	62 02
+16uint1 	62 42
+8unorm4 	22 0A
+8snorm4  	22 2A
+8sint4		22 6A
+8uint4		22 4A
+32uint1 	62 48
+16uint2 	E2 48
+16uint4 	A2 4C
+32uint4 	22 4E
+
+r16f		62 82
+rg16f		E2 88
+r32f		62 88
+rg32ui          62 4c
+rgba16f		A2 8C
+rgba32f		22 8E
+
+(0x80 << 8) means floating point
+(0x40 << 8) means int (clear for norm)
+(0x20 << 8) means signed
+
+(0x02 << 0) always set? probably not part of the format
+
+what remains is the 8-bits from byte 2 lo | byte 1 hi, composing the dimension
+--------------------------
+
+02 8x1
+2A 8x2
+26 16x1
+A2 8x4
+86 32x1
+8E 16x2
+CA 16x4
+C6 32x2
+E2 32x4
+ 
+
+special
+rgb10a2_unorm   A2 09
+rgb10a2_uint    A2 49
+rg11b10_float   62 89
+rgb9e5_float	E2 89
+bgr565_unorm	E2 02
+a1bgr5_unorm	62 03
+bgr5a1_unorm	A2 03
+abgr4_unorm	22 03
+
+9A rgb10a2
+96 10e2
+9E 9e5
+2E bgr565
+36 a1bgr5
+3A bgr5a1
+32 abgr4
+
+compressed
+ETC2 RGB8     22 16
+EAC2 RGBA8    62 16
+ETC2 RGB8A1   A2 16

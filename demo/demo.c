@@ -80,7 +80,7 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		cfg.swizzle_b = AGX_CHANNEL_R;
 		cfg.swizzle_a = AGX_CHANNEL_A;
 		cfg.width = WIDTH;
-		cfg.height = WIDTH;
+		cfg.height = HEIGHT;
 		cfg.buffer = framebuffer->gpu_va;
 		cfg.unk_100 = 0x1000000;
 	};

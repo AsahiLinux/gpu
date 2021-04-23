@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 /* Z-order with 64x64 tiles:
@@ -70,34 +71,44 @@ ash_space_bits(unsigned x)
 		((x & 8) << 3) | ((x & 16) << 4) | ((x & 32) << 5);
 }
 
+#define TILED_UNALIGNED_TYPE(pixel_t, is_store) { \
+	unsigned tiles_per_row = (width + TILE_WIDTH - 1) >> TILE_SHIFT;\
+	unsigned y_offs = ash_space_bits(sy & TILE_MASK);\
+	unsigned x_offs_start = ash_space_bits(sx & TILE_MASK);\
+\
+	for (unsigned y = sy; y < smaxy; ++y) {\
+		unsigned tile_y = (y >> TILE_SHIFT);\
+		unsigned tile_row = tile_y * tiles_per_row;\
+		unsigned x_offs = x_offs_start;\
+\
+		pixel_t *linear_row = linear;\
+		\
+		for (unsigned x = sx; x < smaxx; ++x) {\
+			unsigned tile_x = (x >> TILE_SHIFT);\
+			unsigned tile_idx = (tile_row + tile_x);\
+			unsigned tile_base = tile_idx * (TILE_WIDTH * TILE_HEIGHT);\
+\
+			pixel_t *dest = &tiled[tile_base + y_offs + x_offs];\
+			pixel_t *source = (linear_row++);\
+			pixel_t *outp = (pixel_t *) (is_store ? dest : source); \
+			pixel_t *inp = (pixel_t *) (is_store ? source : dest); \
+			*outp = *inp;\
+\
+			*(linear_row++) = tiled[tile_base + y_offs + x_offs];\
+			x_offs = (x_offs - SPACE_MASK) & SPACE_MASK;\
+		}\
+\
+		y_offs = (((y_offs >> 1) - SPACE_MASK) & SPACE_MASK) << 1;\
+		linear += linear_pitch;\
+	}\
+}
+
 static void
 ash_detile_unaligned_32(uint32_t *tiled, uint32_t *linear,
 		unsigned width, unsigned linear_pitch,
 		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
 {
-	unsigned tiles_per_row = (width + TILE_WIDTH - 1) >> TILE_SHIFT;
-	unsigned y_offs = ash_space_bits(sy & TILE_MASK);
-	unsigned x_offs_start = ash_space_bits(sx & TILE_MASK);
-
-	for (unsigned y = sy; y < smaxy; ++y) {
-		unsigned tile_y = (y >> TILE_SHIFT);
-		unsigned tile_row = tile_y * tiles_per_row;
-		unsigned x_offs = x_offs_start;
-
-		uint32_t *linear_row = linear;
-		
-		for (unsigned x = sx; x < smaxx; ++x) {
-			unsigned tile_x = (x >> TILE_SHIFT);
-			unsigned tile_idx = (tile_row + tile_x);
-			unsigned tile_base = tile_idx * (TILE_WIDTH * TILE_HEIGHT);
-
-			*(linear_row++) = tiled[tile_base + y_offs + x_offs];
-			x_offs = (x_offs - SPACE_MASK) & SPACE_MASK;
-		}
-
-		y_offs = (((y_offs >> 1) - SPACE_MASK) & SPACE_MASK) << 1;
-		linear += linear_pitch;
-	}
+	TILED_UNALIGNED_TYPE(uint32_t, false);
 }
 
 /* Assumes sx, smaxx are both aligned to TILE_WIDTH */

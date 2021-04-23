@@ -38,6 +38,51 @@ demo_viewport(struct agx_allocator *allocator)
 	return t.gpu_va;
 }
 
+static uint64_t
+demo_texture(struct agx_allocator *allocator)
+{
+	unsigned tex_width = 2, tex_height = 2;
+	struct agx_ptr payload = agx_allocate(allocator, tex_width * tex_height * 4);
+	uint64_t payload_ptr = payload.gpu_va >> 4;
+
+	uint32_t *rgba = payload.map;
+	rgba[0] = 0xFF0000FF;
+	rgba[1] = 0x00FF00FF;
+	rgba[2] = 0x0000FFFF;
+	rgba[3] = 0xFF00FFFF;
+
+	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH + 8);
+	bl_pack(t.map, TEXTURE, cfg) {
+		cfg.format = 0xa22;
+		cfg.swizzle_r = AGX_CHANNEL_R;
+		cfg.swizzle_g = AGX_CHANNEL_G;
+		cfg.swizzle_b = AGX_CHANNEL_B;
+		cfg.swizzle_a = AGX_CHANNEL_A;
+		cfg.width = tex_width;
+		cfg.height = tex_height;
+		cfg.depth = 1;
+		cfg.unk_1 = 0x215000680;
+		cfg.unk_2 = 0x60000;
+	};
+
+	memcpy(t.map + AGX_TEXTURE_LENGTH, &payload_ptr, 8);
+
+	return t.gpu_va;
+}
+
+static uint64_t
+demo_sampler(struct agx_allocator *allocator)
+{
+	struct agx_ptr t = agx_allocate(allocator, AGX_SAMPLER_LENGTH);
+	bl_pack(t.map, SAMPLER, cfg) {
+		cfg.wrap_s = AGX_WRAP_CLAMP_TO_EDGE;
+		cfg.wrap_t = AGX_WRAP_CLAMP_TO_EDGE;
+		cfg.wrap_r = AGX_WRAP_CLAMP_TO_EDGE;
+	};
+
+	return t.gpu_va;
+}
+
 /* FP16 */
 static uint64_t
 demo_clear_color(struct agx_allocator *allocator)
@@ -396,6 +441,8 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 	buf[3] = (vs_offs >> 16) | (0x0F8d << 16) | (0x00880100ull << 32);
 }
 
+
+
 static void
 demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation *framebuffer, struct agx_allocator *shader_pool)
 {
@@ -417,9 +464,11 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[19] = ((uint64_t) aux3_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
 
 	/* Fragment shader */
-	buf[24] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
-	buf[25] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
-	buf[26] = 0x00880002 | (0xc080ull << 32);
+	buf[24] = PTR40(dd, 00, 10, demo_texture(allocator));
+	buf[25] = PTR40(9d, 00, 10, demo_sampler(allocator));
+	buf[26] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
+	buf[27] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
+	buf[28] = 0x00880002 | (0xc080ull << 32);
 }
 
 struct cmdbuf {

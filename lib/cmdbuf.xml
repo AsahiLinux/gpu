@@ -71,7 +71,7 @@
     <field name="Unk 100" size="28" start="100" type="hex"/>
   </struct>
 
-  <!-- Payloads follow, left-shifted by 4 because of course -->
+  <!-- Payloads follow, right-shifted by 4 because of course -->
   <struct name="Texture" size="16">
     <!-- See notes for a listing, TODO: enumify -->
     <field name="Format" size="16" start="0" type="hex"/>

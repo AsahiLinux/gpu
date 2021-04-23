@@ -41,15 +41,33 @@ demo_viewport(struct agx_allocator *allocator)
 static uint64_t
 demo_texture(struct agx_allocator *allocator)
 {
-	unsigned tex_width = 2, tex_height = 2;
-	struct agx_ptr payload = agx_allocate(allocator, tex_width * tex_height * 4);
+	unsigned tex_width = 256, tex_height = 256;
+	struct agx_ptr payload = agx_allocate(allocator, tex_width * tex_height * 2 * 4);
 	uint64_t payload_ptr = payload.gpu_va >> 4;
 
-	uint32_t *rgba = payload.map;
+	//memset(payload.map, 0x55, tex_width * (tex_height * 2) * 4);
+	uint32_t *rgba = malloc(tex_width * tex_height * 4);
+#if 1
+	for (unsigned y = 0; y < tex_height; ++y) {
+		for(unsigned x = 0; x < tex_width; ++x) {
+			uint8_t r = (uint8_t) ((((float) y) / tex_height) * 255.0);
+			uint8_t g = (uint8_t) ((((float) x) / tex_width) * 255.0);
+			rgba[(y * tex_width) + x] = (0xFFFF << 16) | (((uint32_t) g) << 8) | ((uint32_t) r);
+//			rgba[(y * tex_width) + x] = 0xFFFFFFFF;
+		}
+	}
+#endif
+	ash_tile(payload.map, rgba,
+			tex_width, 32, tex_width,
+			0, 0, tex_width, tex_height);
+	free(rgba);
+
+#if 0
 	rgba[0] = 0xFF0000FF;
 	rgba[1] = 0x00FF00FF;
 	rgba[2] = 0x0000FFFF;
 	rgba[3] = 0xFF00FFFF;
+#endif
 
 	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH + 8);
 	bl_pack(t.map, TEXTURE, cfg) {
@@ -61,8 +79,8 @@ demo_texture(struct agx_allocator *allocator)
 		cfg.width = tex_width;
 		cfg.height = tex_height;
 		cfg.depth = 1;
-		cfg.unk_1 = 0x215000680;
-		cfg.unk_2 = 0x60000;
+		cfg.unk_1 = 0x015000680; // top nibble 2 seems to enable compression
+		cfg.unk_2 = 0x20000;
 	};
 
 	memcpy(t.map + AGX_TEXTURE_LENGTH, &payload_ptr, 8);
@@ -75,10 +93,16 @@ demo_sampler(struct agx_allocator *allocator)
 {
 	struct agx_ptr t = agx_allocate(allocator, AGX_SAMPLER_LENGTH);
 	bl_pack(t.map, SAMPLER, cfg) {
-		cfg.wrap_s = AGX_WRAP_CLAMP_TO_EDGE;
-		cfg.wrap_t = AGX_WRAP_CLAMP_TO_EDGE;
-		cfg.wrap_r = AGX_WRAP_CLAMP_TO_EDGE;
+		cfg.wrap_s = AGX_WRAP_REPEAT;
+		cfg.wrap_t = AGX_WRAP_REPEAT;
+		cfg.wrap_r = AGX_WRAP_REPEAT;
+		cfg.magnify_linear = true;
+		cfg.minify_linear = true;
+		cfg.compare_func = AGX_COMPARE_FUNC_NEVER;
 	};
+
+	uint64_t *m = (uint64_t *) (t.map + AGX_SAMPLER_LENGTH);
+	m[3] = 0x40; // XXX
 
 	return t.gpu_va;
 }
@@ -151,7 +175,7 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 
 	uint32_t unk[] = {
 		0x800000,
-		0x21002, // upper nibble is input count TODO: xmlify
+		0x21212, // upper nibble is input count TODO: xmlify
 		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- fragment shader
 		agx_upload(shaders, unk_aux0, sizeof(unk_aux0)),
 		0x0,

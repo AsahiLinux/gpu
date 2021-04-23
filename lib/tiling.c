@@ -181,3 +181,15 @@ ash_detile(uint32_t *tiled, uint32_t *linear,
 
 	ash_detile_32(tiled, linear, width, linear_pitch, sx, sy, smaxx, smaxy);
 }
+
+
+void
+ash_tile(uint32_t *tiled, uint32_t *linear,
+		unsigned width, unsigned bpp, unsigned linear_pitch,
+		unsigned sx, unsigned sy, unsigned smaxx, unsigned smaxy)
+{
+	/* TODO: parametrize with macro magic */
+	assert(bpp == 32);
+
+	TILED_UNALIGNED_TYPE(uint32_t, true);
+}

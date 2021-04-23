@@ -295,7 +295,8 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 		DUMP_UNPACKED(BIND_SAMPLER, temp, "Bind sampler\n");
 
 		uint8_t *samp = pandecode_fetch_gpu_mem(temp.buffer, 64);
-		hexdump(pandecode_dump_stream, samp, 64, false);
+		DUMP_CL(SAMPLER, samp, "Sampler");
+		hexdump(pandecode_dump_stream, samp + AGX_SAMPLER_LENGTH, 64 - AGX_SAMPLER_LENGTH, false);
 
 		return AGX_BIND_SAMPLER_LENGTH;
 	} else if (map[0] == 0x1D) {

@@ -8,7 +8,7 @@
     <value name="0" value="5"/>
   </enum>
 
-  <enum name="Func">
+  <enum name="ZS Func">
     <value name="Never" value="0"/>
     <value name="Less" value="1"/>
     <value name="Equal" value="2"/>
@@ -17,6 +17,17 @@
     <value name="Not Equal" value="5"/>
     <value name="Gequal" value="6"/>
     <value name="Always" value="7"/>
+  </enum>
+
+  <enum name="Compare func">
+    <value name="Lequal" value="0"/>
+    <value name="Gequal" value="1"/>
+    <value name="Less" value="2"/>
+    <value name="Greater" value="3"/>
+    <value name="Equal" value="4"/>
+    <value name="Not Equal" value="5"/>
+    <value name="Always" value="6"/>
+    <value name="Never" value="7"/>
   </enum>
 
   <enum name="Stencil Op">
@@ -76,6 +87,40 @@
     <field name="Unk 2" size="19" start="109" type="hex"/>
   </struct>
 
+  <enum name="Wrap">
+    <value name="Clamp to edge" value="0"/>
+    <value name="Repeat" value="1"/>
+    <value name="Mirrored repeat" value="2"/>
+    <value name="Clamp to border" value="3"/>
+  </enum>
+
+  <enum name="Mip filter">
+    <value name="None" value="0"/>
+    <value name="Nearest" value="1"/>
+    <value name="Linear" value="2"/>
+  </enum>
+
+  <enum name="Border colour">
+    <value name="Transparent black" value="0"/>
+    <value name="Opaque black" value="1"/>
+    <value name="Opaque white" value="2"/>
+  </enum>
+
+  <struct name="Sampler" size="8">
+    <field name="Unk 1" size="2" start="17" type="hex" default="3"/>
+    <field name="Magnify linear" size="1" start="19" type="bool"/>
+    <field name="Unk 2" size="2" start="23" type="hex" default="1"/>
+    <field name="Minify linear" size="1" start="25" type="bool"/>
+    <field name="Mip filter" size="2" start="27" type="Mip filter"/>
+    <field name="Wrap S" size="3" start="29" type="Wrap"/>
+    <field name="Wrap T" size="3" start="32" type="Wrap"/>
+    <field name="Wrap R" size="3" start="35" type="Wrap"/>
+    <field name="Pixel coordinates" size="1" start="38" type="bool"/>
+    <field name="Compare func" size="3" start="39" type="Compare func"/>
+    <field name="Unk 3" size="1" start="42" type="hex" default="1"/>
+    <field name="Border colour" size="2" start="55" type="Border colour"/>
+  </struct>
+
   <!--- Identified by tag? -->
   <struct name="Viewport" size="40">
     <field name="Tag 1" size="32" start="0:0" type="hex" default="0xc00"/>
@@ -95,13 +140,13 @@
     <field name="Unk 1" size="8" start="0:8" type="hex" default="0xF"/>
     <field name="Polygon mode" size="2" start="0:18" type="Polygon Mode" default="Fill"/>
     <field name="Disable depth write" size="1" start="0:21" type="bool"/>
-    <field name="Depth function" size="3" start="0:24" type="Func" default="Always"/>
+    <field name="Depth function" size="3" start="0:24" type="ZS Func" default="Always"/>
     <field name="Stencil write mask" size="8" start="1:0" type="hex" default="0xFF"/>
     <field name="Stencil read mask" size="8" start="1:8" type="hex" default="0xFF"/>
     <field name="Depth pass" size="3" start="1:16" type="Stencil Op"/>
     <field name="Depth fail" size="3" start="1:19" type="Stencil Op"/>
     <field name="Stencil fail" size="3" start="1:22" type="Stencil Op"/>
-    <field name="Stencil compare" size="3" start="1:25" type="Func" default="Always"/>
+    <field name="Stencil compare" size="3" start="1:25" type="ZS Func" default="Always"/>
   </struct>
 
   <struct name="Rasterizer" size="28">

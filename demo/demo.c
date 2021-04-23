@@ -423,13 +423,11 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 		{ +1.0, +1.0, +1.0, 1.0 },
 	};
 
-	float face_colours[6][4] = {
-		{ 1.0, 0.0, 0.0, 1.0 },
-		{ 0.0, 1.0, 0.0, 1.0 },
-		{ 0.0, 0.0, 1.0, 1.0 },
-		{ 1.0, 1.0, 1.0, 1.0 },
-		{ 1.0, 0.5, 0.2, 1.0 },
-		{ 0.0, 0.2, 0.5, 1.0 },
+	float vert_texcoord[4][4] = {
+		{ 0.0, 0.0, 0.0, 0.0 },
+		{ 1.0, 0.0, 0.0, 0.0 },
+		{ 0.0, 1.0, 0.0, 0.0 },
+		{ 1.0, 1.0, 0.0, 0.0 },
 	};
 
 	unsigned quads[6][4] = {
@@ -446,7 +444,7 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 		for (unsigned j = 0; j < 6; ++j) {
 			unsigned vert = quads[i][visit[j]];
 			memcpy(uni + count + 0, verts[vert], 16);
-			memcpy(uni + count + 4, face_colours[i], 16);
+			memcpy(uni + count + 4, vert_texcoord[visit[j]], 16);
 			count += 8;
 		}
 	}

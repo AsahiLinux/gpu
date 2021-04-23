@@ -20,27 +20,7 @@ demo_zero(struct agx_allocator *allocator, size_t count)
 	return ptr.gpu_va;
 }
 
-/* Upload vertex attribtues */
-
 float t = 0.0;
-
-static uint64_t
-demo_attributes(struct agx_allocator *allocator)
-{
-	float attributes1[] = {
-		-0.5, +0.5f, 0.0f, 1.0f,
-		+0.5, +0.5f, 0.0f, 1.0f,
-		-0.5, -0.5f, 0.0f, 1.0f,
-		+0.5, -0.5f, 0.0f, 1.0f,
-	};
-
-	uint64_t attribs[1] = {
-		fui(0.5f),
-		//agx_upload(allocator, attributes1, sizeof(attributes1)),
-	};
-
-	return agx_upload(allocator, attribs, sizeof(attribs));
-}
 
 static uint64_t
 demo_viewport(struct agx_allocator *allocator)
@@ -149,14 +129,14 @@ demo_unk8(struct agx_allocator *allocator)
 static uint64_t
 demo_linkage(struct agx_allocator *allocator)
 {
-	uint8_t unk[] = {
-		0x00, 0x00, 0x02, 0x0c,
-		0x00, 0x00, 0x01, 0x00,
-		0x00, 0x00, 0x00, 0x00,
-		0x08, 0x00, 0x00, 0x00 // varying count
+	struct agx_ptr t = agx_allocate(allocator, AGX_LINKAGE_LENGTH);
+
+	bl_pack(t.map, LINKAGE, cfg) {
+		cfg.varying_count = 8;
+		cfg.unk_1 = 0x10000; // varyings otherwise wrong
 	};
 
-	return agx_upload(allocator, unk, sizeof(unk));
+	return t.gpu_va;
 }
 
 static uint64_t
@@ -410,7 +390,6 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 	uint64_t time_ptr = agx_upload(allocator, &time, sizeof(time));
 	uint64_t time_ptr_ptr = agx_upload(allocator, &time_ptr, sizeof(time_ptr));
 
-	uint64_t gpu_va = demo_attributes(allocator);
 	buf[0] = demo_bind_arg_words(time_ptr_ptr, 0, 2);
 	buf[1] = demo_bind_arg_words(colour_ptr_ptr, 2, 2);
 	buf[2] = 0x0000904d | (0x80dull << 32) | ((uint64_t) (vs_offs & 0xFFFF) << 48);

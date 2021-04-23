@@ -425,18 +425,11 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[22] = 0;
 	buf[23] = 0;
 
-	__fp16 uni[] = {
-		0.5,  0.5f, 0.1f, 1.0f
-	};
-
-	uint64_t colour_ptr = agx_upload(allocator, uni, sizeof(uni));
-	uint64_t colour_ptr_ptr = agx_upload(allocator, &colour_ptr, sizeof(colour_ptr));
-
 	/* Fragment shader */
-	buf[24] = demo_bind_arg_words(colour_ptr_ptr, 0, 4);
-	buf[25] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
-	buf[26] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
-	buf[27] = 0x00880002 | (0xc080ull << 32);
+	buf[24] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
+	buf[25] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
+	buf[26] = 0x00880002 | (0xc080ull << 32);
+	buf[27] = 0;
 	buf[28] = 0;
 	buf[29] = 0;
 	buf[30] = 0;

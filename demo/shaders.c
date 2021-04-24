@@ -144,7 +144,7 @@ demo_vertex_shader(struct agx_allocator *allocator)
 uint32_t
 demo_fragment_shader(struct agx_allocator *allocator)
 {
-#if 0
+#if 1
 	return demo_upload_shader("fragtex", allocator, fragment_shader, sizeof(fragment_shader));
 #else
 	FILE *fp = fopen("/Users/bloom/simple/shader_1.bin", "rb");

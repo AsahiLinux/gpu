@@ -45,20 +45,6 @@ demo_texture(struct agx_allocator *allocator)
 	struct agx_ptr payload = agx_allocate(allocator, (tex_width * tex_height * 4) + 64);
 	uint32_t *rgba = malloc(tex_width * tex_height * 4);
 
-#if 0
-	for (unsigned y = 0; y < tex_height; ++y) {
-		for(unsigned x = 0; x < tex_width; ++x) {
-			uint8_t r = (uint8_t) ((((float) y) / (tex_height - 1)) * 253.0);
-			uint8_t g = (uint8_t) ((((float) x) / (tex_width - 1)) * 253.0);
-			r = 0;
-			r = x * 2;
-			g = 0;
-			rgba[(y * tex_width) + x] = (0xFF00 << 16) | (((uint32_t) g) << 8) | ((uint32_t) r);
-//			rgba[(y * tex_width) + x] = 0xFFFFFFFF;
-		}
-	}
-#endif
-
 	FILE *fp = fopen("/Users/bloom/Downloads/Hooves.bmp", "rb");
 	fseek(fp, 0x8a, SEEK_SET);
 	fread(rgba, 1, tex_width * tex_height * 4, fp);
@@ -72,10 +58,10 @@ demo_texture(struct agx_allocator *allocator)
 	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH);
 	bl_pack(t.map, TEXTURE, cfg) {
 		cfg.format = 0xa22;
-		cfg.swizzle_r = AGX_CHANNEL_R;
+		cfg.swizzle_r = AGX_CHANNEL_1;
 		cfg.swizzle_g = AGX_CHANNEL_G;
 		cfg.swizzle_b = AGX_CHANNEL_B;
-		cfg.swizzle_a = AGX_CHANNEL_A;
+		cfg.swizzle_a = AGX_CHANNEL_1;
 		cfg.width = tex_width;
 		cfg.height = tex_height;
 		cfg.depth = 1;
@@ -424,8 +410,8 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 	float vert_texcoord[4][4] = {
 		{ 0.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 1.0, 0.0, 0.0 },
-		{ 1.0, 1.0, 0.0, 0.0 },
-		{ 1.0, 0.0, 0.0, 0.0 },
+		{ 0.5, 1.0, 0.0, 0.0 },
+		{ 0.5, 0.0, 0.0, 0.0 },
 	};
 
 	unsigned quads[6][4] = {

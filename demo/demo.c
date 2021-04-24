@@ -41,10 +41,11 @@ demo_viewport(struct agx_allocator *allocator)
 static uint64_t
 demo_texture(struct agx_allocator *allocator)
 {
-	unsigned tex_width = 64, tex_height = 64;
+	unsigned tex_width = 300, tex_height = 198;
 	struct agx_ptr payload = agx_allocate(allocator, (tex_width * tex_height * 4) + 64);
-
 	uint32_t *rgba = malloc(tex_width * tex_height * 4);
+
+#if 0
 	for (unsigned y = 0; y < tex_height; ++y) {
 		for(unsigned x = 0; x < tex_width; ++x) {
 			uint8_t r = (uint8_t) ((((float) y) / (tex_height - 1)) * 253.0);
@@ -56,6 +57,13 @@ demo_texture(struct agx_allocator *allocator)
 //			rgba[(y * tex_width) + x] = 0xFFFFFFFF;
 		}
 	}
+#endif
+
+	FILE *fp = fopen("/Users/bloom/Downloads/Hooves.bmp", "rb");
+	fseek(fp, 0x8a, SEEK_SET);
+	fread(rgba, 1, tex_width * tex_height * 4, fp);
+	fclose(fp);
+
 	ash_tile(payload.map, rgba,
 			tex_width, 32, tex_width,
 			0, 0, tex_width, tex_height);

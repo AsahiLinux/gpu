@@ -41,17 +41,17 @@ demo_viewport(struct agx_allocator *allocator)
 static uint64_t
 demo_texture(struct agx_allocator *allocator)
 {
-	unsigned tex_width = 512, tex_height = 512;
-	struct agx_ptr payload = agx_allocate(allocator, tex_width * tex_height * 2 * 4);
-	uint64_t payload_ptr = payload.gpu_va >> 4;
+	unsigned tex_width = 64, tex_height = 64;
+	struct agx_ptr payload = agx_allocate(allocator, (tex_width * tex_height * 4) + 64);
 
-	memset(payload.map, 0x55, tex_width * (tex_height * 2) * 4);
-#if 1
 	uint32_t *rgba = malloc(tex_width * tex_height * 4);
 	for (unsigned y = 0; y < tex_height; ++y) {
 		for(unsigned x = 0; x < tex_width; ++x) {
-			uint8_t r = (uint8_t) ((((float) y) / tex_height) * 255.0);
-			uint8_t g = (uint8_t) ((((float) x) / tex_width) * 255.0);
+			uint8_t r = (uint8_t) ((((float) y) / (tex_height - 1)) * 253.0);
+			uint8_t g = (uint8_t) ((((float) x) / (tex_width - 1)) * 253.0);
+			r = 0;
+			r = x * 2;
+			g = 0;
 			rgba[(y * tex_width) + x] = (0xFF00 << 16) | (((uint32_t) g) << 8) | ((uint32_t) r);
 //			rgba[(y * tex_width) + x] = 0xFFFFFFFF;
 		}
@@ -60,21 +60,8 @@ demo_texture(struct agx_allocator *allocator)
 			tex_width, 32, tex_width,
 			0, 0, tex_width, tex_height);
 	free(rgba);
-#endif
-#if 0
 
-	uint32_t *rgba = payload.map;
-	for (unsigned y = 0; y < tex_height; ++y) {
-		for(unsigned x = 0; x < tex_width; ++x) {
-			uint8_t r = (uint8_t) ((((float) y) / tex_height) * 255.0);
-			uint8_t g = (uint8_t) ((((float) x) / tex_width) * 255.0);
-			rgba[(y * tex_width) + x] = (0xFF00 << 16) | (((uint32_t) g) << 8) | ((uint32_t) r);
-//			rgba[(y * tex_width) + x] = 0xFFFFFFFF;
-		}
-	}
-#endif
-
-	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH + 8);
+	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH);
 	bl_pack(t.map, TEXTURE, cfg) {
 		cfg.format = 0xa22;
 		cfg.swizzle_r = AGX_CHANNEL_R;
@@ -88,8 +75,6 @@ demo_texture(struct agx_allocator *allocator)
 		cfg.unk_2 = 0x20000;
 	};
 
-//	memcpy(t.map + AGX_TEXTURE_LENGTH, &payload_ptr, 8);
-
 	return t.gpu_va;
 }
 
@@ -98,11 +83,11 @@ demo_sampler(struct agx_allocator *allocator)
 {
 	struct agx_ptr t = agx_allocate(allocator, AGX_SAMPLER_LENGTH);
 	bl_pack(t.map, SAMPLER, cfg) {
-		cfg.wrap_s = AGX_WRAP_REPEAT;
-		cfg.wrap_t = AGX_WRAP_REPEAT;
-		cfg.wrap_r = AGX_WRAP_REPEAT;
-		cfg.magnify_linear = true;
-		cfg.minify_linear = true;
+		cfg.wrap_s = AGX_WRAP_CLAMP_TO_EDGE;
+		cfg.wrap_t = AGX_WRAP_CLAMP_TO_EDGE;
+		cfg.wrap_r = AGX_WRAP_CLAMP_TO_EDGE;
+		cfg.magnify_linear = false;
+		cfg.minify_linear = false;
 		cfg.compare_func = AGX_COMPARE_FUNC_NEVER;
 	};
 
@@ -430,9 +415,9 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 
 	float vert_texcoord[4][4] = {
 		{ 0.0, 0.0, 0.0, 0.0 },
-		{ 1.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 1.0, 0.0, 0.0 },
 		{ 1.0, 1.0, 0.0, 0.0 },
+		{ 1.0, 0.0, 0.0, 0.0 },
 	};
 
 	unsigned quads[6][4] = {

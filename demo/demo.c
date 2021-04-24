@@ -38,34 +38,24 @@ demo_viewport(struct agx_allocator *allocator)
 	return t.gpu_va;
 }
 
+struct agx_allocation texture_payload;
+unsigned tex_width = 300, tex_height = 198;
+
 static uint64_t
 demo_texture(struct agx_allocator *allocator)
 {
-	unsigned tex_width = 300, tex_height = 198;
-	struct agx_ptr payload = agx_allocate(allocator, (tex_width * tex_height * 4) + 64);
-	uint32_t *rgba = malloc(tex_width * tex_height * 4);
-
-	FILE *fp = fopen("/Users/bloom/Downloads/Hooves.bmp", "rb");
-	fseek(fp, 0x8a, SEEK_SET);
-	fread(rgba, 1, tex_width * tex_height * 4, fp);
-	fclose(fp);
-
-	ash_tile(payload.map, rgba,
-			tex_width, 32, tex_width,
-			0, 0, tex_width, tex_height);
-	free(rgba);
-
 	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH);
+	assert((texture_payload.gpu_va & 0xFF) == 0);
 	bl_pack(t.map, TEXTURE, cfg) {
 		cfg.format = 0xa22;
 		cfg.swizzle_r = AGX_CHANNEL_1;
 		cfg.swizzle_g = AGX_CHANNEL_G;
 		cfg.swizzle_b = AGX_CHANNEL_B;
-		cfg.swizzle_a = AGX_CHANNEL_1;
+		cfg.swizzle_a = AGX_CHANNEL_A;
 		cfg.width = tex_width;
 		cfg.height = tex_height;
 		cfg.depth = 1;
-		cfg.unk_1 = (payload.gpu_va >> 8); // top nibble 2 seems to enable compression
+		cfg.unk_1 = (texture_payload.gpu_va >> 8); // a nibble enabling compression seems to be mixed in here
 		cfg.unk_2 = 0x20000;
 	};
 
@@ -80,8 +70,8 @@ demo_sampler(struct agx_allocator *allocator)
 		cfg.wrap_s = AGX_WRAP_CLAMP_TO_EDGE;
 		cfg.wrap_t = AGX_WRAP_CLAMP_TO_EDGE;
 		cfg.wrap_r = AGX_WRAP_CLAMP_TO_EDGE;
-		cfg.magnify_linear = false;
-		cfg.minify_linear = false;
+		cfg.magnify_linear = true;
+		cfg.minify_linear = true;
 		cfg.compare_func = AGX_COMPARE_FUNC_NEVER;
 	};
 
@@ -142,6 +132,16 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 {
 	/* Varying descriptor */
 	uint8_t unk_aux0[] = {
+		0x03, 0x03, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1D, 0x01, 0x01, 0x00,
+		0x03, 0x03, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1D, 0x01, 0x01, 0x00,
+		0x03, 0x03, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1D, 0x01, 0x01, 0x00,
+
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00,
+
+#if 0
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
@@ -149,6 +149,7 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+#endif
 
 #if 0
 	       0x02, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
@@ -410,8 +411,8 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 	float vert_texcoord[4][4] = {
 		{ 0.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 1.0, 0.0, 0.0 },
-		{ 0.5, 1.0, 0.0, 0.0 },
-		{ 0.5, 0.0, 0.0, 0.0 },
+		{ 1.0, 1.0, 0.0, 0.0 },
+		{ 1.0, 0.0, 0.0, 0.0 },
 	};
 
 	unsigned quads[6][4] = {
@@ -790,6 +791,22 @@ void demo(mach_port_t connection, bool offscreen)
 
 	struct agx_allocation memmap = agx_alloc_cmdbuf(connection, 0x4000, false);
 
+	{ 
+		texture_payload = agx_alloc_mem(connection, ((((tex_width + 64) * (tex_height + 64) * 4) + 64) + 4095) & ~4095,
+				AGX_MEMORY_TYPE_FRAMEBUFFER, false);
+		uint32_t *rgba = malloc((tex_width + 64) * (tex_height + 64) * 4);
+
+		FILE *fp = fopen("/Users/bloom/Downloads/Hooves.bmp", "rb");
+		fseek(fp, 0x8a, SEEK_SET);
+		fread(rgba, 1, tex_width * tex_height * 4, fp);
+		fclose(fp);
+
+		ash_tile(texture_payload.map, rgba,
+				tex_width, 32, tex_width,
+				0, 0, tex_width, tex_height);
+		free(rgba);
+	}
+
 	uint64_t global_ids = agx_cmdbuf_global_ids(connection);
 
 	struct agx_allocation allocs[] = {
@@ -797,7 +814,8 @@ void demo(mach_port_t connection, bool offscreen)
 		bo,
 		vsbuf,
 		fsbuf,
-		framebuffer
+		framebuffer,
+		texture_payload
 	};
 
 	demo_mem_map(memmap.map, allocs, sizeof(allocs) / sizeof(allocs[0]),

@@ -93,8 +93,6 @@ ash_space_bits(unsigned x)
 			pixel_t *outp = (pixel_t *) (is_store ? dest : source); \
 			pixel_t *inp = (pixel_t *) (is_store ? source : dest); \
 			*outp = *inp;\
-\
-			*(linear_row++) = tiled[tile_base + y_offs + x_offs];\
 			x_offs = (x_offs - SPACE_MASK) & SPACE_MASK;\
 		}\
 \

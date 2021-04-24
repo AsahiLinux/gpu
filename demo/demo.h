@@ -20,7 +20,7 @@ struct agx_ptr {
 static struct agx_ptr
 agx_allocate(struct agx_allocator *allocator, size_t size)
 {
-	allocator->offset = (allocator->offset & ~255) + 256;
+	allocator->offset = (allocator->offset & ~511) + 512;
 	assert(size < (allocator->backing.size - allocator->offset));
 
 	struct agx_ptr ptr = {

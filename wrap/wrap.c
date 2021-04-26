@@ -159,7 +159,13 @@ wrap_IOConnectCallMethod(
 		assert(inputCnt == 2);
 		assert((*outputStructCntP) == 0x10);
 		uint64_t *inp = (uint64_t *) input;
-		assert(inp[1] == 1 || inp[1] == 0);
+
+		uint8_t type = inp[1];
+
+		assert(type <= 2);
+		if (type == 2)
+			printf("(cmdbuf with error reporting)\n");
+
 		uint64_t *ptr = (uint64_t *) outputStruct;
 		uint32_t *words = (uint32_t *) (ptr + 1);
 

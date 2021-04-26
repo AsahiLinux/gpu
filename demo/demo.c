@@ -48,7 +48,7 @@ demo_texture(struct agx_allocator *allocator)
 	assert((texture_payload.gpu_va & 0xFF) == 0);
 	bl_pack(t.map, TEXTURE, cfg) {
 		cfg.format = 0xa22;
-		cfg.swizzle_r = AGX_CHANNEL_1;
+		cfg.swizzle_r = AGX_CHANNEL_R;
 		cfg.swizzle_g = AGX_CHANNEL_G;
 		cfg.swizzle_b = AGX_CHANNEL_B;
 		cfg.swizzle_a = AGX_CHANNEL_A;
@@ -132,6 +132,7 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 {
 	/* Varying descriptor */
 	uint8_t unk_aux0[] = {
+#if 0
 		0x03, 0x03, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1D, 0x01, 0x01, 0x00,
 		0x03, 0x03, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1D, 0x01, 0x01, 0x00,
 		0x03, 0x03, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1D, 0x01, 0x01, 0x00,
@@ -140,8 +141,9 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00,
+#endif
 
-#if 0
+#if 1
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
 		0x05, 0x05, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x1F, 0x01, 0x01, 0x00,
@@ -394,7 +396,7 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 {
 	uint32_t vs_offs = demo_vertex_shader(shader_pool);
 
-	float uni[4 * 36 * 2];
+	float uni[4 * 36 * 3];
 	unsigned count = 0;
 
 	float verts[8][4] = {
@@ -424,13 +426,23 @@ demo_vsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocator 
 		{ 2, 6, 7, 3 }
 	};
 
+	float normal[6][3] = {
+		{ 0.0, 0.0, -1.0 },
+		{ 1.0, 0.0, 0.0 },
+		{ 0.0, 0.0, 1.0 },
+		{ -1.0, 0.0, 0.0 },
+		{ 0.0, -1.0, 0.0 },
+		{ 0.0, 1.0, 0.0 }
+	};
+
 	unsigned visit[6] = {0, 1, 2, 2, 3, 0 };
 	for (unsigned i = 0; i < 6; ++i) {
 		for (unsigned j = 0; j < 6; ++j) {
 			unsigned vert = quads[i][visit[j]];
 			memcpy(uni + count + 0, verts[vert], 16);
 			memcpy(uni + count + 4, vert_texcoord[visit[j]], 16);
-			count += 8;
+			memcpy(uni + count + 8, normal[i], 12);
+			count += 12;
 		}
 	}
 
@@ -796,8 +808,7 @@ void demo(mach_port_t connection, bool offscreen)
 				AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 		uint32_t *rgba = malloc((tex_width + 64) * (tex_height + 64) * 4);
 
-		FILE *fp = fopen("/Users/bloom/Downloads/Hooves.bmp", "rb");
-		fseek(fp, 0x8a, SEEK_SET);
+		FILE *fp = fopen("foo.rgba", "rb");
 		fread(rgba, 1, tex_width * tex_height * 4, fp);
 		fclose(fp);
 

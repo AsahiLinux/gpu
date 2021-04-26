@@ -477,10 +477,10 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[ 66] = ((uint64_t) clear_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
 
 	/* AUX3 */
-	buf[16] = PTR40(dd, 00, 10, demo_render_target(allocator, framebuffer));
-	buf[17] = demo_bind_arg_words(demo_unk0_5(allocator), 2, 2);
-	buf[18] = 0x2010bd4d | (0x000dull << 32) | ((uint64_t) (aux3_offs & 0xFFFF) << 48);
-	buf[19] = ((uint64_t) aux3_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
+	buf[48] = PTR40(dd, 00, 10, demo_render_target(allocator, framebuffer));
+	buf[49] = demo_bind_arg_words(demo_unk0_5(allocator), 2, 2);
+	buf[50] = 0x2010bd4d | (0x000dull << 32) | ((uint64_t) (aux3_offs & 0xFFFF) << 48);
+	buf[51] = ((uint64_t) aux3_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
 
 	/* Fragment shader */
 	buf[128] = PTR40(dd, 00, 10, demo_texture(allocator));
@@ -615,7 +615,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0x12);
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x84); // AUX3 -- 0x290 -- XXX: dynalloc
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x184); // AUX3 -- 0x290 -- XXX: dynalloc
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
 	EMIT64(cmdbuf, 0);
@@ -656,7 +656,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0x12);
-	EMIT32(cmdbuf, fsbuf->gpu_va + 0x84); // AUX3
+	EMIT32(cmdbuf, fsbuf->gpu_va + 0x184); // AUX3
 	EMIT32(cmdbuf, 0);
 
 	EMIT_ZERO_WORDS(cmdbuf, 44);

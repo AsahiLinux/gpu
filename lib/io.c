@@ -72,7 +72,7 @@ agx_alloc_cmdbuf(mach_port_t connection, size_t size, bool cmdbuf)
 
 	uint64_t inputs[2] = {
 		size,
-		cmdbuf ? 3 : 0
+		cmdbuf ? 1 : 0
 	};
 
 	kern_return_t ret = IOConnectCallMethod(connection,

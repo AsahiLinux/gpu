@@ -786,6 +786,8 @@ void demo(mach_port_t connection, bool offscreen)
 		struct agx_allocation dummy = agx_alloc_mem(connection, 4096, AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 	}
 
+	struct agx_allocation vsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
+	struct agx_allocation fsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
 	struct agx_allocation shader = agx_alloc_mem(connection, 0x10000, AGX_MEMORY_TYPE_SHADER, false);
 
 	struct agx_allocator shader_pool = { .backing = shader, };
@@ -793,8 +795,6 @@ void demo(mach_port_t connection, bool offscreen)
 	struct agx_allocation bo = agx_alloc_mem(connection, 1920*1080*4*2, AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 	struct agx_allocator allocator = { .backing = bo };
 
-	struct agx_allocation vsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
-	struct agx_allocation fsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
 	struct agx_allocation framebuffer = agx_alloc_mem(connection, 
 		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 4,
 		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
@@ -817,8 +817,6 @@ void demo(mach_port_t connection, bool offscreen)
 				0, 0, tex_width, tex_height);
 		free(rgba);
 	}
-
-	uint64_t global_ids = agx_cmdbuf_global_ids(connection);
 
 	struct agx_allocation allocs[] = {
 		shader,

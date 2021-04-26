@@ -799,9 +799,8 @@ void demo(mach_port_t connection, bool offscreen)
 		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 4,
 		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 
-	struct agx_allocation cmdbuf = agx_alloc_cmdbuf(connection, 0x4000, true);
-
 	struct agx_allocation memmap = agx_alloc_cmdbuf(connection, 0x4000, false);
+	struct agx_allocation cmdbuf = agx_alloc_cmdbuf(connection, 0x4000, true);
 
 	{ 
 		texture_payload = agx_alloc_mem(connection, ((((tex_width + 64) * (tex_height + 64) * 4) + 64) + 4095) & ~4095,

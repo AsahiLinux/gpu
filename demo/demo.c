@@ -163,7 +163,7 @@ demo_launch_fragment(struct agx_allocator *allocator, struct agx_allocation *fsb
 	uint32_t unk[] = {
 		0x800000,
 		0x21212, // upper nibble is input count TODO: xmlify
-		fsbuf->gpu_va + 0xC0, // XXX: dynalloc -- fragment shader
+		fsbuf->gpu_va + (128*8), // XXX: dynalloc -- fragment shader
 		agx_upload(shaders, unk_aux0, sizeof(unk_aux0)),
 		0x0,
 	};
@@ -483,11 +483,11 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[19] = ((uint64_t) aux3_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
 
 	/* Fragment shader */
-	buf[24] = PTR40(dd, 00, 10, demo_texture(allocator));
-	buf[25] = PTR40(9d, 00, 10, demo_sampler(allocator));
-	buf[26] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
-	buf[27] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
-	buf[28] = 0x00880002 | (0xc080ull << 32);
+	buf[128] = PTR40(dd, 00, 10, demo_texture(allocator));
+	buf[129] = PTR40(9d, 00, 10, demo_sampler(allocator));
+	buf[130] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
+	buf[131] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
+	buf[132] = 0x00880002 | (0xc080ull << 32);
 }
 
 struct cmdbuf {

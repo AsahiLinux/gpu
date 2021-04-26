@@ -472,9 +472,9 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	memset(buf, 0, 128 * 8);
 
 	/* Clear shader */
-	buf[ 8] = demo_bind_arg_words(demo_clear_color(allocator), 6, 2);
-	buf[ 9] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (clear_offs & 0xFFFF) << 48);
-	buf[10] = ((uint64_t) clear_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
+	buf[ 64] = demo_bind_arg_words(demo_clear_color(allocator), 6, 2);
+	buf[ 65] = 0x2010bd4d | (0x40dull << 32) | ((uint64_t) (clear_offs & 0xFFFF) << 48);
+	buf[ 66] = ((uint64_t) clear_offs >> 16) | (0x18d << 16) | (0x00880100ull << 32);
 
 	/* AUX3 */
 	buf[16] = PTR40(dd, 00, 10, demo_render_target(allocator, framebuffer));
@@ -610,7 +610,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT32(cmdbuf, 0xffff8002); // 0x270
 	EMIT32(cmdbuf, 0);
-	EMIT64(cmdbuf, fsbuf->gpu_va + 0x44);// clear -- XXX: dynalloc
+	EMIT64(cmdbuf, fsbuf->gpu_va + 0x204);// clear -- XXX: dynalloc
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0);

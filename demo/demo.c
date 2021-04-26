@@ -787,8 +787,8 @@ void demo(mach_port_t connection, bool offscreen)
 	}
 
 	struct agx_allocation vsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
-	struct agx_allocation fsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
 	struct agx_allocation shader = agx_alloc_mem(connection, 0x10000, AGX_MEMORY_TYPE_SHADER, false);
+	struct agx_allocation fsbuf = agx_alloc_mem(connection, 0x8000, AGX_MEMORY_TYPE_CMDBUF_32, false);
 
 	struct agx_allocator shader_pool = { .backing = shader, };
 

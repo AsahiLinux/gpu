@@ -265,13 +265,40 @@
   </struct>
 
   <!--- Command to issue a direct non-indexed draw -->
-  <struct name="Draw" size="15">
-    <field name="Primitive" size="8" start="0:0" type="Primitive"/>
-    <field name="Command" size="16" start="0:8" type="hex" default="0x61c0"/>
-    <field name="Vertex count" size="32" start="0:24" type="uint"/>
-    <field name="Instance count" size="32" start="1:24" type="uint"/> <!-- must be nonzero -->
-    <field name="Vertex start" size="32" start="2:24" type="uint"/>
+  <struct name="Draw" size="16">
+    <field name="Unk" size="8" start="0:0" type="hex" default="0x0"/>
+    <field name="Primitive" size="8" start="0:8" type="Primitive"/>
+    <field name="Command" size="16" start="0:16" type="hex" default="0x61c0"/>
+    <field name="Vertex count" size="32" start="1:0" type="uint"/>
+    <field name="Instance count" size="32" start="2:0" type="uint"/> <!-- must be nonzero -->
+    <field name="Vertex start" size="32" start="3:0" type="uint"/>
   </struct>
+
+  <!-- U8 is a guess, not tested -->
+  <enum name="Index size">
+    <value name="U8" value="0"/>
+    <value name="U16" value="1"/>
+    <value name="U32" value="2"/>
+  </enum>
+
+  <struct name="Indexed draw" size="32">
+    <field name="Unk 1" size="8" start="0:0" type="hex" default="0x1"/>
+    <field name="Command" size="24" start="0:8" type="hex" default="0x400000"/>
+    <field name="Restart index" size="32" start="1:0" type="hex"/>
+    <field name="Unk 2a" size="8" start="2:0" type="hex" default="0x15"/>
+    <field name="Primitive" size="8" start="2:8" type="Primitive"/>
+    <field name="Restart enable" size="1" start="2:16" type="bool"/> <!-- Metal sets this bit for strips -->
+    <field name="Index size" size="3" start="2:17" type="Index size"/>
+    <field name="Unk 2c" size="4" start="2:20" type="hex" default="0xF"/>
+    <field name="Unk 2d" size="8" start="2:24" type="hex" default="0x61"/>
+    <field name="Index buffer offset" size="32" start="3:0" type="hex"/>
+    <field name="Index count" size="32" start="4:0" type="uint"/>
+    <field name="Instance count" size="32" start="5:0" type="uint"/>
+    <field name="Base vertex" size="32" start="6:0" type="uint"/>
+    <field name="Unk 4" size="32" start="7:0" type="uint" default="0x8"/>
+  </struct>
+
+
 
   <!--- Command to launch a direct compute kernel -->
   <struct name="Launch" size="36">

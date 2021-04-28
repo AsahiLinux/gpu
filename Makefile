@@ -5,7 +5,7 @@ all: wrap.dylib demo-bin disasm-bin
 clean:
 	rm -f wrap.dylib demo-bin agx_pack.h
 
-CFLAGS := -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function -Wno-unused-parameter
+CFLAGS := -g -Wall -Werror -Wextra -Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -fsanitize=address
 WRAP_HDRS := $(wildcard lib/*.h)\
 
 WRAP_SRCS := $(wildcard lib/*.c)\

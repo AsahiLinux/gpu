@@ -86,7 +86,7 @@ static uint64_t
 demo_clear_color(struct agx_allocator *allocator)
 {
 	__fp16 colour[] = {
-		0.1f, 0.1f, 0.1f, 1.0f
+		0.3f, 0.2f, 0.1f, 1.0f
 	};
 
 	return agx_upload(allocator, colour, sizeof(colour));
@@ -487,7 +487,7 @@ demo_fsbuf(uint64_t *buf, struct agx_allocator *allocator, struct agx_allocation
 	buf[129] = PTR40(9d, 00, 10, demo_sampler(allocator));
 	buf[130] = 0x2010bd4d | (0x10dull << 32) | ((uint64_t) (fs_offs & 0xFFFF) << 48);
 	buf[131] = (fs_offs >> 16) | (0x208d << 16) | (0xf3580100ull << 32);
-	buf[132] = 0x00880002 | (0xc080ull << 32);
+	buf[132] = 0x00880002 | (0xFFFFFFFFull << 32);
 }
 
 struct cmdbuf {

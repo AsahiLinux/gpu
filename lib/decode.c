@@ -316,6 +316,8 @@ pandecode_record(uint64_t va, size_t size, bool verbose)
 	uint8_t *map = pandecode_fetch_gpu_mem(va, size);
 	uint32_t tag = 0;
 	memcpy(&tag, map, 4);
+	printf("fetched tag %X\n", tag);
+	fflush(pandecode_dump_stream);
 
 	if (tag == 0x00000C00) {
 		assert(size == AGX_VIEWPORT_LENGTH);
@@ -404,6 +406,18 @@ pandecode_cmdstream(unsigned cmdbuf_index, bool verbose)
 	/* TODO: What else is in here? */
 	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;
 	pandecode_stateful(*encoder, "Encoder", pandecode_cmd, verbose);
+
+	uint64_t *clear_pipeline = ((uint64_t *) cmdbuf->map) + 79;
+	if (*clear_pipeline) {
+		assert(((*clear_pipeline) & 0xF) == 0x4);
+		pandecode_stateful((*clear_pipeline) & ~0xF, "Clear pipeline", pandecode_pipeline, verbose);
+	}
+
+	uint64_t *store_pipeline = ((uint64_t *) cmdbuf->map) + 82;
+	if (*store_pipeline) {
+		assert(((*store_pipeline) & 0xF) == 0x4);
+		pandecode_stateful((*store_pipeline) & ~0xF, "Store pipeline", pandecode_pipeline, verbose);
+	}
 
         pandecode_map_read_write();
 }

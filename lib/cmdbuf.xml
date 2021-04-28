@@ -152,6 +152,7 @@
   <struct name="Rasterizer" size="28">
     <field name="Tag" size="32" start="0:0" type="hex" default="0x10000b5"/>
     <field name="Unk 1" size="1" start="1:9" type="hex" default="0x1"/>
+    <field name="Depth clamp" size="1" start="1:16" type="bool" default="false"/>
     <field name="Unk ZS" size="1" start="1:18" type="hex" default="0x1"/>
     <field name="Unk 2" size="2" start="1:19" type="hex" default="0x0"/>
     <field name="Unk fill lines" size="1" start="1:26" type="hex" default="0x0"/>

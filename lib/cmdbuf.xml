@@ -123,10 +123,15 @@
 
   <!--- Identified by tag? -->
   <struct name="Viewport" size="40">
-    <field name="Tag 1" size="32" start="0:0" type="hex" default="0xc00"/>
-    <field name="Tag 2" size="32" start="1:0" type="hex" default="0x18"/>
-    <field name="Tag 3" size="32" start="2:0" type="hex" default="0x12"/>
-    <field name="Tag 4" size="32" start="3:0" type="hex" default="0x0"/>
+    <field name="Tag" size="32" start="0:0" type="hex" default="0xc00"/>
+
+    <!-- Acts like a scissor at 32x32 tile boundaries, ignored unless clip tile is set -->
+    <field name="Max tile X" size="9" start="1:0" type="uint" modifier="minus(1)"/>
+    <field name="Min tile X" size="9" start="1:16" type="uint"/>
+    <field name="Clip tile" size="1" start="1:31" type="bool"/>
+    <field name="Max tile Y" size="9" start="2:0" type="uint" modifier="minus(1)"/>
+    <field name="Min tile Y" size="9" start="2:16" type="uint"/>
+
     <field name="Translate X" size="32" start="4:0" type="float"/>
     <field name="Scale X" size="32" start="5:0" type="float"/>
     <field name="Translate Y" size="32" start="6:0" type="float"/>

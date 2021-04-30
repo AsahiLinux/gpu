@@ -30,6 +30,8 @@
 #define MAX2(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN2(x, y) (((x) < (y)) ? (x) : (y))
 #define ALIGN_POT(v, pot) (((v) + ((pot) - 1)) & ~((pot) - 1))
+#define DIV_ROUND_UP(p, q) (((p) + (q) - 1) / (q))
+
 
 static uint32_t
 fui(float f)

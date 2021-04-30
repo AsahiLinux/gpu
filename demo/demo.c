@@ -27,12 +27,18 @@ demo_viewport(struct agx_allocator *allocator)
 {
 	struct agx_ptr t = agx_allocate(allocator, AGX_VIEWPORT_LENGTH);
 	bl_pack(t.map, VIEWPORT, cfg) {
-		cfg.translate_x = WIDTH / 2;
-		cfg.scale_x = WIDTH /*/ 2*/;
+		cfg.translate_x = (WIDTH ) / 2;
+		cfg.scale_x = WIDTH + 400/*/ 2*/;
 		cfg.translate_y = HEIGHT / 2;
-		cfg.scale_y = -(HEIGHT /*/ 2*/);
+		cfg.scale_y = -(HEIGHT +400/*/ 2*/);
 		cfg.near_z = 0.0f;
 		cfg.far_z = 1.0f;
+
+		cfg.min_tile_x = 0 / 32;
+		cfg.max_tile_x = DIV_ROUND_UP(800, 32);
+		cfg.min_tile_y = 0 / 32;
+		cfg.max_tile_y = DIV_ROUND_UP(600, 32);
+		cfg.clip_tile = false;
 	};
 
 	return t.gpu_va;
@@ -258,6 +264,7 @@ demo_cull(struct agx_allocator *allocator)
 static uint64_t
 demo_unk14(struct agx_allocator *allocator)
 {
+	/* Second word may relate to scissors */
 	uint32_t unk[] = {
 		0x100, 0x0,
 	};
@@ -269,10 +276,18 @@ static uint64_t
 demo_scissor(struct agx_allocator *allocator)
 {
 	uint32_t unk[] = {
+#if 0
 		(200 | (200 << 16)),
 		(200 | (200 << 16)),
 		fui(0.0),
+		fui(1.0),
+#endif
+
+		(10 | (10 << 16)),
+		(10 | (10 << 16)),
+		fui(0.0),
 		fui(1.0)
+
 	};
 
 	return agx_upload(allocator, unk, sizeof(unk));

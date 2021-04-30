@@ -265,6 +265,19 @@ demo_unk14(struct agx_allocator *allocator)
 	return agx_upload(allocator, unk, sizeof(unk));
 }
 
+static uint64_t
+demo_scissor(struct agx_allocator *allocator)
+{
+	uint32_t unk[] = {
+		(200 | (200 << 16)),
+		(200 | (200 << 16)),
+		fui(0.0),
+		fui(1.0)
+	};
+
+	return agx_upload(allocator, unk, sizeof(unk));
+}
+
 /* TODO: there appears to be hidden support for line loops/triangle fans/quads
  * but still need to confirm on a more substantive workload, also I can't get
  * points/lines to work yet.. */
@@ -629,7 +642,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT32(cmdbuf, 0);
 	EMIT32(cmdbuf, 0x12);
 	EMIT64(cmdbuf, fsbuf->gpu_va + 0x184); // AUX3 -- 0x290 -- XXX: dynalloc
-	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
+	EMIT64(cmdbuf, demo_scissor(allocator));
 	EMIT64(cmdbuf, demo_zero(allocator, 0x1000));
 	EMIT64(cmdbuf, 0);
 

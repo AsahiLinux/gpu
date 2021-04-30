@@ -28,9 +28,9 @@ demo_viewport(struct agx_allocator *allocator)
 	struct agx_ptr t = agx_allocate(allocator, AGX_VIEWPORT_LENGTH);
 	bl_pack(t.map, VIEWPORT, cfg) {
 		cfg.translate_x = WIDTH / 2;
-		cfg.scale_x = WIDTH / 2;
+		cfg.scale_x = WIDTH /*/ 2*/;
 		cfg.translate_y = HEIGHT / 2;
-		cfg.scale_y = -(HEIGHT / 2);
+		cfg.scale_y = -(HEIGHT /*/ 2*/);
 		cfg.near_z = 0.0f;
 		cfg.far_z = 1.0f;
 	};

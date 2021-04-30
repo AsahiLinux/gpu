@@ -365,7 +365,11 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 		 DUMP_UNPACKED(BIND_PIPELINE, cmd, "Bind vertex pipeline\n");
 
 		 /* Random unaligned null byte, it's pretty awful.. */
-		 assert(map[AGX_BIND_PIPELINE_LENGTH] == 0);
+		      if (map[AGX_BIND_PIPELINE_LENGTH]) {
+			fprintf(pandecode_dump_stream, "Unk unaligned %X\n",
+				map[AGX_BIND_PIPELINE_LENGTH]);
+		      }
+
 		 return AGX_BIND_PIPELINE_LENGTH + 1;
 	} else if (map[1] == 0xc0 && map[2] == 0x61) {
 		 DUMP_CL(DRAW, map, "Draw");
@@ -402,6 +406,10 @@ pandecode_cmdstream(unsigned cmdbuf_index, bool verbose)
 
 	if (verbose)
 		pandecode_dump_bo(cmdbuf, "Command buffer");
+
+		FILE *fp = fopen("cmdbuf.bin", "wb");
+		fwrite(cmdbuf->map, 1 , cmdbuf->size, fp);
+		fclose(fp);
 
 	/* TODO: What else is in here? */
 	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;

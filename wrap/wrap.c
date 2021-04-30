@@ -65,17 +65,10 @@ wrap_IOConnectCallMethod(
 	size_t		*outputStructCntP)	// In/Out
 {
 	/* Heuristic guess which connection is Metal, skip over I/O from everything else */
-	bool bail = false;
-
-	if (metal_connection == 0) {
-		if (selector == AGX_SELECTOR_SET_API)
-			metal_connection = connection;
-		else
-			bail = true;
-	} else if (metal_connection != connection)
-		bail = true;
-
-	if (bail)
+	printf("Selector %u, %X, %X\n", selector, connection, metal_connection);
+	if (selector == AGX_SELECTOR_SET_API)
+		metal_connection = connection;
+	else if (metal_connection != connection)
 		return IOConnectCallMethod(connection, selector, input, inputCnt, inputStruct, inputStructCnt, output, outputCnt, outputStruct, outputStructCntP);
 
 	/* Check the arguments make sense */
@@ -103,7 +96,7 @@ wrap_IOConnectCallMethod(
 
 		const struct agx_submit_cmdbuf_req *req = inputStruct;
 
-		pandecode_cmdstream(req->cmdbuf, true);
+		pandecode_cmdstream(req->cmdbuf, false);
 
 		if (getenv("ASAHI_DUMP"))
 			pandecode_dump_mappings();

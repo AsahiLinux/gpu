@@ -341,16 +341,29 @@ demo_unk2(struct agx_allocator *allocator, struct agx_allocator *shaders, struct
 	memcpy(out, &temp, 7);
 	out += 7;
 
-	/* Must be after the rest */
-
-	bl_pack(out, DRAW, cfg) {
-		cfg.primitive = AGX_PRIMITIVE_TRIANGLES;
-		cfg.vertex_start = 0;
-		cfg.vertex_count = 36;
-		cfg.instance_count = 1;
+	uint32_t ib[] = {
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+		34, 35,
 	};
 
-	out += AGX_DRAW_LENGTH;
+	uint64_t ib_ptr = agx_upload(allocator, ib, sizeof(ib));
+
+	/* Must be after the rest */
+
+	bl_pack(out, INDEXED_DRAW, cfg) {
+		cfg.restart_index = 0xFFFFFFFF;
+		cfg.unk_2a = (ib_ptr >> 32);
+		cfg.primitive = AGX_PRIMITIVE_TRIANGLES;
+		cfg.restart_enable = false;
+		cfg.index_size = 2;
+		cfg.index_buffer_offset = (ib_ptr & 0xFFFFFFFF);
+		cfg.index_count = 256;
+		cfg.instance_count = 1;
+		cfg.index_buffer_size = sizeof(ib);
+	};
+
+	out += AGX_INDEXED_DRAW_LENGTH;
 
 	uint8_t stop[] = {
 		0x00, 0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, // Stop

@@ -372,7 +372,7 @@ pandecode_cmd(const uint8_t *map, bool verbose)
 
 		 return AGX_BIND_PIPELINE_LENGTH + 1;
 	} else if (map[1] == 0xc0 && map[2] == 0x61) {
-		 DUMP_CL(DRAW, map, "Draw");
+		 DUMP_CL(DRAW, map - 1, "Draw");
 		 return AGX_DRAW_LENGTH;
 	} else if (map[0] == 0x00 && map[1] == 0x00 && map[2] == 0x00 && map[3] == 0xc0) {
 		return STATE_DONE;

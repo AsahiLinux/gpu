@@ -9,7 +9,7 @@
 #include "util.h"
 #include "../agx_pack.h"
 
-#define WIDTH 832
+#define WIDTH 800
 #define HEIGHT 600
 
 static uint64_t
@@ -111,7 +111,7 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		cfg.width = WIDTH;
 		cfg.height = HEIGHT;
 		cfg.buffer = framebuffer->gpu_va;
-		cfg.unk_100 = /*0x4f00*/ (WIDTH * 64) - 64;
+		cfg.unk_100 = (WIDTH - 1) * 64;
 	};
 
 	return t.gpu_va;
@@ -893,7 +893,6 @@ void demo(mach_port_t connection, bool offscreen)
 
 		/* Dump the framebuffer */
 		memcpy(linear, framebuffer.map, stride * HEIGHT);
-		printf("%u, %u\n", WIDTH * 4, stride);
 
 		shader_pool.offset = 0;
 		allocator.offset = 0;

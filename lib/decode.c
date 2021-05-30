@@ -287,6 +287,7 @@ pandecode_pipeline(const uint8_t *map, UNUSED bool verbose)
 
 		uint8_t *tex = pandecode_fetch_gpu_mem(temp.buffer, 64);
 		DUMP_CL(TEXTURE, tex, "Texture");
+		DUMP_CL(RENDER_TARGET, tex, "Render Target");
 		hexdump(pandecode_dump_stream, tex + AGX_TEXTURE_LENGTH, 64 - AGX_TEXTURE_LENGTH, false);
 
 		return AGX_BIND_TEXTURE_LENGTH;
@@ -411,6 +412,7 @@ pandecode_cmdstream(unsigned cmdbuf_index, bool verbose)
 		fwrite(cmdbuf->map, 1 , cmdbuf->size, fp);
 		fclose(fp);
 
+#if 0
 	/* TODO: What else is in here? */
 	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;
 	pandecode_stateful(*encoder, "Encoder", pandecode_cmd, verbose);
@@ -420,6 +422,7 @@ pandecode_cmdstream(unsigned cmdbuf_index, bool verbose)
 		assert(((*clear_pipeline) & 0xF) == 0x4);
 		pandecode_stateful((*clear_pipeline) & ~0xF, "Clear pipeline", pandecode_pipeline, verbose);
 	}
+#endif
 
 	uint64_t *store_pipeline = ((uint64_t *) cmdbuf->map) + 82;
 	if (*store_pipeline) {

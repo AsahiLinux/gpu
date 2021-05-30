@@ -9,7 +9,7 @@
 #include "util.h"
 #include "../agx_pack.h"
 
-#define WIDTH 800
+#define WIDTH 832
 #define HEIGHT 600
 
 static uint64_t
@@ -103,7 +103,7 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 {
 	struct agx_ptr t = agx_allocate(allocator, AGX_RENDER_TARGET_LENGTH);
 	bl_pack(t.map, RENDER_TARGET, cfg) {
-		cfg.unk_0 = 0xa22;
+		cfg.unk_0 = 0xa02;
 		cfg.swizzle_r = AGX_CHANNEL_B;
 		cfg.swizzle_g = AGX_CHANNEL_G;
 		cfg.swizzle_b = AGX_CHANNEL_R;
@@ -111,7 +111,7 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		cfg.width = WIDTH;
 		cfg.height = HEIGHT;
 		cfg.buffer = framebuffer->gpu_va;
-		cfg.unk_100 = 0x1000000;
+		cfg.unk_100 = /*0x4f00*/ (WIDTH * 64) - 64;
 	};
 
 	return t.gpu_va;
@@ -878,6 +878,7 @@ void demo(mach_port_t connection, bool offscreen)
 	} else {
 		struct slowfb fb = slowfb_init(WIDTH, HEIGHT);
 		linear = fb.map;
+		assert(stride == fb.stride);
 		stride = fb.stride;
 	}
 
@@ -891,9 +892,8 @@ void demo(mach_port_t connection, bool offscreen)
 			ret = IODataQueueDequeue(command_queue.notif.queue, NULL, 0);
 
 		/* Dump the framebuffer */
-		ash_detile(framebuffer.map, linear,
-				WIDTH, 32, stride / 4,
-				0, 0, WIDTH, HEIGHT);
+		memcpy(linear, framebuffer.map, stride * HEIGHT);
+		printf("%u, %u\n", WIDTH * 4, stride);
 
 		shader_pool.offset = 0;
 		allocator.offset = 0;

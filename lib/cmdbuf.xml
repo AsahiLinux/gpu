@@ -81,10 +81,10 @@
     <field name="Swizzle A" size="3" start="25" type="Channel" default="A"/>
     <field name="Width" size="14" start="28" type="uint" modifier="minus(1)"/>
     <field name="Height" size="14" start="42" type="uint" modifier="minus(1)"/>
-    <field name="Depth" size="14" start="56" type="uint" modifier="minus(1)"/> <!-- TODO: confirm -->
-    <field name="Unk 1" size="38" start="70" type="hex"/>
+    <field name="Unk 1" size="36" start="66" type="address" modifier="shr(4)"/>
     <field name="sRGB" size="1" start="108" type="bool"/>
-    <field name="Unk 2" size="19" start="109" type="hex"/>
+    <field name="Unk 2" size="1" start="109" type="bool"/>
+    <field name="Pitch" size="18" start="110" type="hex" modifier="shr(2)"/>
   </struct>
 
   <enum name="Wrap">

@@ -53,17 +53,18 @@ demo_texture(struct agx_allocator *allocator)
 	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH);
 	assert((texture_payload.gpu_va & 0xFF) == 0);
 	bl_pack(t.map, TEXTURE, cfg) {
-		cfg.format = 0xa22;
+		cfg.format = 0xa02;
 		cfg.swizzle_r = AGX_CHANNEL_R;
 		cfg.swizzle_g = AGX_CHANNEL_G;
 		cfg.swizzle_b = AGX_CHANNEL_B;
 		cfg.swizzle_a = AGX_CHANNEL_A;
 		cfg.width = tex_width;
 		cfg.height = tex_height;
-		cfg.depth = 1;
-		cfg.unk_1 = (texture_payload.gpu_va >> 8); // a nibble enabling compression seems to be mixed in here
-		cfg.unk_2 = 0x20000;
+		cfg.unk_1 = texture_payload.gpu_va; // a nibble enabling compression seems to be mixed in here
+		cfg.pitch = ((tex_width - 1) / 4) * 4;
+		cfg.srgb = false;
 	};
+	uint32_t *m = (uint32_t *) (((uint8_t *) t.map) + AGX_TEXTURE_LENGTH);
 
 	return t.gpu_va;
 }
@@ -846,16 +847,10 @@ void demo(mach_port_t connection, bool offscreen)
 	{ 
 		texture_payload = agx_alloc_mem(connection, ((((tex_width + 64) * (tex_height + 64) * 4) + 64) + 4095) & ~4095,
 				AGX_MEMORY_TYPE_FRAMEBUFFER, false);
-		uint32_t *rgba = malloc((tex_width + 64) * (tex_height + 64) * 4);
 
 		FILE *fp = fopen("foo.rgba", "rb");
-		fread(rgba, 1, tex_width * tex_height * 4, fp);
+		fread(texture_payload.map, 1, tex_width * tex_height * 4, fp);
 		fclose(fp);
-
-		ash_tile(texture_payload.map, rgba,
-				tex_width, 32, tex_width,
-				0, 0, tex_width, tex_height);
-		free(rgba);
 	}
 
 	struct agx_allocation allocs[] = {

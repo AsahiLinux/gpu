@@ -114,7 +114,6 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		cfg.height = HEIGHT;
 		cfg.buffer = framebuffer->gpu_va;
 		cfg.unk_100 = ((WIDTH - 1) * 4) * 16;//(WIDTH - 1) * 64;
-		printf("%X\n", cfg.unk_100);
 	};
 
 	return t.gpu_va;

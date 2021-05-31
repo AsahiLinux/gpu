@@ -512,7 +512,10 @@ class Group(object):
                 # TODO resolve to name
                 print('   fprintf(fp, "%*s{}: 0x%" PRIx64 "\\n", indent, "", {});'.format(name, val))
             elif field.type in self.parser.enums:
-                print('   fprintf(fp, "%*s{}: %s\\n", indent, "", {}_as_str({}));'.format(name, enum_name(field.type), val))
+                print('   if ({}_as_str({}))'.format(enum_name(field.type), val))
+                print('     fprintf(fp, "%*s{}: %s\\n", indent, "", {}_as_str({}));'.format(name, enum_name(field.type), val))
+                print('    else')
+                print('     fprintf(fp, "%*s{}: unknown %X (XXX)\\n", indent, "", {});'.format(name, val))
             elif field.type == "int":
                 print('   fprintf(fp, "%*s{}: %d\\n", indent, "", {});'.format(name, val))
             elif field.type == "bool":
@@ -671,7 +674,7 @@ class Parser(object):
             name = '{}_{}'.format(prefix, value.name)
             name = safe_name(name).upper()
             print('    case {}: return "{}";'.format(name, value.name))
-        print('    default: return "XXX: INVALID";')
+        print('    default: return NULL;')
         print("    }")
         print("}\n")
 

@@ -54,7 +54,7 @@ static struct agx_allocation *
 pandecode_find_mapped_gpu_mem_containing_rw(uint64_t addr)
 {
         for (unsigned i = 0; i < mmap_count; ++i) {
-                if (addr >= mmap_array[i].gpu_va && (addr - mmap_array[i].gpu_va) < mmap_array[i].size)
+                if (addr >= mmap_array[i].gpu_va && (addr - mmap_array[i].gpu_va) < mmap_array[i].size && mmap_array[i].map != 0)
                         return mmap_array + i;
         }
 
@@ -93,6 +93,7 @@ __pandecode_fetch_gpu_mem(const struct agx_allocation *mem,
 
         assert(mem);
         assert(size + (gpu_va - mem->gpu_va) <= mem->size);
+	printf("%p %llx\n", mem->map, mem->gpu_va);
 
         return mem->map + gpu_va - mem->gpu_va;
 }
@@ -315,6 +316,7 @@ static void
 pandecode_record(uint64_t va, size_t size, bool verbose)
 {
 	uint8_t *map = pandecode_fetch_gpu_mem(va, size);
+	printf("va %llx, size %zu, %p\n", va, size, map);
 	uint32_t tag = 0;
 	memcpy(&tag, map, 4);
 	printf("fetched tag %X\n", tag);
@@ -412,17 +414,15 @@ pandecode_cmdstream(unsigned cmdbuf_index, bool verbose)
 		fwrite(cmdbuf->map, 1 , cmdbuf->size, fp);
 		fclose(fp);
 
-#if 0
 	/* TODO: What else is in here? */
 	uint64_t *encoder = ((uint64_t *) cmdbuf->map) + 7;
-	pandecode_stateful(*encoder, "Encoder", pandecode_cmd, verbose);
+	pandecode_stateful((*encoder) /*+ 0x60*/, "Encoder", pandecode_cmd, verbose);
 
 	uint64_t *clear_pipeline = ((uint64_t *) cmdbuf->map) + 79;
 	if (*clear_pipeline) {
 		assert(((*clear_pipeline) & 0xF) == 0x4);
 		pandecode_stateful((*clear_pipeline) & ~0xF, "Clear pipeline", pandecode_pipeline, verbose);
 	}
-#endif
 
 	uint64_t *store_pipeline = ((uint64_t *) cmdbuf->map) + 82;
 	if (*store_pipeline) {

@@ -61,8 +61,9 @@ demo_texture(struct agx_allocator *allocator)
 		cfg.width = tex_width;
 		cfg.height = tex_height;
 		cfg.unk_1 = texture_payload.gpu_va; // a nibble enabling compression seems to be mixed in here
-		cfg.pitch = ((tex_width - 1) / 4) * 4;
+		cfg.stride = (tex_width * 4) - 16;
 		cfg.srgb = false;
+		cfg.unk_2 = false;
 	};
 	uint32_t *m = (uint32_t *) (((uint8_t *) t.map) + AGX_TEXTURE_LENGTH);
 
@@ -112,7 +113,8 @@ demo_render_target(struct agx_allocator *allocator, struct agx_allocation *frame
 		cfg.width = WIDTH;
 		cfg.height = HEIGHT;
 		cfg.buffer = framebuffer->gpu_va;
-		cfg.unk_100 = (WIDTH - 1) * 64;
+		cfg.unk_100 = ((WIDTH - 1) * 4) * 16;//(WIDTH - 1) * 64;
+		printf("%X\n", cfg.unk_100);
 	};
 
 	return t.gpu_va;
@@ -876,6 +878,7 @@ void demo(mach_port_t connection, bool offscreen)
 		assert(stride == fb.stride);
 		stride = fb.stride;
 	}
+	printf("%u x %u, stride = %u\n", WIDTH, HEIGHT, stride);
 
 	for (;;) {
 		demo_cmdbuf(cmdbuf.map, &allocator, &vsbuf, &fsbuf, &framebuffer, &shader_pool);

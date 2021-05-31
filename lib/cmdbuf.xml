@@ -78,17 +78,22 @@
   </enum>
 
   <enum name="Channels">
-    <!-- Regular -->
     <value name="8x1" value="0x00"/>
     <value name="16x1" value="0x09"/>
+    <value name="8x2" value="0x0A"/>
+    <value name="5_6_5" value="0x0B"/>
+    <value name="4_4_4_4" value="0x0C"/>
+    <value name="1_5_5_5" value="0x0D"/>
+    <value name="5_5_5_1" value="0x0E"/>
     <value name="32x1" value="0x21"/>
-    <!-- 0x26 used for RGB10_XR  -->
+    <value name="16x2" value="0x23"/>
+    <value name="11_11_10" value="0x25"/>
+    <value name="10_10_10_2" value="0x26"/>
+    <value name="9_9_9_E5" value="0x27"/>
     <value name="8x4" value="0x28"/>
+    <value name="32x2" value="0x31"/>
     <value name="16x4" value="0x32"/>
     <value name="32x4" value="0x38"/>
-    
-    <!-- Packed -->
-    <value name="11_11_10" value="0x25"/>
     <value name="GBGR 422" value="0x40"/> <!-- Subsampled, swizzle BRG1 -->
     <value name="BGRG 422" value="0x41"/> <!-- Subsampled, swizzle BRG1 -->
 
@@ -96,13 +101,35 @@
     <value name="PVRTC 2bpp" value="0x50"/>
     <value name="PVRTC 4bpp" value="0x51"/>
 
-    <value name="ETC2 RGB8A1" value="0x5a"/>
+    <value name="ETC2 RGB8" value="0x58"/>
+    <value name="ETC2 RGB8A" value="0x59"/>
+    <value name="ETC2 RGB8A1" value="0x5A"/>
+    <value name="EAC R11" value="0x5B"/>
+    <value name="EAC RG11" value="0x5C"/>
 
     <value name="ASTC 4x4 LDR" value="0x60"/>
-    <value name="ASTC 12x12 LDR" value="0x6d"/>
+    <value name="ASTC 5x4 LDR" value="0x61"/>
+    <value name="ASTC 5x5 LDR" value="0x62"/>
+    <value name="ASTC 6x5 LDR" value="0x63"/>
+    <value name="ASTC 6x6 LDR" value="0x64"/>
+    <value name="ASTC 8x5 LDR" value="0x65"/>
+    <value name="ASTC 8x6 LDR" value="0x66"/>
+    <value name="ASTC 8x8 LDR" value="0x67"/>
+    <value name="ASTC 10x5 LDR" value="0x68"/>
+    <value name="ASTC 10x6 LDR" value="0x69"/>
+    <value name="ASTC 10x8 LDR" value="0x6A"/>
+    <value name="ASTC 10x10 LDR" value="0x6B"/>
+    <value name="ASTC 12x10 LDR" value="0x6C"/>
+    <value name="ASTC 12x12 LDR" value="0x6D"/>
 
+    <value name="BC1" value="0x74"/>
+    <value name="BC2" value="0x75"/>
+    <value name="BC3" value="0x76"/>
     <value name="BC4" value="0x77"/>
-
+    <value name="BC5" value="0x78"/>
+    <value name="BC6H" value="0x79"/>
+    <value name="BC6H Ufloat" value="0x7A"/>
+    <value name="BC7" value="0x7B"/>
   </enum>
 
   <enum name="Texture Type">

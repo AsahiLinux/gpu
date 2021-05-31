@@ -71,14 +71,55 @@
     <field name="Unk 100" size="28" start="100" type="hex"/>
   </struct>
 
+  <enum name="Layout">
+    <value name="Linear" value="0"/>
+    <!-- Morton order with 64x64 tiles -->
+    <value name="Tiled 64x64" value="2"/>
+  </enum>
+
+  <enum name="Channels">
+    <!-- Regular -->
+    <value name="8x1" value="0x00"/>
+    <value name="16x1" value="0x09"/>
+    <value name="32x1" value="0x21"/>
+    <!-- 0x26 used for RGB10_XR  -->
+    <value name="8x4" value="0x28"/>
+    <value name="16x4" value="0x32"/>
+    <value name="32x4" value="0x38"/>
+    
+    <!-- Packed -->
+    <value name="11_11_10" value="0x25"/>
+    <value name="GBGR 422" value="0x40"/> <!-- Subsampled, swizzle BRG1 -->
+    <value name="BGRG 422" value="0x41"/> <!-- Subsampled, swizzle BRG1 -->
+
+    <!-- Compressed -->
+    <value name="PVRTC 2bpp" value="0x50"/>
+    <value name="PVRTC 4bpp" value="0x51"/>
+
+    <value name="ETC2 RGB8A1" value="0x5a"/>
+
+    <value name="ASTC 4x4 LDR" value="0x60"/>
+    <value name="ASTC 12x12 LDR" value="0x6d"/>
+
+    <value name="BC4" value="0x77"/>
+
+  </enum>
+
+  <enum name="Texture Type">
+    <value name="Unorm" value="0"/>
+    <value name="Snorm" value="1"/>
+    <value name="Uint" value="2"/>
+    <value name="Sint" value="3"/>
+    <value name="Float" value="4"/>
+    <value name="XR" value="5"/>
+  </enum>
+
   <!-- Payloads follow, right-shifted by 4 because of course -->
   <struct name="Texture" size="16">
-    <!-- See notes for a listing, TODO: enumify -->
-    <field name="Format" size="16" start="0" type="hex"/>
-    <field name="Funk 1" size="4" start="0" type="hex"/>
-    <field name="Layout" size="2" start="4" type="hex"/>
-    <field name="Funk 2" size="7" start="6" type="hex"/>
-    <field name="Funk 3" size="3" start="13" type="hex"/>
+    <field name="Unknown" size="4" start="0" type="hex" default="0x2"/>
+    <field name="Layout" size="2" start="4" type="Layout"/>
+    <field name="Channels" size="7" start="6" type="Channels"/>
+    <field name="Type" size="3" start="13" type="Texture Type"/>
     <field name="Swizzle R" size="3" start="16" type="Channel" default="R"/>
     <field name="Swizzle G" size="3" start="19" type="Channel" default="G"/>
     <field name="Swizzle B" size="3" start="22" type="Channel" default="B"/>

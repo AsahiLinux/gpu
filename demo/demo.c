@@ -53,7 +53,9 @@ demo_texture(struct agx_allocator *allocator)
 	struct agx_ptr t = agx_allocate(allocator, AGX_TEXTURE_LENGTH);
 	assert((texture_payload.gpu_va & 0xFF) == 0);
 	bl_pack(t.map, TEXTURE, cfg) {
-		cfg.format = 0xa02;
+		cfg.layout = AGX_LAYOUT_LINEAR;
+		cfg.channels = AGX_CHANNELS_8X4;
+		cfg.type = AGX_TEXTURE_TYPE_UNORM;
 		cfg.swizzle_r = AGX_CHANNEL_R;
 		cfg.swizzle_g = AGX_CHANNEL_G;
 		cfg.swizzle_b = AGX_CHANNEL_B;

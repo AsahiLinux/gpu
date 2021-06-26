@@ -678,8 +678,8 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	EMIT_ZERO_WORDS(cmdbuf, 48);
 
-	float depth_clear = 1.0;
-	uint8_t stencil_clear = 0xCA;
+	float depth_clear = rand();//1.0;
+	uint8_t stencil_clear = 0x11;
 
 	EMIT64(cmdbuf, 0); // 0x450
 	EMIT32(cmdbuf, fui(depth_clear));
@@ -770,19 +770,16 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	}
 
 
-#if 1
    uint8_t *m = (uint8_t *) cmdbuf->map;
    *((uint64_t *) (m + 0x2B0)) = 0x80044;
    *((uint64_t *) (m + 0x2C8)) = 0x12B8383ull;
    *((uint64_t *) (m + 0x2D0)) = zbuf->gpu_va;
-   *((uint64_t *) (m + 0x2E8)) = zbuf->gpu_va;
-   *((uint64_t *) (m + 0x2F8)) = zbuf->gpu_va;
-   *((uint64_t *) (m + 0x310)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x2E8)) = zbuf->gpu_va + 800*600*4;
+   *((uint64_t *) (m + 0x2F8)) = zbuf->gpu_va;   // <-- this is the only one that's actually written
+   *((uint64_t *) (m + 0x310)) = zbuf->gpu_va + 800*600*4;
    *((uint64_t *) (m + 0x550)) = zbuf->gpu_va;
-   *((uint64_t *) (m + 0x558)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x558)) = zbuf->gpu_va + 800*600*4;
    *((uint64_t *) (m + 0x580)) = 0x1;
-#endif
-
 }
 
 static struct agx_map_entry
@@ -869,7 +866,7 @@ void demo(mach_port_t connection, bool offscreen)
 		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 
 	struct agx_allocation zbuf = agx_alloc_mem(connection, 
-		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 4,
+		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 16,
 		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 
 	struct agx_allocation memmap = agx_alloc_cmdbuf(connection, 0x4000, false);
@@ -921,7 +918,7 @@ void demo(mach_port_t connection, bool offscreen)
 
 		/* Dump the framebuffer */
 		memcpy(linear, framebuffer.map, stride * HEIGHT);
-		printf("%" PRIx64 "\n", *((uint64_t *) zbuf.map));
+		printf("%" PRIx64 " %" PRIx64 "\n", *((uint64_t *) zbuf.map), *(((uint64_t *) zbuf.map ) + 1));
 
 		shader_pool.offset = 0;
 		allocator.offset = 0;

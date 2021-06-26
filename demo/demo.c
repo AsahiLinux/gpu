@@ -581,6 +581,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 		struct agx_allocation *vsbuf,
 		struct agx_allocation *fsbuf,
 		struct agx_allocation *framebuffer,
+		struct agx_allocation *zbuf,
 		struct agx_allocator *shaders)
 {
 	demo_vsbuf((uint64_t *) vsbuf->map, allocator, shaders);
@@ -595,11 +596,11 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 
 	/* Vertex stuff */
 	EMIT32(cmdbuf, 0x10000);
-	EMIT32(cmdbuf, 0x780); // Compute: 0x188
+	EMIT32(cmdbuf, 0x798); // Compute: 0x188
 	EMIT32(cmdbuf, 0x7);
 	EMIT_ZERO_WORDS(cmdbuf, 5);
 	EMIT32(cmdbuf, 0x758); // Compute: 0x180
-	EMIT32(cmdbuf, 0x18);  // Compute: 0x0
+	EMIT32(cmdbuf, 0x30);  // Compute: 0x0
 	EMIT32(cmdbuf, 0x758); // Compute: 0x0
 	EMIT32(cmdbuf, 0x728); // Compute: 0x150
 
@@ -678,7 +679,7 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT_ZERO_WORDS(cmdbuf, 48);
 
 	float depth_clear = 1.0;
-	uint8_t stencil_clear = 0;
+	uint8_t stencil_clear = 0xCA;
 
 	EMIT64(cmdbuf, 0); // 0x450
 	EMIT32(cmdbuf, fui(depth_clear));
@@ -749,16 +750,39 @@ demo_cmdbuf(uint64_t *buf, struct agx_allocator *allocator,
 	EMIT_ZERO_WORDS(cmdbuf, 72);
 
 	EMIT32(cmdbuf, 0); // 0x760
-	EMIT32(cmdbuf, 0x1); // number of attachments (includes depth/stencil) stored to
+	EMIT32(cmdbuf, 0x2); // number of attachments (includes depth/stencil) stored to
 
 	/* A single attachment follows, depth/stencil have their own attachments */
 	{
 		EMIT64(cmdbuf, 0x100 | (framebuffer->gpu_va << 16));
 		EMIT32(cmdbuf, 0xa0000);
-		EMIT32(cmdbuf, 0x4c000000); // 80000000 also observed, and 8c000 and.. offset into the tilebuffer I imagine
-		EMIT32(cmdbuf, 0x0c001d); // C0020  also observed
-		EMIT32(cmdbuf, 0x640000);
+		EMIT32(cmdbuf, 0x80000000); // 80000000 also observed, and 8c000 and.. offset into the tilebuffer I imagine
+		EMIT32(cmdbuf, 0x0c0025); // C0020  also observed
+		EMIT32(cmdbuf, 0x320000);
 	}
+
+	{
+		EMIT64(cmdbuf, 0x100 | (zbuf->gpu_va << 16));
+		EMIT32(cmdbuf, 0xc0000);
+		EMIT32(cmdbuf, 0x80000000); // 80000000 also observed, and 8c000 and.. offset into the tilebuffer I imagine
+		EMIT32(cmdbuf, 0x0c0025); // C0020  also observed
+		EMIT32(cmdbuf, 0x320000);
+	}
+
+
+#if 1
+   uint8_t *m = (uint8_t *) cmdbuf->map;
+   *((uint64_t *) (m + 0x2B0)) = 0x80044;
+   *((uint64_t *) (m + 0x2C8)) = 0x12B8383ull;
+   *((uint64_t *) (m + 0x2D0)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x2E8)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x2F8)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x310)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x550)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x558)) = zbuf->gpu_va;
+   *((uint64_t *) (m + 0x580)) = 0x1;
+#endif
+
 }
 
 static struct agx_map_entry
@@ -781,7 +805,7 @@ demo_map_header(uint64_t cmdbuf_id, uint64_t encoder_id, unsigned count)
 		.unk3 = 0x528, // 1320
 		.encoder_id = encoder_id,
 		.unk6 = 0x0,
-		.unk7 = 0x780, // 1920
+		.unk7 = 0x798, // 1920
 
 		/* +1 for the sentinel ending */
 		.nr_entries_1 = count + 1,
@@ -844,6 +868,10 @@ void demo(mach_port_t connection, bool offscreen)
 		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 4,
 		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
 
+	struct agx_allocation zbuf = agx_alloc_mem(connection, 
+		ALIGN_POT(WIDTH, 64) * ALIGN_POT(HEIGHT, 64) * 4,
+		AGX_MEMORY_TYPE_FRAMEBUFFER, false);
+
 	struct agx_allocation memmap = agx_alloc_cmdbuf(connection, 0x4000, false);
 	struct agx_allocation cmdbuf = agx_alloc_cmdbuf(connection, 0x4000, true);
 
@@ -862,6 +890,7 @@ void demo(mach_port_t connection, bool offscreen)
 		vsbuf,
 		fsbuf,
 		framebuffer,
+		zbuf,
 		texture_payload
 	};
 
@@ -882,7 +911,7 @@ void demo(mach_port_t connection, bool offscreen)
 	printf("%u x %u, stride = %u\n", WIDTH, HEIGHT, stride);
 
 	for (;;) {
-		demo_cmdbuf(cmdbuf.map, &allocator, &vsbuf, &fsbuf, &framebuffer, &shader_pool);
+		demo_cmdbuf(cmdbuf.map, &allocator, &vsbuf, &fsbuf, &framebuffer, &zbuf, &shader_pool);
 		agx_submit_cmdbuf(connection, &cmdbuf, &memmap, command_queue.id);
 
 		/* Block until it's done */
@@ -892,6 +921,7 @@ void demo(mach_port_t connection, bool offscreen)
 
 		/* Dump the framebuffer */
 		memcpy(linear, framebuffer.map, stride * HEIGHT);
+		printf("%" PRIx64 "\n", *((uint64_t *) zbuf.map));
 
 		shader_pool.offset = 0;
 		allocator.offset = 0;

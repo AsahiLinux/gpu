@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	CFDictionaryRef matching = IOServiceNameMatching("AGXAcceleratorG13G_B0");
 
 	io_service_t service =
-		IOServiceGetMatchingService(kIOMasterPortDefault, matching);
+		IOServiceGetMatchingService(kIOMainPortDefault, matching);
 
 	if (!service) {
 		fprintf(stderr, "G13 (B0) accelerator not found\n");
